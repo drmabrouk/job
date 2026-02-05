@@ -180,6 +180,7 @@ class Jobs {
 
 		$plugin_public = new Jobs_Public( $this->get_plugin_name(), $this->get_version() );
 
+		$this->loader->add_action( 'init', $plugin_public, 'add_rewrite_rules' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_filter( 'body_class', $plugin_public, 'add_rtl_body_class' );
@@ -190,6 +191,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_ajax_nopriv_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_body_open', $plugin_public, 'add_custom_nav_bar' );
+		$this->loader->add_action( 'wp_login', $plugin_public, 'log_login_activity', 10, 2 );
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'handle_dashboard_redirection' );
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );
 		$this->loader->add_action( 'admin_post_nopriv_jobs_register_user', $plugin_public, 'handle_user_registration' );
@@ -199,6 +201,7 @@ class Jobs {
 		$this->loader->add_shortcode( 'jobs_search_engine', $plugin_public, 'shortcode_jobs_search_engine' );
 		$this->loader->add_shortcode( 'jobs_language_switcher', $plugin_public, 'shortcode_language_switcher' );
 		$this->loader->add_shortcode( 'jobs_dashboard', $plugin_public, 'shortcode_jobs_dashboard' );
+		$this->loader->add_shortcode( 'jobs_settings', $plugin_public, 'shortcode_jobs_settings' );
 
 	}
 

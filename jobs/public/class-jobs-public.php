@@ -170,6 +170,21 @@ class Jobs_Public {
 		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
 
+		// Track user history for recommendations
+		if ( is_user_logged_in() ) {
+			$user_id = get_current_user_id();
+			$history = get_user_meta( $user_id, '_jobs_search_history', true ) ?: array();
+			if ( ! empty( $category ) ) {
+				$history[] = array( 'type' => 'category', 'value' => $category, 'time' => time() );
+			}
+			if ( ! empty( $keyword ) ) {
+				$history[] = array( 'type' => 'keyword', 'value' => $keyword, 'time' => time() );
+			}
+			// Keep only last 20
+			$history = array_slice( $history, -20 );
+			update_user_meta( $user_id, '_jobs_search_history', $history );
+		}
+
 		$args = array(
 			'post_type'      => 'job',
 			'post_status'    => 'publish',
@@ -216,7 +231,22 @@ class Jobs_Public {
 
 		$output = ob_get_clean();
 
-		wp_send_json_success( $output );
+		// Get category specific ad if available
+		$category_ad = '';
+		if ( ! empty( $category ) ) {
+			$term = get_term_by( 'slug', $category, 'job_category' );
+			if ( $term ) {
+				$cat_ads = get_option( 'jobs_category_ads', array() );
+				if ( isset( $cat_ads[$term->term_id] ) && ! empty( $cat_ads[$term->term_id] ) ) {
+					$category_ad = $cat_ads[$term->term_id];
+				}
+			}
+		}
+
+		wp_send_json_success( array(
+			'html' => $output,
+			'category_ad' => $category_ad
+		) );
 		wp_die();
 	}
 
@@ -245,6 +275,7 @@ class Jobs_Public {
 					</div>
 					<div class="jobs-nav-links">
 						<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><?php _e( 'Dashboard', 'jobs' ); ?></a>
+						<a href="<?php echo home_url( '/jobs-settings' ); ?>"><?php _e( 'Settings', 'jobs' ); ?></a>
 						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
 						<a href="<?php echo wp_logout_url( home_url() ); ?>"><?php _e( 'Logout', 'jobs' ); ?></a>
 					</div>
@@ -264,6 +295,24 @@ class Jobs_Public {
 			wp_redirect( wp_login_url( home_url( '/jobs-dashboard' ) ) );
 			exit;
 		}
+
+		if ( get_query_var( 'job_seeker_profile' ) ) {
+			include plugin_dir_path( __FILE__ ) . 'partials/jobs-public-profile.php';
+			exit;
+		}
+	}
+
+	/**
+	 * Add custom rewrite rules.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_rewrite_rules() {
+		add_rewrite_rule( '^job-seeker/([^/]+)/?', 'index.php?job_seeker_profile=$matches[1]', 'top' );
+		add_filter( 'query_vars', function( $vars ) {
+			$vars[] = 'job_seeker_profile';
+			return $vars;
+		} );
 	}
 
 	/**
@@ -338,6 +387,21 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Settings shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_settings() {
+		if ( ! is_user_logged_in() ) {
+			return $this->shortcode_jobs_login( array() );
+		}
+
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'partials/jobs-settings-panel.php';
+		return ob_get_clean();
+	}
+
+	/**
 	 * Registration shortcode.
 	 *
 	 * @since    1.0.0
@@ -391,6 +455,30 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Log login activity.
+	 *
+	 * @since    1.0.0
+	 */
+	public function log_login_activity( $user_login, $user ) {
+		$this->log_activity( $user->ID, 'User logged in' );
+	}
+
+	/**
+	 * Log user activity.
+	 *
+	 * @since    1.0.0
+	 */
+	public function log_activity( $user_id, $action ) {
+		$logs = get_user_meta( $user_id, '_jobs_activity_log', true ) ?: array();
+		$logs[] = array(
+			'action' => $action,
+			'time'   => time(),
+			'ip'     => $_SERVER['REMOTE_ADDR']
+		);
+		update_user_meta( $user_id, '_jobs_activity_log', array_slice( $logs, -50 ) );
+	}
+
+	/**
 	 * Language switcher shortcode.
 	 *
 	 * @since    1.0.0
@@ -427,6 +515,9 @@ class Jobs_Public {
 		if ( is_wp_error( $user_id ) ) {
 			wp_die( $user_id->get_error_message() );
 		}
+
+		// Log activity
+		$this->log_activity( $user_id, 'Account created' );
 
 		// Set role
 		$user = new WP_User( $user_id );

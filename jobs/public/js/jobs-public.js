@@ -28,7 +28,16 @@
 				},
 				success: function(response) {
 					if (response.success) {
-						$grid.html(response.data);
+						$grid.html(response.data.html);
+						if (response.data.category_ad) {
+							if ($('.jobs-ad-premium').length) {
+								$('.jobs-ad-premium').html(response.data.category_ad);
+							} else {
+								$('.jobs-search-section').after('<div class="jobs-ad-zone jobs-ad-premium">' + response.data.category_ad + '</div>');
+							}
+						} else {
+							$('.jobs-ad-premium').remove();
+						}
 					}
 					$grid.css('opacity', '1');
 				}

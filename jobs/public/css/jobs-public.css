@@ -408,3 +408,66 @@ body.rtl .jobs-ad-sidebar {
 body.rtl .jobs-table th, body.rtl .jobs-table td {
     text-align: right;
 }
+
+/* Notifications */
+.notification-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.notification-item {
+    background: #fdfdfd;
+    border-left: 4px solid var(--primary-color);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+body.rtl .notification-item {
+    border-left: none;
+    border-right: 4px solid var(--primary-color);
+    border-radius: 8px 0 0 8px;
+}
+
+.notif-time {
+    color: #999;
+    font-size: 12px;
+}
+
+/* Settings & Profiles */
+.settings-group {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+.settings-group h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.profile-avatar {
+    border: 5px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 50%;
+}
+
+.jobs-public-profile {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+@media (max-width: 767px) {
+    .jobs-dashboard {
+        padding: 15px;
+    }
+    .notification-item {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

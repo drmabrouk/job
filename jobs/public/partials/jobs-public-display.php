@@ -85,4 +85,9 @@
 		<?php echo $ad_bottom; ?>
 	</div>
 	<?php endif; ?>
+
+	<?php if ( is_user_logged_in() ) : ?>
+		<hr>
+		<?php include plugin_dir_path( __FILE__ ) . 'jobs-recommendations.php'; ?>
+	<?php endif; ?>
 </div>

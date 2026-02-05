@@ -137,6 +137,7 @@ class Jobs_Admin {
 		add_submenu_page( 'job-reports', __( 'Job Stats', 'jobs' ), __( 'Job Stats', 'jobs' ), 'manage_options', 'job-stats', array( $this, 'display_job_stats_page' ) );
 		add_submenu_page( 'job-reports', __( 'Application Stats', 'jobs' ), __( 'Application Stats', 'jobs' ), 'manage_options', 'job-app-stats', array( $this, 'display_app_stats_page' ) );
 		add_submenu_page( 'job-reports', __( 'User Activity', 'jobs' ), __( 'User Activity', 'jobs' ), 'manage_options', 'job-user-activity', array( $this, 'display_user_activity_page' ) );
+		add_submenu_page( 'job-reports', __( 'Audit Trail', 'jobs' ), __( 'Audit Trail', 'jobs' ), 'manage_options', 'job-audit-trail', array( $this, 'display_audit_trail_page' ) );
 	}
 
 	public function display_job_management_page() { echo '<div class="wrap"><h1>Job Management</h1></div>'; }
@@ -159,6 +160,24 @@ class Jobs_Admin {
 							</select>
 						</td>
 					</tr>
+				</table>
+
+				<hr>
+				<h2><?php _e( 'Category-Specific Premium Ads', 'jobs' ); ?></h2>
+				<table class="form-table" id="category-ads-table">
+					<?php
+					$cat_ads = get_option( 'jobs_category_ads', array() );
+					$categories = get_terms( array( 'taxonomy' => 'job_category', 'hide_empty' => false ) );
+					foreach ( $categories as $cat ) :
+						$val = isset( $cat_ads[$cat->term_id] ) ? $cat_ads[$cat->term_id] : '';
+					?>
+					<tr valign="top">
+						<th scope="row"><?php echo esc_html( $cat->name ); ?></th>
+						<td>
+							<textarea name="jobs_category_ads[<?php echo $cat->term_id; ?>]" rows="3" cols="50" class="large-text"><?php echo esc_textarea( $val ); ?></textarea>
+						</td>
+					</tr>
+					<?php endforeach; ?>
 				</table>
 				<?php submit_button(); ?>
 			</form>
@@ -303,6 +322,43 @@ class Jobs_Admin {
 	public function display_user_activity_page() { echo '<div class="wrap"><h1>User Activity</h1></div>'; }
 
 	/**
+	 * Display Audit Trail page.
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_audit_trail_page() {
+		$users = get_users();
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Security Audit Trail', 'jobs' ); ?></h1>
+			<table class="wp-list-table widefat fixed striped">
+				<thead>
+					<tr>
+						<th><?php _e( 'User', 'jobs' ); ?></th>
+						<th><?php _e( 'Action', 'jobs' ); ?></th>
+						<th><?php _e( 'Time', 'jobs' ); ?></th>
+						<th><?php _e( 'IP Address', 'jobs' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $users as $user ) :
+						$logs = get_user_meta( $user->ID, '_jobs_activity_log', true ) ?: array();
+						foreach ( array_reverse( $logs ) as $log ) :
+					?>
+						<tr>
+							<td><strong><?php echo esc_html( $user->display_name ); ?></strong></td>
+							<td><?php echo esc_html( $log['action'] ); ?></td>
+							<td><?php echo date( 'Y-m-d H:i:s', $log['time'] ); ?></td>
+							<td><?php echo esc_html( $log['ip'] ); ?></td>
+						</tr>
+					<?php endforeach; endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Register settings for the plugin.
 	 *
 	 * @since    1.0.0
@@ -313,6 +369,7 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_ad_top' );
 		register_setting( 'jobs_options', 'jobs_ad_bottom' );
 		register_setting( 'jobs_options', 'jobs_ad_sidebar' );
+		register_setting( 'jobs_options', 'jobs_category_ads' );
 		register_setting( 'jobs_options', 'jobs_default_status' );
 		register_setting( 'jobs_options', 'jobs_enable_notifications' );
 	}

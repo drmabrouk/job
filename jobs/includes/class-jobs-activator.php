@@ -285,24 +285,51 @@ class Jobs_Activator {
 	 * @since    1.0.0
 	 */
 	private static function create_homepage() {
+		// Jobs Home
 		$page_title = 'Jobs';
 		$page_content = '[jobs_search_engine]';
 		$page_check = get_page_by_title( $page_title );
 
-		$new_page = array(
-			'post_type'    => 'page',
-			'post_title'   => $page_title,
-			'post_content' => $page_content,
-			'post_status'  => 'publish',
-			'post_author'  => 1,
-		);
-
 		if ( ! isset( $page_check->ID ) ) {
-			$new_page_id = wp_insert_post( $new_page );
+			$new_page_id = wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $page_title,
+				'post_content' => $page_content,
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+			) );
 			if ( $new_page_id ) {
 				update_option( 'show_on_front', 'page' );
 				update_option( 'page_on_front', $new_page_id );
 			}
+		}
+
+		// Jobs Dashboard
+		$dash_title = 'Jobs Dashboard';
+		$dash_check = get_page_by_title( $dash_title );
+		if ( ! isset( $dash_check->ID ) ) {
+			wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $dash_title,
+				'post_content' => '[jobs_dashboard]',
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+				'post_name'    => 'jobs-dashboard',
+			) );
+		}
+
+		// Jobs Settings
+		$settings_title = 'Jobs Settings';
+		$settings_check = get_page_by_title( $settings_title );
+		if ( ! isset( $settings_check->ID ) ) {
+			wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $settings_title,
+				'post_content' => '[jobs_settings]',
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+				'post_name'    => 'jobs-settings',
+			) );
 		}
 	}
 
