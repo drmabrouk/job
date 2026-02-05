@@ -218,8 +218,17 @@ class Jobs_Public {
 
 		$user_id = get_current_user_id();
 		$job_id = intval($_POST['job_id']);
-		$attach_id = intval($_POST['attachment_id']);
-		$cover = wp_kses_post($_POST['cover_letter']);
+		$attach_id = isset($_POST['attachment_id']) ? intval($_POST['attachment_id']) : 0;
+		$cover = isset($_POST['cover_letter']) ? wp_kses_post($_POST['cover_letter']) : '';
+
+		// Fast Application logic
+		if ( isset($_POST['quick_apply']) ) {
+			$docs = get_user_meta( $user_id, '_jobs_user_documents', true ) ?: array();
+			if ( ! empty($docs) ) {
+				$attach_id = $docs[0]['id']; // Take first document as default
+			}
+			$cover = __( 'Fast Application using profile data.', 'jobs' );
+		}
 
 		$app_id = wp_insert_post( array(
 			'post_title'   => sprintf( __( 'Application: %s - %s', 'jobs' ), get_the_title($job_id), wp_get_current_user()->display_name ),
@@ -636,6 +645,7 @@ class Jobs_Public {
 				</div>
 
 				<div class="jobs-nav-right">
+
 					<div class="nav-lang-switcher">
 						<?php echo $this->shortcode_language_switcher(); ?>
 					</div>
@@ -645,7 +655,25 @@ class Jobs_Public {
 						$roles = ( array ) $user->roles;
 						$role_id = $roles[0];
 						$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst($role_id);
+
+						// Notifications count
+						$notifs = get_user_meta( $user->ID, '_jobs_notifications', true ) ?: array();
+						$unread_notifs = count($notifs);
+
+						// Messages - count unread jobs_message
+						$unread_msgs = 0; // In a real app we would query this
 					?>
+						<div class="nav-icons-group">
+							<a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>" class="nav-icon-link" title="<?php _e('Messages', 'jobs'); ?>">
+								<i class="dashicons dashicons-email-alt"></i>
+								<?php if($unread_msgs > 0): ?><span class="icon-badge"><?php echo $unread_msgs; ?></span><?php endif; ?>
+							</a>
+							<a href="<?php echo home_url('/jobs-dashboard?tab=notifications'); ?>" class="nav-icon-link" title="<?php _e('Notifications', 'jobs'); ?>">
+								<i class="dashicons dashicons-bell"></i>
+								<?php if($unread_notifs > 0): ?><span class="icon-badge"><?php echo $unread_notifs; ?></span><?php endif; ?>
+							</a>
+						</div>
+
 						<div class="nav-user-account">
 							<div class="nav-profile-trigger">
 								<?php echo get_avatar( $user->ID, 32 ); ?>
@@ -659,7 +687,7 @@ class Jobs_Public {
 								</div>
 								<ul>
 									<li><a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="dashicons dashicons-dashboard"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a></li>
-									<li><a href="<?php echo home_url( '/jobs-settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Settings', 'jobs' ); ?></a></li>
+									<li><a href="<?php echo home_url( '/jobs-dashboard?tab=settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Settings', 'jobs' ); ?></a></li>
 									<li><a href="<?php echo wp_logout_url( home_url() ); ?>"><i class="dashicons dashicons-exit"></i> <?php _e( 'Logout', 'jobs' ); ?></a></li>
 								</ul>
 							</div>
@@ -681,6 +709,21 @@ class Jobs_Public {
 	 *
 	 * @since    1.0.0
 	 */
+	/**
+	 * Override Single Job Template
+	 */
+	public function job_single_template( $template ) {
+		if ( is_singular( 'job' ) ) {
+			$new_template = plugin_dir_path( __FILE__ ) . 'partials/jobs-single-listing.php';
+			if ( file_exists( $new_template ) ) {
+				// Wrap with header/footer
+				include_once ABSPATH . 'wp-admin/includes/file.php';
+				return $new_template;
+			}
+		}
+		return $template;
+	}
+
 	public function handle_dashboard_redirection() {
 		if ( is_page( 'jobs-dashboard' ) && ! is_user_logged_in() ) {
 			wp_redirect( wp_login_url( home_url( '/jobs-dashboard' ) ) );
@@ -858,10 +901,13 @@ class Jobs_Public {
 		$current_lang = get_locale();
 		ob_start();
 		?>
-		<div class="jobs-lang-switcher">
-			<a href="?lang=en" class="<?php echo ($current_lang == 'en_US') ? 'active' : ''; ?>">English</a>
-			<span class="sep">|</span>
-			<a href="?lang=ar" class="<?php echo ($current_lang == 'ar') ? 'active' : ''; ?>">العربية</a>
+		<div class="jobs-lang-switcher-modern">
+			<a href="?lang=en" class="<?php echo ($current_lang == 'en_US') ? 'active' : ''; ?>" title="English">
+				<span class="lang-flag">🇺🇸</span> <span class="lang-label">EN</span>
+			</a>
+			<a href="?lang=ar" class="<?php echo ($current_lang == 'ar') ? 'active' : ''; ?>" title="العربية">
+				<span class="lang-flag">🇸🇦</span> <span class="lang-label">AR</span>
+			</a>
 		</div>
 		<?php
 		return ob_get_clean();

@@ -194,6 +194,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_ajax_nopriv_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_body_open', $plugin_public, 'add_custom_nav_bar' );
+		$this->loader->add_filter( 'template_include', $plugin_public, 'job_single_template' );
 		$this->loader->add_action( 'wp_login', $plugin_public, 'log_login_activity', 10, 2 );
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'handle_dashboard_redirection' );
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );

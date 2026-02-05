@@ -1256,3 +1256,160 @@ body.rtl .notification-item {
         gap: 5px;
     }
 }
+
+/* Navigation Enhancements */
+.nav-icons-group {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.nav-icon-link {
+    position: relative;
+    color: #555;
+    text-decoration: none;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.nav-icon-link:hover {
+    color: var(--primary-color);
+}
+
+.nav-icon-link i {
+    font-size: 22px !important;
+    height: 22px !important;
+    width: 22px !important;
+}
+
+.icon-badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 15px;
+    text-align: center;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.jobs-lang-switcher-modern {
+    display: flex;
+    gap: 10px;
+}
+
+.jobs-lang-switcher-modern a {
+    text-decoration: none;
+    color: #777;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: #f8f9fa;
+    transition: all 0.2s;
+}
+
+.jobs-lang-switcher-modern a.active {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.lang-flag {
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+body.rtl .lang-flag {
+    margin-right: 0;
+    margin-left: 5px;
+}
+
+/* Global Clean up - Remove Underlines */
+.account-nav ul li a,
+.job-card-title a,
+.jobs-dash-sidebar a,
+.jobs-account-sidebar a,
+.jobs-table a,
+.btn-modern,
+.jobs-button,
+.nav-main-links a,
+.nav-auth-links a,
+.nav-account-dropdown ul li a,
+.support-card a,
+.admin-dash-nav a {
+    text-decoration: none !important;
+}
+
+.job-card-title a:hover {
+    text-decoration: none !important;
+}
+
+/* Logo & Alignment */
+.jobs-nav-left {
+    flex: 0 0 auto;
+}
+
+.jobs-nav-right {
+    flex: 1;
+    justify-content: flex-end;
+}
+
+body.rtl .jobs-nav-right {
+    justify-content: flex-start;
+}
+
+
+/* Search Engine Overhaul */
+.jobs-homepage-header {
+    max-width: 1000px;
+}
+
+.jobs-smart-search-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(29, 52, 105, 0.1);
+}
+
+.search-main-icon {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.search-main-icon i {
+    font-size: 72px !important;
+    height: 72px !important;
+    width: 72px !important;
+    color: var(--primary-color);
+}
+
+.jobs-search-input-modern {
+    text-align: center !important;
+    padding: 20px 30px !important;
+    font-size: 20px !important;
+    height: auto !important;
+}
+
+body.rtl .jobs-search-input-modern {
+    padding: 20px 30px !important;
+    text-align: center !important;
+}
+
+.search-filters-row {
+    margin-top: 30px;
+}
+
+/* Remove disruptions */
+.jobs-platform-highlights {
+    display: none;
+}

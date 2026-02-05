@@ -58,17 +58,22 @@
 		</div>
 	</div>
 
-	<div class="job-card-footer">
+	<div class="job-card-footer" style="flex-wrap: wrap; gap: 15px;">
 		<span class="job-card-date"><?php printf( __( 'Posted %s ago', 'jobs' ), human_time_diff( get_the_time('U'), current_time('timestamp') ) ); ?></span>
 
-		<?php if ( is_user_logged_in() ) : ?>
-			<a href="<?php the_permalink(); ?>" class="btn-modern btn-primary-modern">
-				<?php _e( 'Apply Now', 'jobs' ); ?>
+		<div class="job-card-actions" style="display: flex; gap: 10px;">
+			<a href="<?php the_permalink(); ?>" class="btn-modern btn-outline-modern" style="padding: 8px 12px; font-size: 13px;">
+				<?php _e( 'View Details', 'jobs' ); ?>
 			</a>
-		<?php else : ?>
-			<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn-modern btn-outline-modern">
-				<?php _e( 'Login to Apply', 'jobs' ); ?>
-			</a>
-		<?php endif; ?>
+			<?php if ( is_user_logged_in() ) : ?>
+				<a href="<?php the_permalink(); ?>?apply=1" class="btn-modern btn-primary-modern" style="padding: 8px 12px; font-size: 13px;">
+					<?php _e( 'Apply', 'jobs' ); ?>
+				</a>
+			<?php else : ?>
+				<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn-modern btn-primary-modern" style="padding: 8px 12px; font-size: 13px;">
+					<?php _e( 'Login to Apply', 'jobs' ); ?>
+				</a>
+			<?php endif; ?>
+		</div>
 	</div>
 </div>
