@@ -1,0 +1,442 @@
+<?php
+
+/**
+ * The public-facing functionality of the plugin.
+ *
+ * @link       https://jobedia.com
+ * @since      1.0.0
+ *
+ * @package    Jobs
+ * @subpackage Jobs/public
+ */
+
+/**
+ * The public-facing functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the public-facing stylesheet and JavaScript.
+ *
+ * @package    Jobs
+ * @subpackage Jobs/public
+ * @author     jobedia <info@jobedia.com>
+ */
+class Jobs_Public {
+
+	/**
+	 * The ID of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $plugin_name    The ID of this plugin.
+	 */
+	private $plugin_name;
+
+	/**
+	 * The version of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string    $version    The current version of this plugin.
+	 */
+	private $version;
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @since    1.0.0
+	 * @param    string    $plugin_name       The name of the plugin.
+	 * @param    string    $version    The version of this plugin.
+	 */
+	public function __construct( $plugin_name, $version ) {
+
+		$this->plugin_name = $plugin_name;
+		$this->version = $version;
+
+	}
+
+	/**
+	 * Register the stylesheets for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_styles() {
+
+		wp_enqueue_style( 'rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap', array(), null );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jobs-public.css', array(), $this->version, 'all' );
+
+	}
+
+	/**
+	 * Register the JavaScript for the public-facing side of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function enqueue_scripts() {
+
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jobs-public.js', array( 'jquery' ), $this->version, false );
+		wp_localize_script( $this->plugin_name, 'jobs_ajax', array(
+			'ajax_url' => admin_url( 'admin-ajax.php' ),
+			'nonce'    => wp_create_nonce( 'jobs_search_nonce' ),
+		) );
+
+	}
+
+	/**
+	 * Add RTL class to body if needed.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_rtl_body_class( $classes ) {
+		if ( is_rtl() ) {
+			$classes[] = 'rtl';
+		}
+		return $classes;
+	}
+
+	/**
+	 * Add SEO meta tags to the head.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_seo_meta_tags() {
+		if ( is_singular( 'job' ) ) {
+			global $post;
+			$description = wp_trim_words( $post->post_excerpt, 25 );
+			if ( empty( $description ) ) {
+				$description = wp_trim_words( $post->post_content, 25 );
+			}
+			echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
+			echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . '" />' . "\n";
+			echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
+			echo '<meta property="og:type" content="article" />' . "\n";
+			echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . '" />' . "\n";
+		}
+	}
+
+	/**
+	 * Add ads to single job content.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_job_single_ads( $content ) {
+		if ( is_singular( 'job' ) && is_main_query() ) {
+			$ad_top = get_option( 'jobs_ad_top' );
+			$ad_bottom = get_option( 'jobs_ad_bottom' );
+
+			if ( $ad_top ) {
+				$content = '<div class="jobs-ad-zone jobs-ad-inline-top">' . $ad_top . '</div>' . $content;
+			}
+			if ( $ad_bottom ) {
+				$content .= '<div class="jobs-ad-zone jobs-ad-inline-bottom">' . $ad_bottom . '</div>';
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 * AJAX handler to get states by country.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_get_states() {
+		$country = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
+
+		$locations = array(
+			'USA' => array( 'California', 'New York', 'Texas', 'Florida' ),
+			'UK' => array( 'London', 'Manchester', 'Birmingham', 'Leeds' ),
+			'UAE' => array( 'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman' ),
+			'Egypt' => array( 'Cairo', 'Alexandria', 'Giza', 'Luxor' ),
+			'Saudi Arabia' => array( 'Riyadh', 'Jeddah', 'Mecca', 'Medina' ),
+		);
+
+		if ( isset( $locations[$country] ) ) {
+			wp_send_json_success( $locations[$country] );
+		} else {
+			wp_send_json_error( __( 'No states found for this country.', 'jobs' ) );
+		}
+		wp_die();
+	}
+
+	/**
+	 * AJAX handler for job search.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_jobs_search() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+
+		$keyword  = isset( $_POST['keyword'] ) ? sanitize_text_field( $_POST['keyword'] ) : '';
+		$category = isset( $_POST['category'] ) ? sanitize_text_field( $_POST['category'] ) : '';
+		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
+		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
+
+		$args = array(
+			'post_type'      => 'job',
+			'post_status'    => 'publish',
+			'posts_per_page' => 12,
+			's'              => $keyword,
+			'meta_query'     => array(),
+			'tax_query'      => array(),
+		);
+
+		if ( ! empty( $category ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'job_category',
+				'field'    => 'slug',
+				'terms'    => $category,
+			);
+		}
+
+		if ( ! empty( $country ) ) {
+			$args['meta_query'][] = array(
+				'key'   => '_job_country',
+				'value' => $country,
+			);
+		}
+
+		if ( ! empty( $state ) ) {
+			$args['meta_query'][] = array(
+				'key'   => '_job_state',
+				'value' => $state,
+			);
+		}
+
+		$query = new WP_Query( $args );
+
+		ob_start();
+
+		if ( $query->have_posts() ) :
+			while ( $query->have_posts() ) : $query->the_post();
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-card-template.php';
+			endwhile;
+			wp_reset_postdata();
+		else :
+			echo '<p>' . __( 'No jobs found.', 'jobs' ) . '</p>';
+		endif;
+
+		$output = ob_get_clean();
+
+		wp_send_json_success( $output );
+		wp_die();
+	}
+
+	/**
+	 * Add custom transparent navigation bar for logged-in users.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_custom_nav_bar() {
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		$user = wp_get_current_user();
+		$role_names = get_option( 'jobs_role_names' );
+		$roles = ( array ) $user->roles;
+		$role_id = $roles[0];
+		$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst( str_replace( '_', ' ', $role_id ) );
+
+		?>
+		<nav class="jobs-top-nav">
+			<div class="jobs-container">
+				<div class="jobs-nav-content">
+					<div class="jobs-user-welcome">
+						<?php printf( __( 'Welcome, %s (%s)', 'jobs' ), '<strong>' . $user->display_name . '</strong>', $display_role ); ?>
+					</div>
+					<div class="jobs-nav-links">
+						<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><?php _e( 'Dashboard', 'jobs' ); ?></a>
+						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
+						<a href="<?php echo wp_logout_url( home_url() ); ?>"><?php _e( 'Logout', 'jobs' ); ?></a>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<?php
+	}
+
+	/**
+	 * Handle dashboard redirection based on role.
+	 *
+	 * @since    1.0.0
+	 */
+	public function handle_dashboard_redirection() {
+		if ( is_page( 'jobs-dashboard' ) && ! is_user_logged_in() ) {
+			wp_redirect( wp_login_url( home_url( '/jobs-dashboard' ) ) );
+			exit;
+		}
+	}
+
+	/**
+	 * Login shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_login( $atts ) {
+		if ( is_user_logged_in() ) {
+			return '<p class="jobs-msg">' . __( 'You are already logged in.', 'jobs' ) . '</p>';
+		}
+
+		$redirect = ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+
+		ob_start();
+		?>
+		<div class="jobs-auth-form jobs-login-form">
+			<h2><?php _e( 'Login to Your Account', 'jobs' ); ?></h2>
+			<?php
+			wp_login_form( array(
+				'redirect' => $redirect,
+				'label_username' => __( 'Username or Email Address', 'jobs' ),
+				'label_password' => __( 'Password', 'jobs' ),
+				'label_remember' => __( 'Remember Me', 'jobs' ),
+				'label_log_in'   => __( 'Log In', 'jobs' ),
+				'remember'       => true,
+				'value_remember' => true,
+			) );
+			?>
+			<p class="jobs-form-footer">
+				<?php _e( "Don't have an account?", 'jobs' ); ?> <a href="#"><?php _e( 'Register here', 'jobs' ); ?></a>
+			</p>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Dashboard shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_dashboard() {
+		if ( ! is_user_logged_in() ) {
+			return $this->shortcode_jobs_login( array() );
+		}
+
+		$user = wp_get_current_user();
+		$role = ( array ) $user->roles;
+		$role = $role[0];
+
+		ob_start();
+		switch ( $role ) {
+			case 'job_seeker':
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-seeker.php';
+				break;
+			case 'employer':
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-employer.php';
+				break;
+			case 'job_reviewer':
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-reviewer.php';
+				break;
+			case 'system_administrator':
+			case 'administrator':
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-admin.php';
+				break;
+			default:
+				echo '<p>' . __( 'You do not have a dashboard assigned.', 'jobs' ) . '</p>';
+				break;
+		}
+		return ob_get_clean();
+	}
+
+	/**
+	 * Registration shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_register( $atts ) {
+		if ( is_user_logged_in() ) {
+			return '<p class="jobs-msg">' . __( 'You are already registered and logged in.', 'jobs' ) . '</p>';
+		}
+
+		ob_start();
+		?>
+		<div class="jobs-auth-form jobs-register-form">
+			<h2><?php _e( 'Create an Account', 'jobs' ); ?></h2>
+			<form id="jobs-registration-form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
+				<input type="hidden" name="action" value="jobs_register_user">
+				<input type="hidden" name="redirect_to" value="<?php echo esc_url( ( is_ssl() ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] ); ?>">
+				<?php wp_nonce_field( 'jobs_register_nonce', 'jobs_nonce' ); ?>
+				<p>
+					<label for="user_login"><?php _e( 'Username', 'jobs' ); ?></label>
+					<input type="text" name="user_login" id="user_login" class="input" required>
+				</p>
+				<p>
+					<label for="user_email"><?php _e( 'Email Address', 'jobs' ); ?></label>
+					<input type="email" name="user_email" id="user_email" class="input" required>
+				</p>
+				<p>
+					<label for="user_pass"><?php _e( 'Password', 'jobs' ); ?></label>
+					<input type="password" name="user_pass" id="user_pass" class="input" required>
+				</p>
+				<p class="jobs-submit">
+					<input type="submit" value="<?php _e( 'Register Now', 'jobs' ); ?>" class="button button-primary button-large">
+				</p>
+			</form>
+			<p class="jobs-form-footer">
+				<?php _e( 'Already have an account?', 'jobs' ); ?> <a href="#"><?php _e( 'Log in here', 'jobs' ); ?></a>
+			</p>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Search engine shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_search_engine( $atts ) {
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'partials/jobs-public-display.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Language switcher shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_language_switcher() {
+		$current_lang = get_locale();
+		ob_start();
+		?>
+		<div class="jobs-lang-switcher">
+			<a href="?lang=en" class="<?php echo ($current_lang == 'en_US') ? 'active' : ''; ?>">English</a>
+			<span class="sep">|</span>
+			<a href="?lang=ar" class="<?php echo ($current_lang == 'ar') ? 'active' : ''; ?>">العربية</a>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Register user from shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function handle_user_registration() {
+		if ( ! isset( $_POST['jobs_nonce'] ) || ! wp_verify_nonce( $_POST['jobs_nonce'], 'jobs_register_nonce' ) ) {
+			wp_die( __( 'Security check failed.', 'jobs' ) );
+		}
+
+		$username = sanitize_user( $_POST['user_login'] );
+		$email    = sanitize_email( $_POST['user_email'] );
+		$password = $_POST['user_pass'];
+
+		$user_id = wp_create_user( $username, $password, $email );
+
+		if ( is_wp_error( $user_id ) ) {
+			wp_die( $user_id->get_error_message() );
+		}
+
+		// Set role
+		$user = new WP_User( $user_id );
+		$user->set_role( 'job_seeker' );
+
+		// Login and redirect
+		$redirect_to = isset( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : home_url();
+		wp_set_auth_cookie( $user_id );
+		wp_redirect( $redirect_to );
+		exit;
+	}
+
+}
