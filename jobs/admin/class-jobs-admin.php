@@ -250,6 +250,18 @@ class Jobs_Admin {
 							<p class="description"><?php _e( 'Optimize containers and spacing for Astra theme.', 'jobs' ); ?></p>
 						</td>
 					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Job Expiration (Days)', 'jobs' ); ?></th>
+						<td>
+							<input type="number" name="jobs_expiration_days" value="<?php echo esc_attr( get_option( 'jobs_expiration_days', '50' ) ); ?>" min="1" max="365" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Enable Geolocation', 'jobs' ); ?></th>
+						<td>
+							<input type="checkbox" name="jobs_enable_geo" value="1" <?php checked( 1, get_option( 'jobs_enable_geo', 1 ) ); ?> />
+						</td>
+					</tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>
@@ -421,6 +433,8 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_logo_width' );
 		register_setting( 'jobs_options', 'jobs_logo_margin' );
 		register_setting( 'jobs_options', 'jobs_astra_compat' );
+		register_setting( 'jobs_options', 'jobs_expiration_days' );
+		register_setting( 'jobs_options', 'jobs_enable_geo' );
 		register_setting( 'jobs_options', 'jobs_default_status' );
 		register_setting( 'jobs_options', 'jobs_enable_notifications' );
 	}

@@ -18,6 +18,7 @@ $logo_margin = get_option( 'jobs_logo_margin', '40' );
 
 <div class="jobs-container">
 	<div class="jobs-homepage-header">
+		<div class="jobs-welcome-badge"><?php _e( 'Trusted by 10,000+ Professionals', 'jobs' ); ?></div>
 		<?php if ( $logo_id ) : ?>
 			<div class="jobs-site-logo-container" style="margin-bottom: <?php echo esc_attr($logo_margin); ?>px;">
 				<a href="<?php echo home_url(); ?>">
@@ -79,6 +80,24 @@ $logo_margin = get_option( 'jobs_logo_margin', '40' );
 						<span class="job-capsule" style="background-color: <?php echo $bg; ?>;" data-slug="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html( $cat->name ); ?></span>
 					<?php endforeach; ?>
 				</div>
+			</div>
+		</div>
+
+		<div class="jobs-platform-highlights">
+			<div class="highlight-item">
+				<i class="dashicons dashicons-analytics"></i>
+				<h4><?php _e( 'Advanced Analytics', 'jobs' ); ?></h4>
+				<p><?php _e( 'Track your career growth with interactive dashboards.', 'jobs' ); ?></p>
+			</div>
+			<div class="highlight-item">
+				<i class="dashicons dashicons-shield"></i>
+				<h4><?php _e( 'Secure & Private', 'jobs' ); ?></h4>
+				<p><?php _e( 'Full control over your data and profile visibility.', 'jobs' ); ?></p>
+			</div>
+			<div class="highlight-item">
+				<i class="dashicons dashicons-awards"></i>
+				<h4><?php _e( 'PDF CV Builder', 'jobs' ); ?></h4>
+				<p><?php _e( 'Generate professional resumes automatically.', 'jobs' ); ?></p>
 			</div>
 		</div>
 	</div>
