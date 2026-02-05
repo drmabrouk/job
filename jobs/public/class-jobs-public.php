@@ -158,6 +158,98 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Add application form to single job content.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_application_form( $content ) {
+		if ( is_singular( 'job' ) && is_main_query() ) {
+			if ( ! is_user_logged_in() ) {
+				return '<div class="jobs-msg">' . sprintf( __( 'Please <a href="%s">login</a> to apply for this job.', 'jobs' ), wp_login_url( get_permalink() ) ) . '</div>' . $content;
+			}
+
+			$user_id = get_current_user_id();
+			$docs = get_user_meta( $user_id, '_jobs_user_documents', true ) ?: array();
+
+			ob_start();
+			?>
+			<div class="jobs-application-form-wrapper" style="margin: 40px 0; padding: 30px; background: #fdfdfd; border: 1px solid #eee; border-radius: 12px;">
+				<h3><?php _e( 'Apply for this Position', 'jobs' ); ?></h3>
+				<form method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
+					<input type="hidden" name="action" value="jobs_submit_application">
+					<input type="hidden" name="job_id" value="<?php the_ID(); ?>">
+					<?php wp_nonce_field( 'jobs_apply_nonce', 'jobs_nonce' ); ?>
+
+					<p>
+						<label><?php _e( 'Select Document to Attach', 'jobs' ); ?></label>
+						<select name="attachment_id" required style="width:100%; padding:10px;">
+							<?php if ( ! empty( $docs ) ) : foreach ( $docs as $doc ) : ?>
+								<option value="<?php echo $doc['id']; ?>"><?php echo esc_html($doc['title']); ?> (<?php echo esc_html($doc['type']); ?>)</option>
+							<?php endforeach; else : ?>
+								<option value=""><?php _e( 'No documents found. Please upload to your Document Manager first.', 'jobs' ); ?></option>
+							<?php endif; ?>
+						</select>
+					</p>
+
+					<p>
+						<label><?php _e( 'Cover Letter (Optional)', 'jobs' ); ?></label>
+						<textarea name="cover_letter" rows="6" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
+					</p>
+
+					<input type="submit" value="<?php _e( 'Submit Application', 'jobs' ); ?>" class="button button-primary button-large" <?php echo empty($docs) ? 'disabled' : ''; ?>>
+				</form>
+			</div>
+			<?php
+			$form = ob_get_clean();
+			$content .= $form;
+		}
+		return $content;
+	}
+
+	/**
+	 * Handle Application Submission.
+	 *
+	 * @since    1.0.0
+	 */
+	public function handle_application_submission() {
+		if ( ! isset( $_POST['jobs_nonce'] ) || ! wp_verify_nonce( $_POST['jobs_nonce'], 'jobs_apply_nonce' ) ) {
+			wp_die( __( 'Security check failed.', 'jobs' ) );
+		}
+
+		$user_id = get_current_user_id();
+		$job_id = intval($_POST['job_id']);
+		$attach_id = intval($_POST['attachment_id']);
+		$cover = wp_kses_post($_POST['cover_letter']);
+
+		$app_id = wp_insert_post( array(
+			'post_title'   => sprintf( __( 'Application: %s - %s', 'jobs' ), get_the_title($job_id), wp_get_current_user()->display_name ),
+			'post_content' => $cover,
+			'post_type'    => 'application',
+			'post_status'  => 'publish',
+			'post_author'  => $user_id,
+		) );
+
+		if ( $app_id ) {
+			update_post_meta( $app_id, '_job_id', $job_id );
+			update_post_meta( $app_id, '_attachment_id', $attach_id );
+
+			// Notify Employer
+			$employer_id = get_post_field( 'post_author', $job_id );
+			$notifs = get_user_meta( $employer_id, '_jobs_notifications', true ) ?: array();
+			$notifs[] = array(
+				'message' => sprintf( __( 'New application received for job: %s', 'jobs' ), get_the_title($job_id) ),
+				'time'    => time(),
+			);
+			update_user_meta( $employer_id, '_jobs_notifications', $notifs );
+
+			$this->log_activity( $user_id, 'Applied for job: ' . get_the_title($job_id) );
+
+			wp_redirect( get_permalink($job_id) . '?applied=1' );
+			exit;
+		}
+	}
+
+	/**
 	 * Add follow employer button to single job content.
 	 *
 	 * @since    1.0.0
@@ -172,7 +264,8 @@ class Jobs_Public {
 				$class = $is_following ? 'followed' : '';
 
 				$btn = '<div class="follow-employer-section"><button class="button follow-employer-btn ' . $class . '" data-id="' . $employer_id . '">' . $text . '</button></div>';
-				$content = $btn . $content;
+				$msg_btn = '<div class="message-employer-section" style="margin-top:10px;"><a href="' . home_url('/jobs-dashboard?tab=messages&view=single&action=new&to=' . $employer_id) . '" class="button">' . __( 'Message Employer', 'jobs' ) . '</a></div>';
+				$content = $btn . $msg_btn . $content;
 			}
 		}
 		return $content;

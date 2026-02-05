@@ -80,4 +80,8 @@ if ( $jobs->have_posts() ) {
 			<p><?php _e( 'Post a new job to start receiving applications.', 'jobs' ); ?></p>
 		<?php endif; ?>
 	</div>
+
+	<hr style="margin: 40px 0;">
+
+	<?php include plugin_dir_path(__FILE__) . 'jobs-candidate-matching.php'; ?>
 </div>

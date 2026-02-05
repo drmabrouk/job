@@ -20,6 +20,13 @@ if ( ! $is_public && get_current_user_id() !== $user->ID ) {
 	wp_die( __( 'This profile is private.', 'jobs' ) );
 }
 
+// Track profile view
+if ( get_current_user_id() !== $user->ID ) {
+	$views = get_user_meta( $user->ID, '_jobs_profile_views', true ) ?: array();
+	$views[] = time();
+	update_user_meta( $user->ID, '_jobs_profile_views', array_slice($views, -100) );
+}
+
 get_header();
 ?>
 <div class="jobs-container">
