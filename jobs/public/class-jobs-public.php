@@ -216,9 +216,10 @@ class Jobs_Public {
 				$expiration = get_post_meta( $job_id, '_jobs_expiration_date', true );
 
 				if ( ! $expiration ) {
-					// Set default if not exists: 50 days from publish
+					// Set default if not exists
+					$days = get_option( 'jobs_expiration_days', '50' );
 					$publish_date = get_the_date( 'Y-m-d H:i:s', $job_id );
-					$expiration = date( 'Y-m-d H:i:s', strtotime( $publish_date . ' + 50 days' ) );
+					$expiration = date( 'Y-m-d H:i:s', strtotime( $publish_date . ' + ' . $days . ' days' ) );
 					update_post_meta( $job_id, '_jobs_expiration_date', $expiration );
 				}
 
@@ -257,8 +258,9 @@ class Jobs_Public {
 				'ID'          => $job_id,
 				'post_status' => 'publish',
 			) );
-			// Reset expiration to 50 days from now
-			$new_expiration = date( 'Y-m-d H:i:s', strtotime( '+ 50 days' ) );
+			// Reset expiration
+			$days = get_option( 'jobs_expiration_days', '50' );
+			$new_expiration = date( 'Y-m-d H:i:s', strtotime( '+ ' . $days . ' days' ) );
 			update_post_meta( $job_id, '_jobs_expiration_date', $new_expiration );
 			wp_send_json_success( __( 'Job reactivated successfully.', 'jobs' ) );
 		}
@@ -429,27 +431,25 @@ class Jobs_Public {
 			'post_status'    => 'publish',
 			'posts_per_page' => 12,
 			's'              => $keyword,
-			'meta_query'     => array(),
-			'tax_query'      => array(),
+			'meta_query'     => array( 'relation' => 'AND' ),
+			'tax_query'      => array( 'relation' => 'AND' ),
+			'orderby'        => 'date',
+			'order'          => 'DESC',
 		);
 
-		// Prioritization logic: if geo_country is found, we might want to sort or filter.
-		// For simplicity, we'll add it to the meta query as a "soft" preference if nothing else is selected.
-		if ( ! empty( $geo_country ) && empty( $country ) && empty( $keyword ) ) {
-			// This is just for initial load / empty search prioritization
-			$args['meta_query']['relation'] = 'OR';
+		// Smart prioritization: if geo_country is found and no specific country is selected
+		if ( ! empty( $geo_country ) && empty( $country ) ) {
 			$args['meta_query'][] = array(
-				'key' => '_job_country',
-				'value' => $geo_country,
-				'compare' => '=',
-			);
-			$args['meta_query'][] = array(
-				'key' => '_job_country',
-				'compare' => 'EXISTS',
-			);
-			$args['orderby'] = array(
-				'meta_value' => 'DESC',
-				'date' => 'DESC',
+				'relation' => 'OR',
+				array(
+					'key' => '_job_country',
+					'value' => $geo_country,
+					'compare' => '=',
+				),
+				array(
+					'key' => '_job_country',
+					'compare' => 'NOT EXISTS',
+				),
 			);
 		}
 
