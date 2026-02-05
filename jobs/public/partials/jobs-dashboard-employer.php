@@ -3,6 +3,7 @@
  * Employer Dashboard
  */
 $user_id = get_current_user_id();
+$layout = get_user_meta( $user_id, '_jobs_dash_layout', true ) ?: 'grid';
 $jobs = new WP_Query( array(
 	'post_type' => 'job',
 	'author'    => $user_id,
@@ -26,7 +27,7 @@ if ( $jobs->have_posts() ) {
 	}
 }
 ?>
-<div class="jobs-dashboard employer-dashboard">
+<div class="jobs-dashboard employer-dashboard layout-<?php echo $layout; ?>">
 	<h1><?php _e( 'Employer Dashboard', 'jobs' ); ?></h1>
 	<div class="dashboard-stats">
 		<div class="stat-box">
@@ -36,6 +37,12 @@ if ( $jobs->have_posts() ) {
 		<div class="stat-box">
 			<h3><?php _e( 'Total Applications', 'jobs' ); ?></h3>
 			<p><?php echo $total_apps; ?></p>
+			<div class="mini-bar-chart">
+				<div class="bar" style="height: 40%;"></div>
+				<div class="bar" style="height: 70%;"></div>
+				<div class="bar" style="height: 50%;"></div>
+				<div class="bar" style="height: 90%;"></div>
+			</div>
 		</div>
 	</div>
 	<div class="dashboard-content">

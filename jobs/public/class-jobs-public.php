@@ -327,6 +327,29 @@ class Jobs_Public {
 	 *
 	 * @since    1.0.0
 	 */
+	/**
+	 * AJAX handler to check for new notifications.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_check_notifications() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		if ( ! is_user_logged_in() ) wp_send_json_error();
+
+		$user_id = get_current_user_id();
+		$notifications = get_user_meta( $user_id, '_jobs_notifications', true ) ?: array();
+
+		$unread_count = 0;
+		foreach ( $notifications as $notif ) {
+			if ( ! isset( $notif['read'] ) || ! $notif['read'] ) {
+				$unread_count++;
+			}
+		}
+
+		wp_send_json_success( array( 'unread_count' => $unread_count ) );
+		wp_die();
+	}
+
 	public function ajax_follow_employer() {
 		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
 		if ( ! is_user_logged_in() ) wp_send_json_error( __( 'Login required.', 'jobs' ) );
@@ -382,6 +405,7 @@ class Jobs_Public {
 
 		$keyword  = isset( $_POST['keyword'] ) ? sanitize_text_field( $_POST['keyword'] ) : '';
 		$category = isset( $_POST['category'] ) ? sanitize_text_field( $_POST['category'] ) : '';
+		$type     = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : '';
 		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
 
@@ -414,6 +438,14 @@ class Jobs_Public {
 				'taxonomy' => 'job_category',
 				'field'    => 'slug',
 				'terms'    => $category,
+			);
+		}
+
+		if ( ! empty( $type ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'job_type',
+				'field'    => 'slug',
+				'terms'    => $type,
 			);
 		}
 

@@ -31,6 +31,15 @@
 					<option value="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></option>
 				<?php endforeach; ?>
 			</select>
+			<?php
+			$types = get_terms( array( 'taxonomy' => 'job_type', 'hide_empty' => false ) );
+			?>
+			<select id="jobs-type-select" class="jobs-filter-select">
+				<option value=""><?php _e( 'All Types', 'jobs' ); ?></option>
+				<?php foreach ( $types as $type ) : ?>
+					<option value="<?php echo esc_attr( $type->slug ); ?>"><?php echo esc_html( $type->name ); ?></option>
+				<?php endforeach; ?>
+			</select>
 			<select id="jobs-country-select" class="jobs-filter-select">
 				<option value=""><?php _e( 'Select Country', 'jobs' ); ?></option>
 				<option value="USA">USA</option>

@@ -32,6 +32,7 @@ class Jobs_Activator {
 		self::register_post_types();
 		self::register_taxonomies();
 		self::preload_categories();
+		self::preload_job_types();
 		self::create_homepage();
 		self::setup_cron();
 		flush_rewrite_rules();
@@ -143,6 +144,21 @@ class Jobs_Activator {
 	 * @since    1.0.0
 	 */
 	public static function register_taxonomies() {
+		// Job Type Taxonomy
+		register_taxonomy( 'job_type', array( 'job' ), array(
+			'hierarchical'      => true,
+			'labels'            => array(
+				'name'              => _x( 'Job Types', 'taxonomy general name', 'jobs' ),
+				'singular_name'     => _x( 'Job Type', 'taxonomy singular name', 'jobs' ),
+				'menu_name'         => __( 'Job Types', 'jobs' ),
+			),
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'rewrite'           => array( 'slug' => 'job-type' ),
+		) );
+
+		// Job Category Taxonomy
 		register_taxonomy( 'job_category', array( 'job' ), array(
 			'hierarchical'      => true,
 			'labels'            => array(
@@ -163,6 +179,18 @@ class Jobs_Activator {
 			'query_var'         => true,
 			'rewrite'           => array( 'slug' => 'job-category' ),
 		) );
+	}
+
+	/**
+	 * Preload Job Types.
+	 *
+	 * @since    1.0.0
+	 */
+	private static function preload_job_types() {
+		$types = array( 'Full-time', 'Part-time', 'Freelance', 'Contract', 'Internship', 'Remote' );
+		foreach ( $types as $type ) {
+			wp_insert_term( $type, 'job_type' );
+		}
 	}
 
 	/**

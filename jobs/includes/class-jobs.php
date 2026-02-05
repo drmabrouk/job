@@ -201,6 +201,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_extend_job', $plugin_public, 'ajax_extend_job' );
 		$this->loader->add_action( 'wp_ajax_save_job', $plugin_public, 'ajax_save_job' );
 		$this->loader->add_action( 'wp_ajax_follow_employer', $plugin_public, 'ajax_follow_employer' );
+		$this->loader->add_action( 'wp_ajax_check_notifications', $plugin_public, 'ajax_check_notifications' );
 		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 
 		$this->loader->add_shortcode( 'jobs_login', $plugin_public, 'shortcode_jobs_login' );

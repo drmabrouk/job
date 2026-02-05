@@ -9,6 +9,7 @@
 		function performSearch() {
 			var keyword = $searchInput.val();
 			var category = $('#jobs-category-select').val();
+			var type = $('#jobs-type-select').val();
 			var country = $('#jobs-country-select').val();
 			var state = $('#jobs-state-select').val();
 
@@ -19,6 +20,7 @@
 					action: 'jobs_search',
 					keyword: keyword,
 					category: category,
+					type: type,
 					country: country,
 					state: state,
 					nonce: jobs_ajax.nonce
@@ -50,6 +52,10 @@
 		});
 
 		$(document).on('change', '#jobs-category-select', function() {
+			performSearch();
+		});
+
+		$(document).on('change', '#jobs-type-select', function() {
 			performSearch();
 		});
 
@@ -155,6 +161,32 @@
 		});
 
 		// Follow Employer
+		// Notification Polling
+		function checkNotifications() {
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'check_notifications',
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					if (response.success && response.data.unread_count > 0) {
+						if ($('.jobs-nav-links .notif-badge').length) {
+							$('.jobs-nav-links .notif-badge').text(response.data.unread_count);
+						} else {
+							$('.jobs-nav-links a[href*="jobs-dashboard"]').append(' <span class="notif-badge">' + response.data.unread_count + '</span>');
+						}
+					}
+				}
+			});
+		}
+
+		if ($('.jobs-top-nav').length) {
+			setInterval(checkNotifications, 30000); // Every 30 seconds
+			checkNotifications();
+		}
+
 		$(document).on('click', '.follow-employer-btn', function() {
 			var $btn = $(this);
 			var empId = $btn.data('id');

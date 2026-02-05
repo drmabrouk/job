@@ -7,10 +7,13 @@ $notif_pref = get_user_meta( $user->ID, '_jobs_notif_pref', true ) ?: 'all';
 $privacy_pref = get_user_meta( $user->ID, '_jobs_privacy_pref', true ) ?: 'public';
 $profile_public = get_user_meta( $user->ID, '_jobs_profile_public', true ) ?: 'no';
 $profile_indexed = get_user_meta( $user->ID, '_jobs_profile_indexed', true ) ?: 'no';
+$dashboard_layout = get_user_meta( $user->ID, '_jobs_dash_layout', true ) ?: 'grid';
 
 if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['jobs_settings_nonce'], 'jobs_save_settings' ) ) {
 	update_user_meta( $user->ID, '_jobs_notif_pref', sanitize_text_field( $_POST['notif_pref'] ) );
 	update_user_meta( $user->ID, '_jobs_privacy_pref', sanitize_text_field( $_POST['privacy_pref'] ) );
+	update_user_meta( $user->ID, '_jobs_dash_layout', sanitize_text_field( $_POST['dash_layout'] ) );
+	update_user_meta( $user->ID, '_jobs_locale', sanitize_text_field( $_POST['user_lang'] ) );
 
 	if ( in_array( 'job_seeker', (array) $user->roles ) ) {
 		update_user_meta( $user->ID, '_jobs_profile_public', isset($_POST['profile_public']) ? 'yes' : 'no' );
@@ -37,6 +40,28 @@ if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['j
 				<label>
 					<input type="radio" name="notif_pref" value="none" <?php checked( $notif_pref, 'none' ); ?>> <?php _e( 'None', 'jobs' ); ?>
 				</label>
+			</p>
+		</div>
+
+		<div class="settings-group">
+			<h3><?php _e( 'Dashboard Layout', 'jobs' ); ?></h3>
+			<p>
+				<label>
+					<input type="radio" name="dash_layout" value="grid" <?php checked( $dashboard_layout, 'grid' ); ?>> <?php _e( 'Grid View', 'jobs' ); ?>
+				</label><br>
+				<label>
+					<input type="radio" name="dash_layout" value="list" <?php checked( $dashboard_layout, 'list' ); ?>> <?php _e( 'List View', 'jobs' ); ?>
+				</label>
+			</p>
+		</div>
+
+		<div class="settings-group">
+			<h3><?php _e( 'Interface Language', 'jobs' ); ?></h3>
+			<p>
+				<select name="user_lang">
+					<option value="en_US" <?php selected( get_user_meta($user->ID, '_jobs_locale', true), 'en_US' ); ?>>English</option>
+					<option value="ar" <?php selected( get_user_meta($user->ID, '_jobs_locale', true), 'ar' ); ?>>العربية</option>
+				</select>
 			</p>
 		</div>
 
