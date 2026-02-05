@@ -186,13 +186,7 @@ class Jobs_Public {
 	public function ajax_get_states() {
 		$country = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 
-		$locations = array(
-			'USA' => array( 'California', 'New York', 'Texas', 'Florida' ),
-			'UK' => array( 'London', 'Manchester', 'Birmingham', 'Leeds' ),
-			'UAE' => array( 'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman' ),
-			'Egypt' => array( 'Cairo', 'Alexandria', 'Giza', 'Luxor' ),
-			'Saudi Arabia' => array( 'Riyadh', 'Jeddah', 'Mecca', 'Medina' ),
-		);
+		$locations = get_option( 'jobs_global_locations', array() );
 
 		if ( isset( $locations[$country] ) ) {
 			wp_send_json_success( $locations[$country] );

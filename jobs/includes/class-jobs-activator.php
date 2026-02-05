@@ -33,6 +33,8 @@ class Jobs_Activator {
 		self::register_taxonomies();
 		self::preload_categories();
 		self::preload_job_types();
+		self::seed_locations();
+		self::seed_sample_jobs();
 		self::create_homepage();
 		self::setup_cron();
 		flush_rewrite_rules();
@@ -201,104 +203,65 @@ class Jobs_Activator {
 	private static function preload_categories() {
 		$professions = array(
 			'Information Technology' => array(
-				'Software Development' => array( 'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'Mobile App Developer' ),
-				'Data Science' => array( 'Data Analyst', 'Data Scientist', 'Machine Learning Engineer' ),
-				'Cybersecurity' => array( 'Security Analyst', 'Ethical Hacker', 'Information Security Manager' ),
-				'Cloud Computing' => array( 'Cloud Architect', 'DevOps Engineer' ),
+				'Software Development' => array( 'Frontend Developer', 'Backend Developer', 'Full Stack Developer', 'Mobile App Developer', 'Python Developer', 'Java Developer', 'PHP Developer' ),
+				'Data Science' => array( 'Data Analyst', 'Data Scientist', 'Machine Learning Engineer', 'AI Researcher', 'Data Engineer' ),
+				'Cybersecurity' => array( 'Security Analyst', 'Ethical Hacker', 'Information Security Manager', 'SOC Analyst', 'Penetration Tester' ),
+				'Cloud Computing' => array( 'Cloud Architect', 'DevOps Engineer', 'Site Reliability Engineer', 'Cloud Security Specialist' ),
+				'IT Support' => array( 'Help Desk Technician', 'Network Administrator', 'Systems Administrator', 'IT Manager' ),
 			),
 			'Engineering' => array(
-				'Civil Engineering' => array( 'Structural Engineering', 'Transportation Engineering', 'Geotechnical Engineering' ),
-				'Mechanical Engineering' => array( 'Automotive Engineering', 'Aerospace Engineering', 'Robotics' ),
-				'Electrical Engineering' => array( 'Power Systems', 'Electronics', 'Telecommunications' ),
-				'Chemical Engineering' => array( 'Process Engineering', 'Petroleum Engineering' ),
+				'Civil Engineering' => array( 'Structural Engineering', 'Transportation Engineering', 'Geotechnical Engineering', 'Water Resources Engineer', 'Urban Planner' ),
+				'Mechanical Engineering' => array( 'Automotive Engineering', 'Aerospace Engineering', 'Robotics', 'Manufacturing Engineer', 'Thermal Engineer' ),
+				'Electrical Engineering' => array( 'Power Systems', 'Electronics', 'Telecommunications', 'Hardware Engineer', 'Embedded Systems' ),
+				'Chemical Engineering' => array( 'Process Engineering', 'Petroleum Engineering', 'Biochemical Engineer' ),
+				'Biomedical Engineering' => array( 'Medical Device Designer', 'Clinical Engineer' ),
 			),
 			'Healthcare' => array(
-				'Medical Doctors' => array( 'General Practitioner', 'Surgeon', 'Pediatrician', 'Psychiatrist' ),
-				'Nursing' => array( 'Registered Nurse', 'Nurse Practitioner' ),
-				'Pharmacy' => array( 'Pharmacist', 'Pharmacy Technician' ),
-				'Therapy' => array( 'Physical Therapist', 'Occupational Therapist' ),
+				'Medical Doctors' => array( 'General Practitioner', 'Surgeon', 'Pediatrician', 'Psychiatrist', 'Cardiologist', 'Dermatologist' ),
+				'Nursing' => array( 'Registered Nurse', 'Nurse Practitioner', 'Nursing Assistant' ),
+				'Pharmacy' => array( 'Pharmacist', 'Pharmacy Technician', 'Clinical Pharmacist' ),
+				'Therapy' => array( 'Physical Therapist', 'Occupational Therapist', 'Speech Therapist' ),
+				'Diagnostics' => array( 'Radiologist', 'Lab Technician', 'Pathologist' ),
 			),
 			'Education' => array(
-				'Teaching' => array( 'Primary School Teacher', 'Secondary School Teacher', 'University Professor' ),
-				'Administration' => array( 'Principal', 'School Counselor' ),
+				'Teaching' => array( 'Primary School Teacher', 'Secondary School Teacher', 'University Professor', 'Special Education Teacher', 'Language Instructor' ),
+				'Administration' => array( 'Principal', 'School Counselor', 'Academic Dean' ),
+				'Support' => array( 'Librarian', 'Tutor', 'Instructional Designer' ),
 			),
 			'Finance' => array(
-				'Accounting' => array( 'Public Accountant', 'Auditor', 'Tax Consultant' ),
-				'Banking' => array( 'Investment Banker', 'Loan Officer' ),
-				'Insurance' => array( 'Actuary', 'Underwriter' ),
+				'Accounting' => array( 'Public Accountant', 'Auditor', 'Tax Consultant', 'Bookkeeper', 'Cost Accountant' ),
+				'Banking' => array( 'Investment Banker', 'Loan Officer', 'Branch Manager', 'Teller' ),
+				'Insurance' => array( 'Actuary', 'Underwriter', 'Insurance Agent' ),
+				'Investments' => array( 'Financial Analyst', 'Portfolio Manager', 'Stockbroker' ),
 			),
-			// Adding more to reach a good number, though 100 unique sub-sub categories might be verbose to type fully here, I will structure it.
-			'Marketing' => array(
-				'Digital Marketing' => array( 'SEO Specialist', 'Content Marketer', 'Social Media Manager' ),
-				'Advertising' => array( 'Copywriter', 'Art Director' ),
-			),
-			'Sales' => array(
-				'Retail' => array( 'Sales Associate', 'Store Manager' ),
-				'B2B Sales' => array( 'Account Executive', 'Business Development Manager' ),
-			),
-			'Legal' => array(
-				'Attorneys' => array( 'Corporate Lawyer', 'Criminal Lawyer', 'Family Lawyer' ),
-				'Support' => array( 'Paralegal', 'Legal Assistant' ),
-			),
-			'Human Resources' => array(
-				'Recruitment' => array( 'Technical Recruiter', 'Headhunter' ),
-				'Management' => array( 'HR Manager', 'Employee Relations' ),
-			),
-			'Construction' => array(
-				'Management' => array( 'Project Manager', 'Site Supervisor' ),
-				'Trades' => array( 'Electrician', 'Plumber', 'Carpenter', 'Mason' ),
-			),
-			'Business & Management' => array(
-				'Administration' => array( 'Office Manager', 'Executive Assistant' ),
-				'Project Management' => array( 'Agile Coach', 'Scrum Master' ),
-				'Consulting' => array( 'Management Consultant', 'Strategy Consultant' ),
+			'Marketing & Media' => array(
+				'Digital Marketing' => array( 'SEO Specialist', 'Content Marketer', 'Social Media Manager', 'PPC Specialist' ),
+				'Advertising' => array( 'Copywriter', 'Art Director', 'Media Buyer' ),
+				'Public Relations' => array( 'PR Specialist', 'Communications Manager', 'Spokesperson' ),
+				'Journalism' => array( 'Reporter', 'Editor', 'News Anchor', 'Photojournalist' ),
 			),
 			'Arts & Design' => array(
-				'Graphic Design' => array( 'UI Designer', 'UX Designer', 'Illustrator' ),
-				'Media' => array( 'Video Editor', 'Photographer', 'Animator' ),
-				'Fashion' => array( 'Fashion Designer', 'Textile Designer' ),
+				'Graphic Design' => array( 'UI Designer', 'UX Designer', 'Illustrator', 'Motion Designer' ),
+				'Media Production' => array( 'Video Editor', 'Photographer', 'Animator', 'Sound Engineer' ),
+				'Fashion' => array( 'Fashion Designer', 'Textile Designer', 'Stylist' ),
+				'Interior Design' => array( 'Residential Designer', 'Commercial Designer' ),
 			),
-			'Hospitality' => array(
-				'Hotel Management' => array( 'Hotel Manager', 'Receptionist' ),
-				'Food & Beverage' => array( 'Chef', 'Waiter', 'Bartender' ),
-				'Tourism' => array( 'Tour Guide', 'Travel Agent' ),
+			'Business & Management' => array(
+				'Administration' => array( 'Office Manager', 'Executive Assistant', 'Data Entry Clerk' ),
+				'Project Management' => array( 'Agile Coach', 'Scrum Master', 'Project Coordinator' ),
+				'Consulting' => array( 'Management Consultant', 'Strategy Consultant', 'Operations Consultant' ),
+				'Human Resources' => array( 'Recruiter', 'HR Manager', 'Employee Relations', 'Comp & Benefits' ),
 			),
-			'Logistics & Transport' => array(
-				'Supply Chain' => array( 'Logistics Manager', 'Warehouse Supervisor' ),
-				'Transportation' => array( 'Truck Driver', 'Pilot', 'Shipping Clerk' ),
+			'Sales & Retail' => array(
+				'Retail' => array( 'Sales Associate', 'Store Manager', 'Visual Merchandiser' ),
+				'B2B Sales' => array( 'Account Executive', 'Business Development Manager', 'Sales Engineer' ),
+				'Customer Service' => array( 'Customer Success Manager', 'Support Agent' ),
 			),
-			'Science' => array(
-				'Biology' => array( 'Biotechnologist', 'Microbiologist' ),
-				'Physics' => array( 'Physicist', 'Astronomer' ),
-				'Environmental' => array( 'Environmental Scientist', 'Ecologist' ),
-			),
-			'Media & Communication' => array(
-				'Journalism' => array( 'Reporter', 'Editor', 'News Anchor' ),
-				'Public Relations' => array( 'PR Specialist', 'Communications Manager' ),
-			),
-			'Agriculture' => array(
-				'Farming' => array( 'Agronomist', 'Farm Manager' ),
-				'Fisheries' => array( 'Marine Biologist', 'Fishery Officer' ),
-			),
-			'Public Sector' => array(
-				'Government' => array( 'Policy Analyst', 'Civil Servant', 'Diplomat' ),
-				'Emergency Services' => array( 'Firefighter', 'Police Officer', 'Paramedic' ),
-			),
-			'Retail' => array(
-				'Store Operations' => array( 'Cashier', 'Visual Merchandiser' ),
-				'Purchasing' => array( 'Buyer', 'Procurement Officer' ),
-			),
-			'Beauty & Wellness' => array(
-				'Personal Care' => array( 'Hairdresser', 'Beautician', 'Makeup Artist' ),
-				'Fitness' => array( 'Personal Trainer', 'Yoga Instructor' ),
-			),
-			'Maintenance' => array(
-				'General Maintenance' => array( 'Janitor', 'Handyman' ),
-				'Technical' => array( 'HVAC Technician', 'Elevator Mechanic' ),
-			),
-			'Security' => array(
-				'Physical Security' => array( 'Security Guard', 'Bodyguard' ),
-				'Systems' => array( 'Alarm Technician', 'CCTV Operator' ),
+			'Logistics & Construction' => array(
+				'Supply Chain' => array( 'Logistics Manager', 'Warehouse Supervisor', 'Purchasing Manager' ),
+				'Transportation' => array( 'Truck Driver', 'Pilot', 'Shipping Clerk', 'Dispatcher' ),
+				'Construction' => array( 'Project Manager', 'Site Supervisor', 'Estimator' ),
+				'Trades' => array( 'Electrician', 'Plumber', 'Carpenter', 'Mason', 'Welder' ),
 			),
 		);
 
@@ -324,6 +287,66 @@ class Jobs_Activator {
 	 *
 	 * @since    1.0.0
 	 */
+	/**
+	 * Seed sample job listings.
+	 *
+	 * @since    1.0.0
+	 */
+	/**
+	 * Seed location data.
+	 *
+	 * @since    1.0.0
+	 */
+	private static function seed_locations() {
+		$locations = array(
+			'USA' => array( 'California', 'New York', 'Texas', 'Florida', 'Washington', 'Illinois' ),
+			'UK' => array( 'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool' ),
+			'UAE' => array( 'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Fujairah', 'Ras Al Khaimah' ),
+			'Egypt' => array( 'Cairo', 'Alexandria', 'Giza', 'Luxor', 'Aswan', 'Port Said' ),
+			'Saudi Arabia' => array( 'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar' ),
+			'Canada' => array( 'Ontario', 'Quebec', 'British Columbia', 'Alberta' ),
+			'Germany' => array( 'Berlin', 'Munich', 'Hamburg', 'Frankfurt' ),
+		);
+		update_option( 'jobs_global_locations', $locations );
+	}
+
+	private static function seed_sample_jobs() {
+		$jobs = array(
+			array( 'title' => 'Senior Frontend Developer', 'cat' => 'Software Development', 'type' => 'Full-time', 'country' => 'USA', 'state' => 'California' ),
+			array( 'title' => 'Structural Engineer', 'cat' => 'Civil Engineering', 'type' => 'Full-time', 'country' => 'UK', 'state' => 'London' ),
+			array( 'title' => 'Registered Nurse', 'cat' => 'Nursing', 'type' => 'Full-time', 'country' => 'UAE', 'state' => 'Dubai' ),
+			array( 'title' => 'Marketing Manager', 'cat' => 'Digital Marketing', 'type' => 'Contract', 'country' => 'USA', 'state' => 'New York' ),
+			array( 'title' => 'Graphic Designer', 'cat' => 'Graphic Design', 'type' => 'Freelance', 'country' => 'Egypt', 'state' => 'Cairo' ),
+			array( 'title' => 'Data Scientist', 'cat' => 'Data Science', 'type' => 'Full-time', 'country' => 'USA', 'state' => 'Texas' ),
+			array( 'title' => 'Project Manager', 'cat' => 'Project Management', 'type' => 'Full-time', 'country' => 'UK', 'state' => 'Manchester' ),
+			array( 'title' => 'Sales Associate', 'cat' => 'Retail', 'type' => 'Part-time', 'country' => 'UAE', 'state' => 'Abu Dhabi' ),
+			array( 'title' => 'Accountant', 'cat' => 'Accounting', 'type' => 'Full-time', 'country' => 'Saudi Arabia', 'state' => 'Riyadh' ),
+			array( 'title' => 'Legal Assistant', 'cat' => 'Support', 'type' => 'Internship', 'country' => 'USA', 'state' => 'Florida' ),
+		);
+
+		foreach ( $jobs as $data ) {
+			$job_id = wp_insert_post( array(
+				'post_title'   => $data['title'],
+				'post_content' => 'Sample job description for ' . $data['title'] . '.',
+				'post_status'  => 'publish',
+				'post_type'    => 'job',
+				'post_author'  => 1,
+			) );
+
+			if ( $job_id ) {
+				$term = get_term_by( 'name', $data['cat'], 'job_category' );
+				if ( $term ) wp_set_object_terms( $job_id, $term->term_id, 'job_category' );
+
+				$type_term = get_term_by( 'name', $data['type'], 'job_type' );
+				if ( $type_term ) wp_set_object_terms( $job_id, $type_term->term_id, 'job_type' );
+
+				update_post_meta( $job_id, '_job_country', $data['country'] );
+				update_post_meta( $job_id, '_job_state', $data['state'] );
+				update_post_meta( $job_id, '_jobs_expiration_date', date( 'Y-m-d H:i:s', strtotime( '+ 50 days' ) ) );
+			}
+		}
+	}
+
 	private static function create_homepage() {
 		// Jobs Home
 		$page_title = 'Jobs';

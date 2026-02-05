@@ -42,11 +42,12 @@
 			</select>
 			<select id="jobs-country-select" class="jobs-filter-select">
 				<option value=""><?php _e( 'Select Country', 'jobs' ); ?></option>
-				<option value="USA">USA</option>
-				<option value="UK">UK</option>
-				<option value="UAE">UAE</option>
-				<option value="Egypt">Egypt</option>
-				<option value="Saudi Arabia">Saudi Arabia</option>
+				<?php
+				$locs = get_option( 'jobs_global_locations', array() );
+				foreach ( array_keys($locs) as $country ) :
+				?>
+					<option value="<?php echo esc_attr($country); ?>"><?php echo esc_html($country); ?></option>
+				<?php endforeach; ?>
 			</select>
 			<select id="jobs-state-select" class="jobs-filter-select" disabled>
 				<option value=""><?php _e( 'Select Country First', 'jobs' ); ?></option>
