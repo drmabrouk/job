@@ -15,6 +15,9 @@ $admin_tab = isset($_GET['admin_tab']) ? sanitize_text_field($_GET['admin_tab'])
 			<a href="?tab=overview&admin_tab=overview" class="<?php echo $admin_tab == 'overview' ? 'active' : ''; ?>"><?php _e( 'Overview', 'jobs' ); ?></a>
 			<a href="?tab=overview&admin_tab=jobs" class="<?php echo $admin_tab == 'jobs' ? 'active' : ''; ?>"><?php _e( 'Job Moderation', 'jobs' ); ?></a>
 			<a href="?tab=overview&admin_tab=users" class="<?php echo $admin_tab == 'users' ? 'active' : ''; ?>"><?php _e( 'User Management', 'jobs' ); ?></a>
+			<a href="?tab=overview&admin_tab=locations" class="<?php echo $admin_tab == 'locations' ? 'active' : ''; ?>"><?php _e( 'Locations', 'jobs' ); ?></a>
+			<a href="?tab=overview&admin_tab=professions" class="<?php echo $admin_tab == 'professions' ? 'active' : ''; ?>"><?php _e( 'Professions', 'jobs' ); ?></a>
+			<a href="?tab=overview&admin_tab=translations" class="<?php echo $admin_tab == 'translations' ? 'active' : ''; ?>"><?php _e( 'Translations', 'jobs' ); ?></a>
 			<a href="?tab=overview&admin_tab=system" class="<?php echo $admin_tab == 'system' ? 'active' : ''; ?>"><?php _e( 'System Logs', 'jobs' ); ?></a>
 		</div>
 	</div>
@@ -121,6 +124,15 @@ $admin_tab = isset($_GET['admin_tab']) ? sanitize_text_field($_GET['admin_tab'])
 			</table>
 		</div>
 
+	<?php elseif ( $admin_tab == 'locations' ) :
+		include plugin_dir_path(__FILE__) . 'jobs-admin-locations.php';
+	?>
+	<?php elseif ( $admin_tab == 'professions' ) :
+		include plugin_dir_path(__FILE__) . 'jobs-admin-professions.php';
+	?>
+	<?php elseif ( $admin_tab == 'translations' ) :
+		include plugin_dir_path(__FILE__) . 'jobs-admin-translations.php';
+	?>
 	<?php elseif ( $admin_tab == 'system' ) : ?>
 		<div class="admin-logs-wrapper">
 			<h3><?php _e( 'Security Audit Trail', 'jobs' ); ?></h3>

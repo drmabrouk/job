@@ -311,14 +311,29 @@ class Jobs_Activator {
 	 */
 	private static function seed_locations() {
 		$locations = array(
-			'USA' => array( 'California', 'New York', 'Texas', 'Florida', 'Washington', 'Illinois' ),
-			'UK' => array( 'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool' ),
-			'UAE' => array( 'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Fujairah', 'Ras Al Khaimah' ),
-			'Egypt' => array( 'Cairo', 'Alexandria', 'Giza', 'Luxor', 'Aswan', 'Port Said' ),
-			'Saudi Arabia' => array( 'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar' ),
-			'Canada' => array( 'Ontario', 'Quebec', 'British Columbia', 'Alberta' ),
-			'Germany' => array( 'Berlin', 'Munich', 'Hamburg', 'Frankfurt' ),
+			'Algeria' => array( 'Algiers', 'Oran', 'Constantine', 'Annaba', 'Blida' ),
+			'Bahrain' => array( 'Manama', 'Riffa', 'Muharraq', 'Hamad Town' ),
+			'Canada' => array( 'Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba' ),
+			'Egypt' => array( 'Cairo', 'Alexandria', 'Giza', 'Luxor', 'Aswan', 'Port Said', 'Suez', 'Mansoura' ),
+			'Iraq' => array( 'Baghdad', 'Basra', 'Mosul', 'Erbil', 'Sulaymaniyah' ),
+			'Jordan' => array( 'Amman', 'Zarqa', 'Irbid', 'Aqaba', 'Madaba' ),
+			'Kuwait' => array( 'Kuwait City', 'Al Ahmadi', 'Hawalli', 'Salmiya' ),
+			'Lebanon' => array( 'Beirut', 'Tripoli', 'Sidon', 'Tyre', 'Byblos' ),
+			'Libya' => array( 'Tripoli', 'Benghazi', 'Misrata', 'Bayda' ),
+			'Morocco' => array( 'Casablanca', 'Rabat', 'Marrakesh', 'Fez', 'Tangier', 'Agadir' ),
+			'Oman' => array( 'Muscat', 'Salalah', 'Sohar', 'Nizwa' ),
+			'Palestine' => array( 'Jerusalem', 'Gaza City', 'Ramallah', 'Nablus', 'Hebron' ),
+			'Qatar' => array( 'Doha', 'Al Wakrah', 'Al Khor', 'Al Rayyan' ),
+			'Saudi Arabia' => array( 'Riyadh', 'Jeddah', 'Mecca', 'Medina', 'Dammam', 'Khobar', 'Abha', 'Tabuk' ),
+			'Sudan' => array( 'Khartoum', 'Omdurman', 'Port Sudan' ),
+			'Syria' => array( 'Damascus', 'Aleppo', 'Homs', 'Latakia' ),
+			'Tunisia' => array( 'Tunis', 'Sfax', 'Sousse', 'Kairouan' ),
+			'UAE' => array( 'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Fujairah', 'Ras Al Khaimah', 'Al Ain' ),
+			'UK' => array( 'London', 'Manchester', 'Birmingham', 'Leeds', 'Glasgow', 'Liverpool', 'Edinburgh' ),
+			'USA' => array( 'California', 'New York', 'Texas', 'Florida', 'Washington', 'Illinois', 'Georgia', 'Arizona' ),
+			'Yemen' => array( 'Sana\'a', 'Aden', 'Taiz', 'Al Hudaydah' ),
 		);
+		ksort($locations);
 		update_option( 'jobs_global_locations', $locations );
 	}
 

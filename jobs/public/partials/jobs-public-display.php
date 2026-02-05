@@ -29,8 +29,10 @@ $logo_margin = get_option( 'jobs_logo_margin', '40' );
 
 		<div class="jobs-search-section-centered">
 			<div class="jobs-smart-search-wrapper">
-				<div class="search-input-group">
+				<div class="search-main-icon">
 					<i class="dashicons dashicons-search"></i>
+				</div>
+				<div class="search-input-group">
 					<input type="text" id="jobs-search-input" class="jobs-search-input-modern" placeholder="<?php _e( 'Job title or profession...', 'jobs' ); ?>" />
 				</div>
 
@@ -83,23 +85,6 @@ $logo_margin = get_option( 'jobs_logo_margin', '40' );
 			</div>
 		</div>
 
-		<div class="jobs-platform-highlights">
-			<div class="highlight-item">
-				<i class="dashicons dashicons-analytics"></i>
-				<h4><?php _e( 'Advanced Analytics', 'jobs' ); ?></h4>
-				<p><?php _e( 'Track your career growth with interactive dashboards.', 'jobs' ); ?></p>
-			</div>
-			<div class="highlight-item">
-				<i class="dashicons dashicons-shield"></i>
-				<h4><?php _e( 'Secure & Private', 'jobs' ); ?></h4>
-				<p><?php _e( 'Full control over your data and profile visibility.', 'jobs' ); ?></p>
-			</div>
-			<div class="highlight-item">
-				<i class="dashicons dashicons-awards"></i>
-				<h4><?php _e( 'PDF CV Builder', 'jobs' ); ?></h4>
-				<p><?php _e( 'Generate professional resumes automatically.', 'jobs' ); ?></p>
-			</div>
-		</div>
 	</div>
 
 	<?php if ( $ad_top = get_option( 'jobs_ad_top' ) ?: get_option( 'jobs_adsense_code' ) ) : ?>
