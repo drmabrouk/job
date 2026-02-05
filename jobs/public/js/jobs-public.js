@@ -91,6 +91,95 @@
 				performSearch();
 			}
 		});
+
+		// Job Reactivation
+		$(document).on('click', '.reactivate-job', function() {
+			var $btn = $(this);
+			var jobId = $btn.data('id');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'reactivate_job',
+					job_id: jobId,
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					alert(response.data);
+					location.reload();
+				}
+			});
+		});
+
+		// Job Extension
+		$(document).on('click', '.extend-job', function() {
+			var $btn = $(this);
+			var jobId = $btn.data('id');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'extend_job',
+					job_id: jobId,
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					alert(response.data);
+					location.reload();
+				}
+			});
+		});
+
+		// Save Job
+		$(document).on('click', '.save-job-btn', function() {
+			var $btn = $(this);
+			var jobId = $btn.data('id');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'save_job',
+					job_id: jobId,
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					if (response.success) {
+						$btn.toggleClass('saved');
+						$btn.text($btn.hasClass('saved') ? '★' : '☆');
+					}
+				}
+			});
+		});
+
+		// Follow Employer
+		$(document).on('click', '.follow-employer-btn', function() {
+			var $btn = $(this);
+			var empId = $btn.data('id');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'follow_employer',
+					employer_id: empId,
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					if (response.success) {
+						$btn.toggleClass('followed');
+						if ($btn.hasClass('followed')) {
+							$btn.text('Unfollow Employer');
+						} else {
+							$btn.text('Follow Employer');
+						}
+						// If in list, maybe remove or reload
+					}
+				}
+			});
+		});
 	});
 
 })(jQuery);

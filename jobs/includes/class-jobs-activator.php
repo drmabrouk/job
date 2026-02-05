@@ -33,7 +33,19 @@ class Jobs_Activator {
 		self::register_taxonomies();
 		self::preload_categories();
 		self::create_homepage();
+		self::setup_cron();
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Setup daily cron.
+	 *
+	 * @since    1.0.0
+	 */
+	private static function setup_cron() {
+		if ( ! wp_next_scheduled( 'jobs_daily_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'jobs_daily_cron' );
+		}
 	}
 
 	/**

@@ -43,6 +43,16 @@
 				<option value=""><?php _e( 'Select Country First', 'jobs' ); ?></option>
 			</select>
 		</div>
+		<div class="jobs-category-capsules" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+			<?php
+			$all_cats = get_terms( array( 'taxonomy' => 'job_category', 'number' => 12 ) );
+			foreach ( $all_cats as $cat ) :
+				$colors = array( '#E3F2FD', '#F1F8E9', '#FFFDE7', '#F3E5F5', '#E8EAF6', '#FBE9E7' );
+				$bg = $colors[array_rand($colors)];
+			?>
+				<span class="job-capsule" style="background-color: <?php echo $bg; ?>;"><?php echo esc_html( $cat->name ); ?></span>
+			<?php endforeach; ?>
+		</div>
 	</div>
 
 	<?php if ( $ad_top = get_option( 'jobs_ad_top' ) ?: get_option( 'jobs_adsense_code' ) ) : ?>
@@ -58,7 +68,8 @@
 		$args = array(
 			'post_type'      => 'job',
 			'post_status'    => 'publish',
-			'posts_per_page' => 12,
+			'posts_per_page' => 10,
+			'orderby'        => 'rand',
 		);
 		$query = new WP_Query( $args );
 

@@ -35,9 +35,19 @@
 	</div>
 
 	<?php if ( is_user_logged_in() ) : ?>
-		<a href="<?php the_permalink(); ?>" class="btn-apply">
-			<?php _e( 'Apply Now', 'jobs' ); ?>
-		</a>
+		<div class="job-actions">
+			<a href="<?php the_permalink(); ?>" class="btn-apply">
+				<?php _e( 'Apply Now', 'jobs' ); ?>
+			</a>
+			<?php
+			$user_id = get_current_user_id();
+			$saved = get_user_meta( $user_id, '_jobs_saved_jobs', true ) ?: array();
+			$is_saved = in_array( get_the_ID(), $saved );
+			?>
+			<button class="save-job-btn <?php echo $is_saved ? 'saved' : ''; ?>" data-id="<?php the_ID(); ?>">
+				<?php echo $is_saved ? '★' : '☆'; ?>
+			</button>
+		</div>
 	<?php else : ?>
 		<a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn-apply">
 			<?php _e( 'Login to Apply', 'jobs' ); ?>

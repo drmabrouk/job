@@ -7,6 +7,7 @@ $jobs = new WP_Query( array(
 	'post_type' => 'job',
 	'author'    => $user_id,
 	'posts_per_page' => -1,
+	'post_status' => array( 'publish', 'draft', 'pending' ),
 ) );
 
 $total_apps = 0;
@@ -53,7 +54,17 @@ if ( $jobs->have_posts() ) {
 						<tr>
 							<td><?php echo get_the_title(); ?></td>
 							<td><?php echo get_the_date(); ?></td>
-							<td><?php echo get_post_status(); ?></td>
+							<td>
+								<span class="status-badge status-<?php echo get_post_status(); ?>"><?php echo get_post_status(); ?></span>
+								<br><small><?php _e( 'Expires:', 'jobs' ); ?> <?php echo get_post_meta( get_the_ID(), '_jobs_expiration_date', true ) ?: 'N/A'; ?></small>
+							</td>
+							<td>
+								<?php if ( get_post_status() == 'draft' ) : ?>
+									<button class="button reactivate-job" data-id="<?php the_ID(); ?>"><?php _e( 'Reactivate', 'jobs' ); ?></button>
+								<?php elseif ( get_post_status() == 'publish' ) : ?>
+									<button class="button extend-job" data-id="<?php the_ID(); ?>"><?php _e( 'Extend', 'jobs' ); ?></button>
+								<?php endif; ?>
+							</td>
 						</tr>
 					<?php endwhile; wp_reset_postdata(); ?>
 				</tbody>

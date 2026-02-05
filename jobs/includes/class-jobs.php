@@ -181,11 +181,13 @@ class Jobs {
 		$plugin_public = new Jobs_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'init', $plugin_public, 'add_rewrite_rules' );
+		$this->loader->add_action( 'jobs_daily_cron', $plugin_public, 'check_job_expirations' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_filter( 'body_class', $plugin_public, 'add_rtl_body_class' );
 		$this->loader->add_action( 'wp_head', $plugin_public, 'add_seo_meta_tags' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_job_single_ads' );
+		$this->loader->add_filter( 'the_content', $plugin_public, 'add_follow_employer_button' );
 		$this->loader->add_action( 'wp_ajax_jobs_search', $plugin_public, 'ajax_jobs_search' );
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_search', $plugin_public, 'ajax_jobs_search' );
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
@@ -195,6 +197,11 @@ class Jobs {
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'handle_dashboard_redirection' );
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );
 		$this->loader->add_action( 'admin_post_nopriv_jobs_register_user', $plugin_public, 'handle_user_registration' );
+		$this->loader->add_action( 'wp_ajax_reactivate_job', $plugin_public, 'ajax_reactivate_job' );
+		$this->loader->add_action( 'wp_ajax_extend_job', $plugin_public, 'ajax_extend_job' );
+		$this->loader->add_action( 'wp_ajax_save_job', $plugin_public, 'ajax_save_job' );
+		$this->loader->add_action( 'wp_ajax_follow_employer', $plugin_public, 'ajax_follow_employer' );
+		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 
 		$this->loader->add_shortcode( 'jobs_login', $plugin_public, 'shortcode_jobs_login' );
 		$this->loader->add_shortcode( 'jobs_register', $plugin_public, 'shortcode_jobs_register' );
