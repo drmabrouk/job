@@ -69,7 +69,8 @@ class Jobs_Admin {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-		// Logic can be added if needed
+		wp_enqueue_media();
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jobs-admin.js', array( 'jquery' ), $this->version, false );
 	}
 
 	/**
@@ -208,7 +209,53 @@ class Jobs_Admin {
 		</div>
 		<?php
 	}
-	public function display_theme_settings_page() { echo '<div class="wrap"><h1>General Layout</h1></div>'; }
+	public function display_theme_settings_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Theme & Layout Settings', 'jobs' ); ?></h1>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'jobs_options' );
+				?>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Site Logo', 'jobs' ); ?></th>
+						<td>
+							<input type="hidden" name="jobs_logo_id" id="jobs_logo_id" value="<?php echo esc_attr( get_option( 'jobs_logo_id' ) ); ?>" />
+							<div id="jobs_logo_preview" style="margin-bottom: 10px;">
+								<?php if ( $logo_id = get_option( 'jobs_logo_id' ) ) : ?>
+									<?php echo wp_get_attachment_image( $logo_id, 'medium' ); ?>
+								<?php endif; ?>
+							</div>
+							<button type="button" class="button" id="jobs_upload_logo_btn"><?php _e( 'Upload/Select Logo', 'jobs' ); ?></button>
+							<button type="button" class="button" id="jobs_remove_logo_btn"><?php _e( 'Remove Logo', 'jobs' ); ?></button>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Logo Width (px)', 'jobs' ); ?></th>
+						<td>
+							<input type="number" name="jobs_logo_width" value="<?php echo esc_attr( get_option( 'jobs_logo_width', '200' ) ); ?>" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Logo Margin Bottom (px)', 'jobs' ); ?></th>
+						<td>
+							<input type="number" name="jobs_logo_margin" value="<?php echo esc_attr( get_option( 'jobs_logo_margin', '40' ) ); ?>" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Astra Compatibility Mode', 'jobs' ); ?></th>
+						<td>
+							<input type="checkbox" name="jobs_astra_compat" value="1" <?php checked( 1, get_option( 'jobs_astra_compat', 1 ) ); ?> />
+							<p class="description"><?php _e( 'Optimize containers and spacing for Astra theme.', 'jobs' ); ?></p>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button(); ?>
+			</form>
+		</div>
+		<?php
+	}
 	public function display_colors_fonts_page() { echo '<div class="wrap"><h1>Colors & Fonts</h1></div>'; }
 	public function display_role_renaming_page() {
 		$role_names = get_option( 'jobs_role_names', array(
@@ -370,6 +417,10 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_ad_bottom' );
 		register_setting( 'jobs_options', 'jobs_ad_sidebar' );
 		register_setting( 'jobs_options', 'jobs_category_ads' );
+		register_setting( 'jobs_options', 'jobs_logo_id' );
+		register_setting( 'jobs_options', 'jobs_logo_width' );
+		register_setting( 'jobs_options', 'jobs_logo_margin' );
+		register_setting( 'jobs_options', 'jobs_astra_compat' );
 		register_setting( 'jobs_options', 'jobs_default_status' );
 		register_setting( 'jobs_options', 'jobs_enable_notifications' );
 	}

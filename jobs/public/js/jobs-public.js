@@ -2,7 +2,7 @@
 	'use strict';
 
 	$(function() {
-		var $searchInput = $('#jobs-search-input');
+		var $searchInput = $('.jobs-search-input-modern, #jobs-search-input');
 		var $grid = $('#jobs-grid');
 		var searchTimer;
 
@@ -52,6 +52,12 @@
 		});
 
 		$(document).on('change', '#jobs-category-select', function() {
+			performSearch();
+		});
+
+		$(document).on('click', '.job-capsule', function() {
+			var slug = $(this).data('slug');
+			$('#jobs-category-select').val(slug);
 			performSearch();
 		});
 
@@ -139,6 +145,18 @@
 		});
 
 		// Save Job
+		// Nav Dropdown Toggle for Touch
+		$('.nav-profile-trigger').on('click', function(e) {
+			if ($(window).width() < 1024) {
+				e.stopPropagation();
+				$('.nav-account-dropdown').toggleClass('show');
+			}
+		});
+
+		$(document).on('click', function() {
+			$('.nav-account-dropdown').removeClass('show');
+		});
+
 		$(document).on('click', '.save-job-btn', function() {
 			var $btn = $(this);
 			var jobId = $btn.data('id');
