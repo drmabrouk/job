@@ -62,7 +62,9 @@ class Jobs_Public {
 	public function enqueue_styles() {
 
 		wp_enqueue_style( 'rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap', array(), null );
+		wp_enqueue_style( 'fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css', array(), '6.0.0' );
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jobs-public.css', array(), $this->version, 'all' );
+		wp_enqueue_script( 'html2pdf', 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', array(), '0.10.1', true );
 
 		// Custom Colors
 		$primary = get_option('jobs_primary_color', '#1d3469');
@@ -640,24 +642,26 @@ class Jobs_Public {
 		$is_logged_in = is_user_logged_in();
 
 		?>
-		<nav class="jobs-top-nav-modern">
-			<div class="jobs-container-nav">
-				<div class="jobs-nav-left">
-					<a href="<?php echo home_url(); ?>" class="nav-logo-link">
+		<nav class="jobs-top-nav-refined">
+			<div class="nav-inner-container">
+				<!-- Brand Section (Far Left) -->
+				<div class="nav-brand-section">
+					<a href="<?php echo home_url(); ?>" class="nav-logo-wrap">
 						<?php if ( $logo_id = get_option( 'jobs_logo_id' ) ) : ?>
-							<?php echo wp_get_attachment_image( $logo_id, array(100, 40), false, array( 'class' => 'nav-logo-img' ) ); ?>
+							<?php echo wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'main-logo-img' ) ); ?>
 						<?php else : ?>
-							<span class="nav-brand-text">Jobedia</span>
+							<span class="brand-text">Jobedia</span>
 						<?php endif; ?>
 					</a>
-					<div class="nav-main-links">
-						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
+					<div class="main-nav-links">
+						<a href="<?php echo home_url( '/jobs' ); ?>" class="nav-item"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
+						<a href="#" class="nav-item"><?php _e( 'Employers', 'jobs' ); ?></a>
 					</div>
 				</div>
 
-				<div class="jobs-nav-right">
-
-					<div class="nav-lang-switcher">
+				<!-- Action Section (Far Right) -->
+				<div class="nav-actions-section">
+					<div class="lang-toggle-wrap">
 						<?php echo $this->shortcode_language_switcher(); ?>
 					</div>
 
@@ -667,46 +671,65 @@ class Jobs_Public {
 						$role_id = $roles[0];
 						$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst($role_id);
 
-						// Notifications count
+						// Notifications Polling Context
 						$notifs = get_user_meta( $user->ID, '_jobs_notifications', true ) ?: array();
 						$unread_notifs = count($notifs);
-
-						// Messages - count unread jobs_message
-						$unread_msgs = 0; // In a real app we would query this
 					?>
-						<div class="nav-icons-group">
-							<a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>" class="nav-icon-link" title="<?php _e('Messages', 'jobs'); ?>">
+						<div class="user-meta-controls">
+							<!-- Messages Shortcut -->
+							<a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>" class="icon-control-btn" title="<?php _e('Messages', 'jobs'); ?>">
 								<i class="dashicons dashicons-email-alt"></i>
-								<?php if($unread_msgs > 0): ?><span class="icon-badge"><?php echo $unread_msgs; ?></span><?php endif; ?>
 							</a>
-							<a href="<?php echo home_url('/jobs-dashboard?tab=notifications'); ?>" class="nav-icon-link" title="<?php _e('Notifications', 'jobs'); ?>">
-								<i class="dashicons dashicons-bell"></i>
-								<?php if($unread_notifs > 0): ?><span class="icon-badge"><?php echo $unread_notifs; ?></span><?php endif; ?>
-							</a>
-						</div>
 
-						<div class="nav-user-account">
-							<div class="nav-profile-trigger">
-								<?php echo get_avatar( $user->ID, 32 ); ?>
-								<span class="nav-user-name"><?php echo esc_html( $user->display_name ); ?></span>
-								<i class="dashicons dashicons-arrow-down-alt2"></i>
-							</div>
-							<div class="nav-account-dropdown">
-								<div class="dropdown-header">
-									<strong><?php echo esc_html( $user->display_name ); ?></strong>
-									<span class="role-badge"><?php echo esc_html( $display_role ); ?></span>
+							<!-- Notifications Dropdown -->
+							<div class="nav-dropdown-wrapper notification-trigger">
+								<button class="icon-control-btn" id="notif-drop-btn">
+									<i class="dashicons dashicons-bell"></i>
+									<?php if($unread_notifs > 0): ?><span class="pulse-badge"><?php echo $unread_notifs; ?></span><?php endif; ?>
+								</button>
+								<div class="smart-dropdown-panel" id="notif-panel">
+									<div class="panel-header">
+										<span><?php _e( 'Notifications', 'jobs' ); ?></span>
+										<a href="#"><?php _e( 'Mark all read', 'jobs' ); ?></a>
+									</div>
+									<div class="panel-body scrollable">
+										<?php if( !empty($notifs) ) : foreach( array_reverse($notifs) as $n ) : ?>
+											<div class="notif-row unread">
+												<div class="notif-icon"><i class="dashicons dashicons-info"></i></div>
+												<div class="notif-content">
+													<p><?php echo esc_html($n['message']); ?></p>
+													<small><?php echo human_time_diff($n['time'], time()); ?> ago</small>
+												</div>
+											</div>
+										<?php endforeach; else : ?>
+											<p class="empty-msg"><?php _e( 'No new notifications', 'jobs' ); ?></p>
+										<?php endif; ?>
+									</div>
 								</div>
-								<ul>
-									<li><a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="dashicons dashicons-dashboard"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a></li>
-									<li><a href="<?php echo home_url( '/jobs-dashboard?tab=settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Settings', 'jobs' ); ?></a></li>
-									<li><a href="<?php echo wp_logout_url( home_url() ); ?>"><i class="dashicons dashicons-exit"></i> <?php _e( 'Logout', 'jobs' ); ?></a></li>
-								</ul>
+							</div>
+
+							<!-- Profile Dropdown (Far Right) -->
+							<div class="nav-dropdown-wrapper profile-trigger">
+								<div class="user-pill">
+									<?php echo get_avatar( $user->ID, 40 ); ?>
+									<div class="user-name-role">
+										<span class="u-name"><?php echo esc_html( $user->display_name ); ?></span>
+										<span class="u-role"><?php echo esc_html( $display_role ); ?></span>
+									</div>
+									<i class="dashicons dashicons-arrow-down-alt2"></i>
+								</div>
+								<div class="smart-dropdown-panel profile-panel">
+									<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="dashicons dashicons-dashboard"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a>
+									<a href="<?php echo home_url( '/jobs-dashboard?tab=settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Account Settings', 'jobs' ); ?></a>
+									<div class="divider"></div>
+									<a href="<?php echo wp_logout_url( home_url() ); ?>" class="logout-link"><i class="dashicons dashicons-exit"></i> <?php _e( 'Logout', 'jobs' ); ?></a>
+								</div>
 							</div>
 						</div>
 					<?php else : ?>
-						<div class="nav-auth-links">
-							<a href="<?php echo wp_login_url(); ?>" class="btn-login"><?php _e( 'Login', 'jobs' ); ?></a>
-							<a href="<?php echo wp_registration_url(); ?>" class="btn-register"><?php _e( 'Register', 'jobs' ); ?></a>
+						<div class="guest-auth-actions">
+							<a href="<?php echo home_url('/jobs-auth'); ?>" class="btn-login-text"><?php _e( 'Sign In', 'jobs' ); ?></a>
+							<a href="<?php echo home_url('/jobs-auth'); ?>" class="jobs-button"><?php _e( 'Post a Job', 'jobs' ); ?></a>
 						</div>
 					<?php endif; ?>
 				</div>
@@ -963,9 +986,10 @@ class Jobs_Public {
 			wp_send_json_error( $user_signon->get_error_message() );
 		} else {
 			$this->log_activity( $user_signon->ID, 'User logged in via AJAX' );
+			$redirect = isset($_POST['redirect_to']) ? esc_url_raw($_POST['redirect_to']) : home_url('/jobs-dashboard');
 			wp_send_json_success( array(
 				'message' => __( 'Login successful! Redirecting...', 'jobs' ),
-				'redirect' => home_url('/jobs-dashboard')
+				'redirect' => $redirect
 			) );
 		}
 	}

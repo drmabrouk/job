@@ -270,10 +270,28 @@ class Jobs_Activator {
 				'Customer Service' => array( 'Customer Success Manager', 'Support Agent' ),
 			),
 			'Logistics & Construction' => array(
-				'Supply Chain' => array( 'Logistics Manager', 'Warehouse Supervisor', 'Purchasing Manager' ),
-				'Transportation' => array( 'Truck Driver', 'Pilot', 'Shipping Clerk', 'Dispatcher' ),
-				'Construction' => array( 'Project Manager', 'Site Supervisor', 'Estimator' ),
-				'Trades' => array( 'Electrician', 'Plumber', 'Carpenter', 'Mason', 'Welder' ),
+				'Supply Chain' => array( 'Logistics Manager', 'Warehouse Supervisor', 'Purchasing Manager', 'Inventory Clerk', 'Supply Chain Analyst' ),
+				'Transportation' => array( 'Truck Driver', 'Pilot', 'Shipping Clerk', 'Dispatcher', 'Flight Attendant', 'Marine Captain' ),
+				'Construction' => array( 'Project Manager', 'Site Supervisor', 'Estimator', 'Quantity Surveyor', 'Safety Officer' ),
+				'Trades' => array( 'Electrician', 'Plumber', 'Carpenter', 'Mason', 'Welder', 'Painter', 'HVAC Technician' ),
+			),
+			'Legal & Public Safety' => array(
+				'Law' => array( 'Lawyer', 'Paralegal', 'Legal Secretary', 'Judge', 'Corporate Counsel' ),
+				'Public Safety' => array( 'Police Officer', 'Firefighter', 'Paramedic', 'Security Guard', 'Correctional Officer' ),
+			),
+			'Hospitality & Tourism' => array(
+				'Hotel' => array( 'Hotel Manager', 'Receptionist', 'Housekeeper', 'Concierge' ),
+				'Food Service' => array( 'Chef', 'Waiter', 'Bartender', 'Restaurant Manager', 'Barista' ),
+				'Tourism' => array( 'Tour Guide', 'Travel Agent', 'Event Planner' ),
+			),
+			'Agriculture & Environment' => array(
+				'Farming' => array( 'Farmer', 'Agricultural Worker', 'Agronomist', 'Rancher' ),
+				'Environment' => array( 'Environmental Scientist', 'Geologist', 'Park Ranger', 'Ecologist' ),
+			),
+			'Science & Research' => array(
+				'Life Sciences' => array( 'Biologist', 'Biotechnologist', 'Microbiologist' ),
+				'Physical Sciences' => array( 'Physicist', 'Chemist', 'Astronomer' ),
+				'Social Sciences' => array( 'Psychologist', 'Sociologist', 'Anthropologist' ),
 			),
 		);
 
@@ -419,6 +437,20 @@ class Jobs_Activator {
 				'post_status'  => 'publish',
 				'post_author'  => 1,
 				'post_name'    => 'jobs-settings',
+			) );
+		}
+
+		// Auth Page
+		$auth_title = 'Join Us';
+		$auth_check = get_page_by_title( $auth_title );
+		if ( ! isset( $auth_check->ID ) ) {
+			wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $auth_title,
+				'post_content' => '[jobs_auth]',
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+				'post_name'    => 'jobs-auth',
 			) );
 		}
 	}

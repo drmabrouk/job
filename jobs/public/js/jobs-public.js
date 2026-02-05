@@ -9,7 +9,6 @@
 		function performSearch() {
 			var keyword = $searchInput.val();
 			var category = $('#jobs-category-select').val();
-			var type = $('#jobs-type-select').val();
 			var country = $('#jobs-country-select').val();
 			var state = $('#jobs-state-select').val();
 
@@ -20,7 +19,6 @@
 					action: 'jobs_search',
 					keyword: keyword,
 					category: category,
-					type: type,
 					country: country,
 					state: state,
 					nonce: jobs_ajax.nonce
@@ -42,7 +40,7 @@
 			searchTimer = setTimeout(performSearch, 300);
 		});
 
-		$(document).on('change', '#jobs-category-select, #jobs-type-select, #jobs-state-select', function() {
+		$(document).on('change', '#jobs-category-select, #jobs-state-select', function() {
 			performSearch();
 		});
 
@@ -104,6 +102,12 @@
 				success: function(response) {
 					if (response.success) {
 						$btn.toggleClass('saved');
+						var $icon = $btn.find('i');
+						if ($btn.hasClass('saved')) {
+							$icon.removeClass('far').addClass('fas');
+						} else {
+							$icon.removeClass('fas').addClass('far');
+						}
 						if ($('.jobs-toast').length === 0) {
 							$('body').append('<div class="jobs-toast" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#2d3748; color:#fff; padding:12px 24px; border-radius:50px; z-index:10000; display:none;"></div>');
 						}
@@ -187,76 +191,51 @@
 			setInterval(checkNotifications, 30000);
 			checkNotifications();
 		}
+
+		// Browser Geolocation Integration
+		if ("geolocation" in navigator) {
+			navigator.geolocation.getCurrentPosition(function(position) {
+				const lat = position.coords.latitude;
+				const lon = position.coords.longitude;
+
+				$.ajax({
+					url: jobs_ajax.ajax_url,
+					type: 'POST',
+					data: {
+						action: 'jobs_geo_search',
+						lat: lat,
+						lon: lon,
+						nonce: jobs_ajax.nonce
+					},
+					success: function(response) {
+						if (response.success && response.data.html) {
+							$('#jobs-grid').html(response.data.html);
+						}
+					}
+				});
+			});
+		}
+
+		// Admin User Management Logic (if present)
+		$(document).on('click', '#add-user-btn', function() {
+			$('#modal-title').text('Add New User');
+			if($('#admin-user-form').length) $('#admin-user-form')[0].reset();
+			$('#user-modal').fadeIn();
+		});
+
+		$(document).on('click', '.edit-user-link', function(e) {
+			e.preventDefault();
+			$('#modal-title').text('Edit User');
+			$('#user-modal').fadeIn();
+		});
+
+		$(document).on('click', '.delete-user-link', function(e) {
+			e.preventDefault();
+			if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+				$(this).closest('tr').fadeOut();
+			}
+		});
+
 	});
 
 })(jQuery);
-
-	// Admin User Management Logic
-	.on('click', '#add-user-btn', function() {
-		.text('Add New User');
-		[0].reset();
-		.fadeIn();
-	});
-
-	.on('click', '.edit-user-link', function(e) {
-		e.preventDefault();
-		.text('Edit User');
-		// In a real app, we'd fetch user data via AJAX here
-		.fadeIn();
-	});
-
-	.on('click', '.delete-user-link', function(e) {
-		e.preventDefault();
-		if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-			// AJAX delete logic here
-			.closest('tr').fadeOut();
-		}
-	});
-
-
-	// Admin User Management Logic
-	$(document).on('click', '#add-user-btn', function() {
-		$('#modal-title').text('Add New User');
-		$('#admin-user-form')[0].reset();
-		$('#user-modal').fadeIn();
-	});
-
-	$(document).on('click', '.edit-user-link', function(e) {
-		e.preventDefault();
-		$('#modal-title').text('Edit User');
-		// In a real app, we'd fetch user data via AJAX here
-		$('#user-modal').fadeIn();
-	});
-
-	$(document).on('click', '.delete-user-link', function(e) {
-		e.preventDefault();
-		if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-			// AJAX delete logic here
-			$(this).closest('tr').fadeOut();
-		}
-	});
-
-	// Browser Geolocation Integration
-	if ("geolocation" in navigator) {
-		navigator.geolocation.getCurrentPosition(function(position) {
-			const lat = position.coords.latitude;
-			const lon = position.coords.longitude;
-
-			// Priority search based on coordinates
-			$.ajax({
-				url: jobs_ajax.ajax_url,
-				type: 'POST',
-				data: {
-					action: 'jobs_geo_search',
-					lat: lat,
-					lon: lon,
-					nonce: jobs_ajax.nonce
-				},
-				success: function(response) {
-					if (response.success && response.data.html) {
-						$('#jobs-grid').html(response.data.html);
-					}
-				}
-			});
-		});
-	}
