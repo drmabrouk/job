@@ -64,6 +64,11 @@ class Jobs_Public {
 		wp_enqueue_style( 'rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap', array(), null );
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jobs-public.css', array(), $this->version, 'all' );
 
+		// Custom Colors
+		$primary = get_option('jobs_primary_color', '#1d3469');
+		$secondary = get_option('jobs_secondary_color', '#15264d');
+		$custom_css = ":root { --primary-color: $primary; --primary-dark: $secondary; }";
+		wp_add_inline_style( $this->plugin_name, $custom_css );
 	}
 
 	/**
@@ -165,7 +170,7 @@ class Jobs_Public {
 	public function add_application_form( $content ) {
 		if ( is_singular( 'job' ) && is_main_query() ) {
 			if ( ! is_user_logged_in() ) {
-				return '<div class="jobs-msg">' . sprintf( __( 'Please <a href="%s">login</a> to apply for this job.', 'jobs' ), wp_login_url( get_permalink() ) ) . '</div>' . $content;
+				return '<div class="jobs-msg">' . sprintf( __( 'Please <a href="%s">login</a> to apply for this job.', 'jobs' ), home_url('/jobs-auth') ) . '</div>' . $content;
 			}
 
 			$user_id = get_current_user_id();
@@ -173,16 +178,15 @@ class Jobs_Public {
 
 			ob_start();
 			?>
-			<div class="jobs-application-form-wrapper" style="margin: 40px 0; padding: 30px; background: #fdfdfd; border: 1px solid #eee; border-radius: 12px;">
+			<div id="jobs-application-container" class="jobs-application-form-wrapper" style="margin: 40px 0; padding: 30px; background: #fdfdfd; border: 1px solid #eee; border-radius: 12px;">
 				<h3><?php _e( 'Apply for this Position', 'jobs' ); ?></h3>
-				<form method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
-					<input type="hidden" name="action" value="jobs_submit_application">
+				<form id="jobs-standard-apply-form">
 					<input type="hidden" name="job_id" value="<?php the_ID(); ?>">
-					<?php wp_nonce_field( 'jobs_apply_nonce', 'jobs_nonce' ); ?>
+					<?php wp_nonce_field( 'jobs_apply_nonce', 'nonce' ); ?>
 
 					<p>
 						<label><?php _e( 'Select Document to Attach', 'jobs' ); ?></label>
-						<select name="attachment_id" required style="width:100%; padding:10px;">
+						<select name="attachment_id" required style="width:100%; padding:10px; border-radius: 8px; border: 1px solid #ddd;">
 							<?php if ( ! empty( $docs ) ) : foreach ( $docs as $doc ) : ?>
 								<option value="<?php echo $doc['id']; ?>"><?php echo esc_html($doc['title']); ?> (<?php echo esc_html($doc['type']); ?>)</option>
 							<?php endforeach; else : ?>
@@ -196,7 +200,7 @@ class Jobs_Public {
 						<textarea name="cover_letter" rows="6" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;"></textarea>
 					</p>
 
-					<input type="submit" value="<?php _e( 'Submit Application', 'jobs' ); ?>" class="button button-primary button-large" <?php echo empty($docs) ? 'disabled' : ''; ?>>
+					<input type="submit" value="<?php _e( 'Submit Application', 'jobs' ); ?>" class="jobs-button" <?php echo empty($docs) ? 'disabled' : ''; ?>>
 				</form>
 			</div>
 			<?php
@@ -713,7 +717,7 @@ class Jobs_Public {
 	 * Override Single Job Template
 	 */
 	public function job_single_template( $template ) {
-		if ( is_singular( 'job' ) ) {
+		if ( is_singular( 'job' ) || get_post_type() === 'job' ) {
 			$new_template = plugin_dir_path( __FILE__ ) . 'partials/jobs-single-listing.php';
 			if ( file_exists( $new_template ) ) {
 				return $new_template;
@@ -935,33 +939,136 @@ class Jobs_Public {
 		return '';
 	}
 
-	public function handle_user_registration() {
-		if ( ! isset( $_POST['jobs_nonce'] ) || ! wp_verify_nonce( $_POST['jobs_nonce'], 'jobs_register_nonce' ) ) {
-			wp_die( __( 'Security check failed.', 'jobs' ) );
+	/**
+	 * AJAX Login handler.
+	 */
+	public function ajax_login() {
+		check_ajax_referer( 'jobs_auth_nonce', 'auth_nonce' );
+
+		$info = array();
+		$info['user_login'] = sanitize_user($_POST['user_login']);
+		$info['user_password'] = $_POST['user_pass'];
+		$info['remember'] = isset($_POST['rememberme']);
+
+		$user_signon = wp_signon( $info, is_ssl() );
+
+		if ( is_wp_error( $user_signon ) ) {
+			wp_send_json_error( $user_signon->get_error_message() );
+		} else {
+			$this->log_activity( $user_signon->ID, 'User logged in via AJAX' );
+			wp_send_json_success( array(
+				'message' => __( 'Login successful! Redirecting...', 'jobs' ),
+				'redirect' => home_url('/jobs-dashboard')
+			) );
+		}
+	}
+
+	/**
+	 * AJAX Register handler.
+	 */
+	public function ajax_register() {
+		check_ajax_referer( 'jobs_auth_nonce', 'auth_nonce' );
+
+		$email = sanitize_email($_POST['user_email']);
+		$name = sanitize_text_field($_POST['full_name']);
+		$pass = $_POST['user_pass'];
+		$role = sanitize_text_field($_POST['user_role']);
+
+		if ( ! is_email($email) ) {
+			wp_send_json_error( __( 'Invalid email address.', 'jobs' ) );
 		}
 
-		$username = sanitize_user( $_POST['user_login'] );
-		$email    = sanitize_email( $_POST['user_email'] );
-		$password = $_POST['user_pass'];
-
-		$user_id = wp_create_user( $username, $password, $email );
-
-		if ( is_wp_error( $user_id ) ) {
-			wp_die( $user_id->get_error_message() );
+		if ( email_exists($email) ) {
+			wp_send_json_error( __( 'Email already registered.', 'jobs' ) );
 		}
 
-		// Log activity
+		if ( strlen($pass) < 8 ) {
+			wp_send_json_error( __( 'Password must be at least 8 characters.', 'jobs' ) );
+		}
+
+		$username = strstr($email, '@', true) . rand(100,999);
+		$user_id = wp_create_user( $username, $pass, $email );
+
+		if ( is_wp_error($user_id) ) {
+			wp_send_json_error( $user_id->get_error_message() );
+		}
+
+		$user = new WP_User($user_id);
+		$user->set_role($role);
+		wp_update_user( array( 'ID' => $user_id, 'display_name' => $name ) );
+
+		// Auto login after registration
+		wp_set_auth_cookie($user_id);
 		$this->log_activity( $user_id, 'Account created' );
 
-		// Set role
-		$user = new WP_User( $user_id );
-		$user->set_role( 'job_seeker' );
+		wp_send_json_success( __( 'Account created successfully!', 'jobs' ) );
+	}
 
-		// Login and redirect
-		$redirect_to = isset( $_POST['redirect_to'] ) ? esc_url_raw( $_POST['redirect_to'] ) : home_url();
-		wp_set_auth_cookie( $user_id );
-		wp_redirect( $redirect_to );
-		exit;
+	/**
+	 * AJAX Application Submission.
+	 */
+	public function ajax_submit_application() {
+		check_ajax_referer( 'jobs_apply_nonce', 'nonce' );
+
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( __( 'You must be logged in to apply.', 'jobs' ) );
+		}
+
+		$user_id = get_current_user_id();
+		$job_id = intval($_POST['job_id']);
+		$attach_id = isset($_POST['attachment_id']) ? intval($_POST['attachment_id']) : 0;
+		$cover = isset($_POST['cover_letter']) ? wp_kses_post($_POST['cover_letter']) : '';
+
+		if ( isset($_POST['quick_apply']) ) {
+			$docs = get_user_meta( $user_id, '_jobs_user_documents', true ) ?: array();
+			if ( ! empty($docs) ) {
+				$attach_id = $docs[0]['id'];
+			}
+			$cover = __( 'Fast Application using profile data.', 'jobs' );
+		}
+
+		$app_id = wp_insert_post( array(
+			'post_title'   => sprintf( __( 'Application: %s - %s', 'jobs' ), get_the_title($job_id), wp_get_current_user()->display_name ),
+			'post_content' => $cover,
+			'post_type'    => 'application',
+			'post_status'  => 'publish',
+			'post_author'  => $user_id,
+		) );
+
+		if ( $app_id ) {
+			update_post_meta( $app_id, '_job_id', $job_id );
+			update_post_meta( $app_id, '_attachment_id', $attach_id );
+
+			$employer_id = get_post_field( 'post_author', $job_id );
+			$notifs = get_user_meta( $employer_id, '_jobs_notifications', true ) ?: array();
+			$notifs[] = array(
+				'message' => sprintf( __( 'New application received for job: %s', 'jobs' ), get_the_title($job_id) ),
+				'time'    => time(),
+			);
+			update_user_meta( $employer_id, '_jobs_notifications', $notifs );
+
+			$this->log_activity( $user_id, 'Applied for job: ' . get_the_title($job_id) );
+
+			wp_send_json_success( __( 'Application submitted successfully!', 'jobs' ) );
+		}
+
+		wp_send_json_error( __( 'Failed to submit application.', 'jobs' ) );
+	}
+
+	/**
+	 * Dynamic Auth Shortcode.
+	 */
+	public function shortcode_jobs_auth() {
+		if ( is_user_logged_in() ) {
+			return '<p class="jobs-msg success">' . __( 'You are already logged in.', 'jobs' ) . '</p>';
+		}
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'partials/jobs-auth-dynamic.php';
+		return ob_get_clean();
+	}
+
+	public function handle_user_registration() {
+		// Handled via AJAX now
 	}
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Account Settings Panel
+ * Account Settings Panel - Advanced Configuration
  */
 $user = wp_get_current_user();
 $notif_pref = get_user_meta( $user->ID, '_jobs_notif_pref', true ) ?: 'all';
@@ -10,161 +10,105 @@ $profile_indexed = get_user_meta( $user->ID, '_jobs_profile_indexed', true ) ?: 
 $dashboard_layout = get_user_meta( $user->ID, '_jobs_dash_layout', true ) ?: 'grid';
 $settings_view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'general';
 
-// Handle Password Change
-if ( isset( $_POST['jobs_change_password'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
-	if ( ! empty( $_POST['new_pass'] ) && $_POST['new_pass'] === $_POST['confirm_pass'] ) {
-		wp_set_password( $_POST['new_pass'], $user->ID );
-		echo '<div class="jobs-msg">' . __( 'Password changed successfully.', 'jobs' ) . '</div>';
-	} else {
-		echo '<div class="jobs-msg" style="background:#f8d7da; color:#721c24;">' . __( 'Passwords do not match.', 'jobs' ) . '</div>';
-	}
-}
-
-// Handle Logout from other devices
-if ( isset( $_POST['jobs_logout_others'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
-	wp_destroy_other_sessions();
-	echo '<div class="jobs-msg">' . __( 'Logged out from all other devices.', 'jobs' ) . '</div>';
-}
-
-if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['jobs_settings_nonce'], 'jobs_save_settings' ) ) {
-	update_user_meta( $user->ID, '_jobs_notif_pref', sanitize_text_field( $_POST['notif_pref'] ) );
-	update_user_meta( $user->ID, '_jobs_privacy_pref', sanitize_text_field( $_POST['privacy_pref'] ) );
-	update_user_meta( $user->ID, '_jobs_dash_layout', sanitize_text_field( $_POST['dash_layout'] ) );
-	update_user_meta( $user->ID, '_jobs_locale', sanitize_text_field( $_POST['user_lang'] ) );
-
-	if ( in_array( 'job_seeker', (array) $user->roles ) ) {
-		update_user_meta( $user->ID, '_jobs_profile_public', isset($_POST['profile_public']) ? 'yes' : 'no' );
-		update_user_meta( $user->ID, '_jobs_profile_indexed', isset($_POST['profile_indexed']) ? 'yes' : 'no' );
-	}
-
-	echo '<div class="jobs-msg">' . __( 'Settings saved successfully.', 'jobs' ) . '</div>';
-}
 ?>
-<div class="jobs-settings-panel">
-	<div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-		<h2><?php _e( 'Account Settings', 'jobs' ); ?></h2>
-		<div class="settings-nav">
-			<a href="?tab=settings&view=general" class="button <?php echo $settings_view == 'general' ? 'button-primary' : ''; ?>"><?php _e( 'General', 'jobs' ); ?></a>
-			<a href="?tab=settings&view=security" class="button <?php echo $settings_view == 'security' ? 'button-primary' : ''; ?>"><?php _e( 'Security', 'jobs' ); ?></a>
+<div class="jobs-settings-panel-refined">
+	<div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+		<h2 style="margin: 0; color: var(--primary-color); font-size: 28px; font-weight: 700;"><?php _e( 'Account Settings', 'jobs' ); ?></h2>
+		<div class="settings-nav-pills" style="display: flex; gap: 10px; background: #f1f3f5; padding: 5px; border-radius: 12px;">
+			<a href="?tab=settings&view=general" class="nav-pill <?php echo $settings_view == 'general' ? 'active' : ''; ?>" style="padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; color: <?php echo $settings_view == 'general' ? '#fff' : '#4a5568'; ?>; background: <?php echo $settings_view == 'general' ? 'var(--primary-color)' : 'transparent'; ?>;"><?php _e( 'General', 'jobs' ); ?></a>
+			<a href="?tab=settings&view=security" class="nav-pill <?php echo $settings_view == 'security' ? 'active' : ''; ?>" style="padding: 8px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; color: <?php echo $settings_view == 'security' ? '#fff' : '#4a5568'; ?>; background: <?php echo $settings_view == 'security' ? 'var(--primary-color)' : 'transparent'; ?>;"><?php _e( 'Security', 'jobs' ); ?></a>
 		</div>
 	</div>
 
 	<?php if ( $settings_view == 'general' ) : ?>
-	<form method="post" action="">
+	<form method="post" action="" class="account-section" style="background:#fff; padding:40px; border-radius:24px; border:1px solid #f0f0f0;">
 		<?php wp_nonce_field( 'jobs_save_settings', 'jobs_settings_nonce' ); ?>
 
-		<div class="settings-group">
-			<h3><?php _e( 'Notification Preferences', 'jobs' ); ?></h3>
-			<p>
-				<label>
-					<input type="radio" name="notif_pref" value="all" <?php checked( $notif_pref, 'all' ); ?>> <?php _e( 'All Notifications', 'jobs' ); ?>
-				</label><br>
-				<label>
-					<input type="radio" name="notif_pref" value="important" <?php checked( $notif_pref, 'important' ); ?>> <?php _e( 'Only Important Updates', 'jobs' ); ?>
-				</label><br>
-				<label>
-					<input type="radio" name="notif_pref" value="none" <?php checked( $notif_pref, 'none' ); ?>> <?php _e( 'None', 'jobs' ); ?>
-				</label>
-			</p>
+		<div class="settings-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+			<div class="settings-group">
+				<h3 style="font-size: 18px; margin-bottom: 20px; color: #2d3748;"><?php _e( 'Notification Preferences', 'jobs' ); ?></h3>
+				<div class="form-group" style="margin-bottom: 20px;">
+					<label style="display:block; margin-bottom:10px; font-weight:600;"><?php _e( 'Email Alerts Frequency', 'jobs' ); ?></label>
+					<select name="notif_freq" class="jobs-filter-select" style="width:100%; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+						<option value="instant"><?php _e( 'Instant (Real-time)', 'jobs' ); ?></option>
+						<option value="daily"><?php _e( 'Daily Digest', 'jobs' ); ?></option>
+						<option value="weekly"><?php _e( 'Weekly Summary', 'jobs' ); ?></option>
+						<option value="none"><?php _e( 'Disabled', 'jobs' ); ?></option>
+					</select>
+				</div>
+				<div class="checkbox-group" style="display:flex; flex-direction:column; gap:12px;">
+					<label><input type="checkbox" name="notif_msg" value="yes" checked> <?php _e( 'New Message Alerts', 'jobs' ); ?></label>
+					<label><input type="checkbox" name="notif_app" value="yes" checked> <?php _e( 'Application Status Changes', 'jobs' ); ?></label>
+					<label><input type="checkbox" name="notif_matches" value="yes"> <?php _e( 'New Job Matches', 'jobs' ); ?></label>
+				</div>
+			</div>
+
+			<div class="settings-group">
+				<h3 style="font-size: 18px; margin-bottom: 20px; color: #2d3748;"><?php _e( 'Privacy & Visibility', 'jobs' ); ?></h3>
+				<div class="form-group" style="margin-bottom: 20px;">
+					<label style="display:block; margin-bottom:10px; font-weight:600;"><?php _e( 'Profile Visibility', 'jobs' ); ?></label>
+					<select name="privacy_pref" class="jobs-filter-select" style="width:100%; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+						<option value="public" <?php selected($privacy_pref, 'public'); ?>><?php _e( 'Public - Visible to everyone', 'jobs' ); ?></option>
+						<option value="verified" <?php selected($privacy_pref, 'verified'); ?>><?php _e( 'Verified - Logged-in users only', 'jobs' ); ?></option>
+						<option value="employers" <?php selected($privacy_pref, 'employers'); ?>><?php _e( 'Employers - Verified employers only', 'jobs' ); ?></option>
+						<option value="private" <?php selected($privacy_pref, 'private'); ?>><?php _e( 'Private - Hidden', 'jobs' ); ?></option>
+					</select>
+				</div>
+				<div class="checkbox-group" style="display:flex; flex-direction:column; gap:12px;">
+					<label><input type="checkbox" name="show_online" value="yes" checked> <?php _e( 'Show my online status', 'jobs' ); ?></label>
+					<label><input type="checkbox" name="profile_indexed" value="yes" <?php checked($profile_indexed, 'yes'); ?>> <?php _e( 'Allow Search Engines indexing', 'jobs' ); ?></label>
+				</div>
+			</div>
 		</div>
 
-		<div class="settings-group">
-			<h3><?php _e( 'Dashboard Layout', 'jobs' ); ?></h3>
-			<p>
-				<label>
-					<input type="radio" name="dash_layout" value="grid" <?php checked( $dashboard_layout, 'grid' ); ?>> <?php _e( 'Grid View', 'jobs' ); ?>
-				</label><br>
-				<label>
-					<input type="radio" name="dash_layout" value="list" <?php checked( $dashboard_layout, 'list' ); ?>> <?php _e( 'List View', 'jobs' ); ?>
-				</label>
-			</p>
+		<div class="settings-footer" style="margin-top: 40px; padding-top: 30px; border-top: 1px solid #f0f0f0;">
+			<input type="submit" name="jobs_save_account_settings" class="jobs-button" value="<?php _e( 'Save Changes', 'jobs' ); ?>" style="padding: 15px 40px;">
 		</div>
-
-		<div class="settings-group">
-			<h3><?php _e( 'Interface Language', 'jobs' ); ?></h3>
-			<p>
-				<select name="user_lang">
-					<option value="en_US" <?php selected( get_user_meta($user->ID, '_jobs_locale', true), 'en_US' ); ?>>English</option>
-					<option value="ar" <?php selected( get_user_meta($user->ID, '_jobs_locale', true), 'ar' ); ?>>العربية</option>
-				</select>
-			</p>
-		</div>
-
-		<div class="settings-group">
-			<h3><?php _e( 'Privacy Settings', 'jobs' ); ?></h3>
-			<p>
-				<label>
-					<input type="radio" name="privacy_pref" value="public" <?php checked( $privacy_pref, 'public' ); ?>> <?php _e( 'Public (Visible to everyone)', 'jobs' ); ?>
-				</label><br>
-				<label>
-					<input type="radio" name="privacy_pref" value="private" <?php checked( $privacy_pref, 'private' ); ?>> <?php _e( 'Private (Only employers)', 'jobs' ); ?>
-				</label>
-			</p>
-		</div>
-
-		<?php if ( in_array( 'job_seeker', (array) $user->roles ) ) : ?>
-		<div class="settings-group">
-			<h3><?php _e( 'Public Profile Settings', 'jobs' ); ?></h3>
-			<p>
-				<label>
-					<input type="checkbox" name="profile_public" value="yes" <?php checked( $profile_public, 'yes' ); ?>> <?php _e( 'Enable Public Profile', 'jobs' ); ?>
-				</label><br>
-				<small><?php printf( __( 'Your shareable link: %s', 'jobs' ), '<code>' . home_url( '/job-seeker/' . $user->user_nicename ) . '</code>' ); ?></small>
-			</p>
-			<p>
-				<label>
-					<input type="checkbox" name="profile_indexed" value="yes" <?php checked( $profile_indexed, 'yes' ); ?>> <?php _e( 'Allow Search Engines to Index My Profile', 'jobs' ); ?>
-				</label>
-			</p>
-		</div>
-		<?php endif; ?>
-
-		<p class="submit">
-			<input type="submit" name="jobs_save_account_settings" class="button button-primary" value="<?php _e( 'Save Settings', 'jobs' ); ?>">
-		</p>
 	</form>
 	<?php else : ?>
-		<div class="security-settings">
-			<div class="settings-group">
-				<h3><?php _e( 'Change Password', 'jobs' ); ?></h3>
-				<form method="post" class="jobs-frontend-form">
+		<div class="security-settings account-section" style="background:#fff; padding:40px; border-radius:24px; border:1px solid #f0f0f0;">
+			<div class="settings-group" style="margin-bottom: 40px;">
+				<h3 style="font-size: 18px; margin-bottom: 25px; color: #2d3748;"><?php _e( 'Update Password', 'jobs' ); ?></h3>
+				<form method="post" class="jobs-frontend-form" style="max-width: 500px;">
 					<?php wp_nonce_field( 'jobs_save_security', 'jobs_security_nonce' ); ?>
-					<p>
+					<div class="form-group" style="margin-bottom: 15px;">
 						<label><?php _e( 'New Password', 'jobs' ); ?></label>
-						<input type="password" name="new_pass" required>
-					</p>
-					<p>
+						<input type="password" name="new_pass" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+					</div>
+					<div class="form-group" style="margin-bottom: 25px;">
 						<label><?php _e( 'Confirm New Password', 'jobs' ); ?></label>
-						<input type="password" name="confirm_pass" required>
-					</p>
-					<input type="submit" name="jobs_change_password" class="button button-primary" value="<?php _e( 'Update Password', 'jobs' ); ?>">
+						<input type="password" name="confirm_pass" required style="width:100%; padding:12px; border-radius:10px; border:1px solid #e2e8f0;">
+					</div>
+					<input type="submit" name="jobs_change_password" class="jobs-button" value="<?php _e( 'Update Password', 'jobs' ); ?>">
 				</form>
 			</div>
 
 			<div class="settings-group">
-				<h3><?php _e( 'Active Sessions', 'jobs' ); ?></h3>
-				<p><?php _e( 'You are currently logged into this account on these devices:', 'jobs' ); ?></p>
-				<table class="jobs-table">
+				<h3 style="font-size: 18px; margin-bottom: 20px; color: #2d3748;"><?php _e( 'Active Sessions', 'jobs' ); ?></h3>
+				<p style="color: #718096; margin-bottom: 20px;"><?php _e( 'Manage your logged-in devices and active sessions.', 'jobs' ); ?></p>
+				<table class="jobs-table" style="width:100%; border-collapse: collapse;">
 					<thead>
-						<tr>
-							<th><?php _e( 'IP Address', 'jobs' ); ?></th>
-							<th><?php _e( 'Last Activity', 'jobs' ); ?></th>
+						<tr style="text-align: left; border-bottom: 2px solid #f7fafc;">
+							<th style="padding: 15px;"><?php _e( 'IP Address', 'jobs' ); ?></th>
+							<th style="padding: 15px;"><?php _e( 'Last Activity', 'jobs' ); ?></th>
+							<th style="padding: 15px;"><?php _e( 'Action', 'jobs' ); ?></th>
 						</tr>
 					</thead>
 					<tbody>
 						<?php
 						$sessions = wp_get_all_sessions();
 						foreach ( $sessions as $session ) : ?>
-							<tr>
-								<td><?php echo esc_html($session['ip']); ?></td>
-								<td><?php echo date('M j, H:i', $session['login']); ?></td>
+							<tr style="border-bottom: 1px solid #f7fafc;">
+								<td style="padding: 15px;"><?php echo esc_html($session['ip']); ?></td>
+								<td style="padding: 15px;"><?php echo date('M j, H:i', $session['login']); ?></td>
+								<td style="padding: 15px;"><span class="status-badge" style="background: #e6f7ef; color: #27ae60; font-size: 10px;"><?php _e( 'Active', 'jobs' ); ?></span></td>
 							</tr>
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-				<form method="post" style="margin-top: 20px;">
+				<form method="post" style="margin-top: 30px;">
 					<?php wp_nonce_field( 'jobs_save_security', 'jobs_security_nonce' ); ?>
-					<input type="submit" name="jobs_logout_others" class="button" value="<?php _e( 'Logout from all other devices', 'jobs' ); ?>">
+					<input type="submit" name="jobs_logout_others" class="jobs-button btn-outline" value="<?php _e( 'Log out from all other devices', 'jobs' ); ?>">
 				</form>
 			</div>
 		</div>

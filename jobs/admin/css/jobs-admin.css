@@ -18,3 +18,19 @@
 #adminmenu li.current a.menu-top, #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu, #adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head, #adminmenu li.wp-has-current-submenu.opensub > a.menu-top {
     background: #15264d;
 }
+
+.jobs-admin-dashboard-grid .card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.jobs-admin-dashboard-grid .card h2 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}

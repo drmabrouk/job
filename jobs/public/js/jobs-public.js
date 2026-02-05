@@ -31,15 +31,6 @@
 				success: function(response) {
 					if (response.success) {
 						$grid.html(response.data.html);
-						if (response.data.category_ad) {
-							if ($('.jobs-ad-premium').length) {
-								$('.jobs-ad-premium').html(response.data.category_ad);
-							} else {
-								$('.jobs-search-section').after('<div class="jobs-ad-zone jobs-ad-premium">' + response.data.category_ad + '</div>');
-							}
-						} else {
-							$('.jobs-ad-premium').remove();
-						}
 					}
 					$grid.css('opacity', '1');
 				}
@@ -51,21 +42,13 @@
 			searchTimer = setTimeout(performSearch, 300);
 		});
 
-		$(document).on('change', '#jobs-category-select', function() {
+		$(document).on('change', '#jobs-category-select, #jobs-type-select, #jobs-state-select', function() {
 			performSearch();
 		});
 
 		$(document).on('click', '.job-capsule', function() {
 			var slug = $(this).data('slug');
 			$('#jobs-category-select').val(slug);
-			performSearch();
-		});
-
-		$(document).on('change', '#jobs-type-select', function() {
-			performSearch();
-		});
-
-		$(document).on('change', '#jobs-state-select', function() {
 			performSearch();
 		});
 
@@ -104,60 +87,9 @@
 			}
 		});
 
-		// Job Reactivation
-		$(document).on('click', '.reactivate-job', function() {
-			var $btn = $(this);
-			var jobId = $btn.data('id');
-
-			$.ajax({
-				url: jobs_ajax.ajax_url,
-				type: 'POST',
-				data: {
-					action: 'reactivate_job',
-					job_id: jobId,
-					nonce: jobs_ajax.nonce
-				},
-				success: function(response) {
-					alert(response.data);
-					location.reload();
-				}
-			});
-		});
-
-		// Job Extension
-		$(document).on('click', '.extend-job', function() {
-			var $btn = $(this);
-			var jobId = $btn.data('id');
-
-			$.ajax({
-				url: jobs_ajax.ajax_url,
-				type: 'POST',
-				data: {
-					action: 'extend_job',
-					job_id: jobId,
-					nonce: jobs_ajax.nonce
-				},
-				success: function(response) {
-					alert(response.data);
-					location.reload();
-				}
-			});
-		});
-
-		// Save Job
-		// Nav Dropdown Toggle for Touch
-		$('.nav-profile-trigger').on('click', function(e) {
-			if ($(window).width() < 1024) {
-				e.stopPropagation();
-				$('.nav-account-dropdown').toggleClass('show');
-			}
-		});
-
-		$(document).on('click', function() {
-			$('.nav-account-dropdown').removeClass('show');
-		});
-
-		$(document).on('click', '.save-job-btn', function() {
+		// Save Job Logic
+		$(document).on('click', '.save-job-btn-refined, .save-job-btn-modern', function(e) {
+			e.preventDefault();
 			var $btn = $(this);
 			var jobId = $btn.data('id');
 
@@ -172,13 +104,66 @@
 				success: function(response) {
 					if (response.success) {
 						$btn.toggleClass('saved');
-						$btn.text($btn.hasClass('saved') ? '★' : '☆');
+						if ($('.jobs-toast').length === 0) {
+							$('body').append('<div class="jobs-toast" style="position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#2d3748; color:#fff; padding:12px 24px; border-radius:50px; z-index:10000; display:none;"></div>');
+						}
+						$('.jobs-toast').text(response.data).fadeIn().delay(2000).fadeOut();
+					} else {
+						alert(response.data);
 					}
 				}
 			});
 		});
 
-		// Follow Employer
+		// AJAX Application Submission
+		$(document).on('submit', '#quick-apply-form, #jobs-standard-apply-form', function(e) {
+			e.preventDefault();
+			var $form = $(this);
+			var $btn = $form.find('button[type="submit"], input[type="submit"]');
+			var $container = $('#job-apply-container, #jobs-application-container');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: $form.serialize() + '&action=jobs_submit_application_ajax&nonce=' + $form.find('input[name="nonce"]').val(),
+				beforeSend: function() {
+					$btn.prop('disabled', true).text('Sending...');
+				},
+				success: function(response) {
+					if (response.success) {
+						$container.html('<div class="jobs-msg success" style="background:#f0fff4; color:#2f855a; border:1px solid #c6f6d5; padding:20px; border-radius:12px; text-align:center;">' + response.data + '</div>');
+					} else {
+						alert(response.data);
+						$btn.prop('disabled', false).text('Submit');
+					}
+				}
+			});
+		});
+
+		// Sidebar Collapse Toggle
+		$('.jobs-sidebar-toggle').on('click', function() {
+			$('.jobs-account-sidebar').toggleClass('collapsed');
+			localStorage.setItem('jobs_sidebar_collapsed', $('.jobs-account-sidebar').hasClass('collapsed'));
+		});
+
+		if (localStorage.getItem('jobs_sidebar_collapsed') === 'true') {
+			$('.jobs-account-sidebar').addClass('collapsed');
+		}
+
+		// Smart Notification Dropdown
+		$(document).on('click', '#notif-drop-btn', function(e) {
+			e.stopPropagation();
+			$('#notif-panel').toggleClass('show');
+		});
+
+		$(document).on('click', function() {
+			$('.smart-dropdown-panel').removeClass('show');
+		});
+
+		$('.smart-dropdown-panel').on('click', function(e) {
+			e.stopPropagation();
+		});
+
 		// Notification Polling
 		function checkNotifications() {
 			$.ajax({
@@ -190,46 +175,18 @@
 				},
 				success: function(response) {
 					if (response.success && response.data.unread_count > 0) {
-						if ($('.jobs-nav-links .notif-badge').length) {
-							$('.jobs-nav-links .notif-badge').text(response.data.unread_count);
-						} else {
-							$('.jobs-nav-links a[href*="jobs-dashboard"]').append(' <span class="notif-badge">' + response.data.unread_count + '</span>');
+						if ($('.pulse-badge').length) {
+							$('.pulse-badge').text(response.data.unread_count);
 						}
 					}
 				}
 			});
 		}
 
-		if ($('.jobs-top-nav').length) {
-			setInterval(checkNotifications, 30000); // Every 30 seconds
+		if ($('.jobs-top-nav-refined').length) {
+			setInterval(checkNotifications, 30000);
 			checkNotifications();
 		}
-
-		$(document).on('click', '.follow-employer-btn', function() {
-			var $btn = $(this);
-			var empId = $btn.data('id');
-
-			$.ajax({
-				url: jobs_ajax.ajax_url,
-				type: 'POST',
-				data: {
-					action: 'follow_employer',
-					employer_id: empId,
-					nonce: jobs_ajax.nonce
-				},
-				success: function(response) {
-					if (response.success) {
-						$btn.toggleClass('followed');
-						if ($btn.hasClass('followed')) {
-							$btn.text('Unfollow Employer');
-						} else {
-							$btn.text('Follow Employer');
-						}
-						// If in list, maybe remove or reload
-					}
-				}
-			});
-		});
 	});
 
 })(jQuery);
