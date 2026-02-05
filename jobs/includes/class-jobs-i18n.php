@@ -50,12 +50,19 @@ class Jobs_i18n {
 	public function set_locale( $locale ) {
 		if ( isset( $_GET['lang'] ) ) {
 			$lang = sanitize_text_field( $_GET['lang'] );
-			if ( $lang == 'ar' ) {
-				setcookie( 'jobs_lang', 'ar', time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
-				return 'ar';
-			} elseif ( $lang == 'en' ) {
-				setcookie( 'jobs_lang', 'en', time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
-				return 'en_US';
+			if ( $lang == 'ar' || $lang == 'en' ) {
+				setcookie( 'jobs_lang', $lang, time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN );
+				if ( is_user_logged_in() ) {
+					update_user_meta( get_current_user_id(), '_jobs_locale', ( $lang == 'ar' ? 'ar' : 'en_US' ) );
+				}
+				return ( $lang == 'ar' ? 'ar' : 'en_US' );
+			}
+		}
+
+		if ( is_user_logged_in() ) {
+			$user_locale = get_user_meta( get_current_user_id(), '_jobs_locale', true );
+			if ( $user_locale ) {
+				return $user_locale;
 			}
 		}
 

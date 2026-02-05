@@ -32,8 +32,21 @@ class Jobs_Activator {
 		self::register_post_types();
 		self::register_taxonomies();
 		self::preload_categories();
+		self::preload_job_types();
 		self::create_homepage();
+		self::setup_cron();
 		flush_rewrite_rules();
+	}
+
+	/**
+	 * Setup daily cron.
+	 *
+	 * @since    1.0.0
+	 */
+	private static function setup_cron() {
+		if ( ! wp_next_scheduled( 'jobs_daily_cron' ) ) {
+			wp_schedule_event( time(), 'daily', 'jobs_daily_cron' );
+		}
 	}
 
 	/**
@@ -131,6 +144,21 @@ class Jobs_Activator {
 	 * @since    1.0.0
 	 */
 	public static function register_taxonomies() {
+		// Job Type Taxonomy
+		register_taxonomy( 'job_type', array( 'job' ), array(
+			'hierarchical'      => true,
+			'labels'            => array(
+				'name'              => _x( 'Job Types', 'taxonomy general name', 'jobs' ),
+				'singular_name'     => _x( 'Job Type', 'taxonomy singular name', 'jobs' ),
+				'menu_name'         => __( 'Job Types', 'jobs' ),
+			),
+			'show_ui'           => true,
+			'show_admin_column' => true,
+			'query_var'         => true,
+			'rewrite'           => array( 'slug' => 'job-type' ),
+		) );
+
+		// Job Category Taxonomy
 		register_taxonomy( 'job_category', array( 'job' ), array(
 			'hierarchical'      => true,
 			'labels'            => array(
@@ -151,6 +179,18 @@ class Jobs_Activator {
 			'query_var'         => true,
 			'rewrite'           => array( 'slug' => 'job-category' ),
 		) );
+	}
+
+	/**
+	 * Preload Job Types.
+	 *
+	 * @since    1.0.0
+	 */
+	private static function preload_job_types() {
+		$types = array( 'Full-time', 'Part-time', 'Freelance', 'Contract', 'Internship', 'Remote' );
+		foreach ( $types as $type ) {
+			wp_insert_term( $type, 'job_type' );
+		}
 	}
 
 	/**
@@ -285,24 +325,51 @@ class Jobs_Activator {
 	 * @since    1.0.0
 	 */
 	private static function create_homepage() {
+		// Jobs Home
 		$page_title = 'Jobs';
 		$page_content = '[jobs_search_engine]';
 		$page_check = get_page_by_title( $page_title );
 
-		$new_page = array(
-			'post_type'    => 'page',
-			'post_title'   => $page_title,
-			'post_content' => $page_content,
-			'post_status'  => 'publish',
-			'post_author'  => 1,
-		);
-
 		if ( ! isset( $page_check->ID ) ) {
-			$new_page_id = wp_insert_post( $new_page );
+			$new_page_id = wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $page_title,
+				'post_content' => $page_content,
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+			) );
 			if ( $new_page_id ) {
 				update_option( 'show_on_front', 'page' );
 				update_option( 'page_on_front', $new_page_id );
 			}
+		}
+
+		// Jobs Dashboard
+		$dash_title = 'Jobs Dashboard';
+		$dash_check = get_page_by_title( $dash_title );
+		if ( ! isset( $dash_check->ID ) ) {
+			wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $dash_title,
+				'post_content' => '[jobs_dashboard]',
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+				'post_name'    => 'jobs-dashboard',
+			) );
+		}
+
+		// Jobs Settings
+		$settings_title = 'Jobs Settings';
+		$settings_check = get_page_by_title( $settings_title );
+		if ( ! isset( $settings_check->ID ) ) {
+			wp_insert_post( array(
+				'post_type'    => 'page',
+				'post_title'   => $settings_title,
+				'post_content' => '[jobs_settings]',
+				'post_status'  => 'publish',
+				'post_author'  => 1,
+				'post_name'    => 'jobs-settings',
+			) );
 		}
 	}
 

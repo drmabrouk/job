@@ -3,10 +3,12 @@
  * Employer Dashboard
  */
 $user_id = get_current_user_id();
+$layout = get_user_meta( $user_id, '_jobs_dash_layout', true ) ?: 'grid';
 $jobs = new WP_Query( array(
 	'post_type' => 'job',
 	'author'    => $user_id,
 	'posts_per_page' => -1,
+	'post_status' => array( 'publish', 'draft', 'pending' ),
 ) );
 
 $total_apps = 0;
@@ -25,7 +27,7 @@ if ( $jobs->have_posts() ) {
 	}
 }
 ?>
-<div class="jobs-dashboard employer-dashboard">
+<div class="jobs-dashboard employer-dashboard layout-<?php echo $layout; ?>">
 	<h1><?php _e( 'Employer Dashboard', 'jobs' ); ?></h1>
 	<div class="dashboard-stats">
 		<div class="stat-box">
@@ -35,6 +37,12 @@ if ( $jobs->have_posts() ) {
 		<div class="stat-box">
 			<h3><?php _e( 'Total Applications', 'jobs' ); ?></h3>
 			<p><?php echo $total_apps; ?></p>
+			<div class="mini-bar-chart">
+				<div class="bar" style="height: 40%;"></div>
+				<div class="bar" style="height: 70%;"></div>
+				<div class="bar" style="height: 50%;"></div>
+				<div class="bar" style="height: 90%;"></div>
+			</div>
 		</div>
 	</div>
 	<div class="dashboard-content">
@@ -53,7 +61,17 @@ if ( $jobs->have_posts() ) {
 						<tr>
 							<td><?php echo get_the_title(); ?></td>
 							<td><?php echo get_the_date(); ?></td>
-							<td><?php echo get_post_status(); ?></td>
+							<td>
+								<span class="status-badge status-<?php echo get_post_status(); ?>"><?php echo get_post_status(); ?></span>
+								<br><small><?php _e( 'Expires:', 'jobs' ); ?> <?php echo get_post_meta( get_the_ID(), '_jobs_expiration_date', true ) ?: 'N/A'; ?></small>
+							</td>
+							<td>
+								<?php if ( get_post_status() == 'draft' ) : ?>
+									<button class="button reactivate-job" data-id="<?php the_ID(); ?>"><?php _e( 'Reactivate', 'jobs' ); ?></button>
+								<?php elseif ( get_post_status() == 'publish' ) : ?>
+									<button class="button extend-job" data-id="<?php the_ID(); ?>"><?php _e( 'Extend', 'jobs' ); ?></button>
+								<?php endif; ?>
+							</td>
 						</tr>
 					<?php endwhile; wp_reset_postdata(); ?>
 				</tbody>

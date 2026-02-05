@@ -31,6 +31,15 @@
 					<option value="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></option>
 				<?php endforeach; ?>
 			</select>
+			<?php
+			$types = get_terms( array( 'taxonomy' => 'job_type', 'hide_empty' => false ) );
+			?>
+			<select id="jobs-type-select" class="jobs-filter-select">
+				<option value=""><?php _e( 'All Types', 'jobs' ); ?></option>
+				<?php foreach ( $types as $type ) : ?>
+					<option value="<?php echo esc_attr( $type->slug ); ?>"><?php echo esc_html( $type->name ); ?></option>
+				<?php endforeach; ?>
+			</select>
 			<select id="jobs-country-select" class="jobs-filter-select">
 				<option value=""><?php _e( 'Select Country', 'jobs' ); ?></option>
 				<option value="USA">USA</option>
@@ -42,6 +51,16 @@
 			<select id="jobs-state-select" class="jobs-filter-select" disabled>
 				<option value=""><?php _e( 'Select Country First', 'jobs' ); ?></option>
 			</select>
+		</div>
+		<div class="jobs-category-capsules" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+			<?php
+			$all_cats = get_terms( array( 'taxonomy' => 'job_category', 'number' => 12 ) );
+			foreach ( $all_cats as $cat ) :
+				$colors = array( '#E3F2FD', '#F1F8E9', '#FFFDE7', '#F3E5F5', '#E8EAF6', '#FBE9E7' );
+				$bg = $colors[array_rand($colors)];
+			?>
+				<span class="job-capsule" style="background-color: <?php echo $bg; ?>;"><?php echo esc_html( $cat->name ); ?></span>
+			<?php endforeach; ?>
 		</div>
 	</div>
 
@@ -58,7 +77,8 @@
 		$args = array(
 			'post_type'      => 'job',
 			'post_status'    => 'publish',
-			'posts_per_page' => 12,
+			'posts_per_page' => 10,
+			'orderby'        => 'rand',
 		);
 		$query = new WP_Query( $args );
 
@@ -84,5 +104,10 @@
 	<div class="jobs-ad-zone jobs-ad-bottom">
 		<?php echo $ad_bottom; ?>
 	</div>
+	<?php endif; ?>
+
+	<?php if ( is_user_logged_in() ) : ?>
+		<hr>
+		<?php include plugin_dir_path( __FILE__ ) . 'jobs-recommendations.php'; ?>
 	<?php endif; ?>
 </div>

@@ -110,6 +110,30 @@ class Jobs_Public {
 			echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
 			echo '<meta property="og:type" content="article" />' . "\n";
 			echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . '" />' . "\n";
+
+			// Schema.org JobPosting JSON-LD
+			$schema = array(
+				'@context' => 'https://schema.org/',
+				'@type'    => 'JobPosting',
+				'title'    => get_the_title(),
+				'description' => wp_kses_post( $post->post_content ),
+				'datePosted'  => get_the_date( 'c' ),
+				'validThrough' => get_post_meta( get_the_ID(), '_jobs_expiration_date', true ),
+				'hiringOrganization' => array(
+					'@type' => 'Organization',
+					'name'  => get_the_author_meta( 'display_name' ),
+					'sameAs' => home_url(),
+				),
+				'jobLocation' => array(
+					'@type' => 'Place',
+					'address' => array(
+						'@type' => 'PostalAddress',
+						'addressLocality' => get_post_meta( get_the_ID(), '_job_state', true ),
+						'addressCountry' => get_post_meta( get_the_ID(), '_job_country', true ),
+					),
+				),
+			);
+			echo '<script type="application/ld+json">' . json_encode( $schema ) . '</script>' . "\n";
 		}
 	}
 
@@ -128,6 +152,27 @@ class Jobs_Public {
 			}
 			if ( $ad_bottom ) {
 				$content .= '<div class="jobs-ad-zone jobs-ad-inline-bottom">' . $ad_bottom . '</div>';
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 * Add follow employer button to single job content.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_follow_employer_button( $content ) {
+		if ( is_singular( 'job' ) && is_main_query() ) {
+			$employer_id = get_post_field( 'post_author', get_the_ID() );
+			if ( is_user_logged_in() ) {
+				$following = get_user_meta( get_current_user_id(), '_jobs_followed_employers', true ) ?: array();
+				$is_following = in_array( $employer_id, $following );
+				$text = $is_following ? __( 'Unfollow Employer', 'jobs' ) : __( 'Follow Employer', 'jobs' );
+				$class = $is_following ? 'followed' : '';
+
+				$btn = '<div class="follow-employer-section"><button class="button follow-employer-btn ' . $class . '" data-id="' . $employer_id . '">' . $text . '</button></div>';
+				$content = $btn . $content;
 			}
 		}
 		return $content;
@@ -158,6 +203,199 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Daily cron task to expire jobs.
+	 *
+	 * @since    1.0.0
+	 */
+	public function check_job_expirations() {
+		$args = array(
+			'post_type'      => 'job',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+		);
+		$query = new WP_Query( $args );
+
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				$job_id = get_the_ID();
+				$expiration = get_post_meta( $job_id, '_jobs_expiration_date', true );
+
+				if ( ! $expiration ) {
+					// Set default if not exists: 50 days from publish
+					$publish_date = get_the_date( 'Y-m-d H:i:s', $job_id );
+					$expiration = date( 'Y-m-d H:i:s', strtotime( $publish_date . ' + 50 days' ) );
+					update_post_meta( $job_id, '_jobs_expiration_date', $expiration );
+				}
+
+				if ( strtotime( $expiration ) < time() ) {
+					// Expire job: move to draft/archive
+					wp_update_post( array(
+						'ID'          => $job_id,
+						'post_status' => 'draft', // Personal archive
+					) );
+
+					// Notify employer
+					$author_id = get_post_field( 'post_author', $job_id );
+					$notifs = get_user_meta( $author_id, '_jobs_notifications', true ) ?: array();
+					$notifs[] = array(
+						'message' => sprintf( __( 'Your job listing "%s" has expired and moved to your archive.', 'jobs' ), get_the_title($job_id) ),
+						'time'    => time(),
+					);
+					update_user_meta( $author_id, '_jobs_notifications', $notifs );
+				}
+			}
+			wp_reset_postdata();
+		}
+	}
+
+	/**
+	 * AJAX handler to reactivate a job.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_reactivate_job() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		$job_id = isset( $_POST['job_id'] ) ? intval( $_POST['job_id'] ) : 0;
+
+		if ( $job_id && get_post_field( 'post_author', $job_id ) == get_current_user_id() ) {
+			wp_update_post( array(
+				'ID'          => $job_id,
+				'post_status' => 'publish',
+			) );
+			// Reset expiration to 50 days from now
+			$new_expiration = date( 'Y-m-d H:i:s', strtotime( '+ 50 days' ) );
+			update_post_meta( $job_id, '_jobs_expiration_date', $new_expiration );
+			wp_send_json_success( __( 'Job reactivated successfully.', 'jobs' ) );
+		}
+		wp_send_json_error( __( 'Failed to reactivate job.', 'jobs' ) );
+	}
+
+	/**
+	 * AJAX handler to extend a job.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_extend_job() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		$job_id = isset( $_POST['job_id'] ) ? intval( $_POST['job_id'] ) : 0;
+
+		if ( $job_id && get_post_field( 'post_author', $job_id ) == get_current_user_id() ) {
+			$current_expiration = get_post_meta( $job_id, '_jobs_expiration_date', true );
+			$max_expiration = date( 'Y-m-d H:i:s', strtotime( get_the_date( 'Y-m-d H:i:s', $job_id ) . ' + 1 year' ) );
+
+			$new_expiration = date( 'Y-m-d H:i:s', strtotime( $current_expiration . ' + 30 days' ) );
+
+			if ( strtotime( $new_expiration ) > strtotime( $max_expiration ) ) {
+				$new_expiration = $max_expiration;
+			}
+
+			update_post_meta( $job_id, '_jobs_expiration_date', $new_expiration );
+			wp_send_json_success( sprintf( __( 'Job extended until %s.', 'jobs' ), $new_expiration ) );
+		}
+		wp_send_json_error( __( 'Failed to extend job.', 'jobs' ) );
+	}
+
+	/**
+	 * AJAX handler to save a job.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_save_job() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		if ( ! is_user_logged_in() ) wp_send_json_error( __( 'Login required.', 'jobs' ) );
+
+		$user_id = get_current_user_id();
+		$job_id = isset( $_POST['job_id'] ) ? intval( $_POST['job_id'] ) : 0;
+		$saved = get_user_meta( $user_id, '_jobs_saved_jobs', true ) ?: array();
+
+		if ( ! in_array( $job_id, $saved ) ) {
+			$saved[] = $job_id;
+			update_user_meta( $user_id, '_jobs_saved_jobs', $saved );
+			$this->log_activity( $user_id, 'Saved job: ' . get_the_title($job_id) );
+			wp_send_json_success( __( 'Job saved.', 'jobs' ) );
+		} else {
+			$saved = array_diff( $saved, array($job_id) );
+			update_user_meta( $user_id, '_jobs_saved_jobs', $saved );
+			wp_send_json_success( __( 'Job removed from saved.', 'jobs' ) );
+		}
+		wp_die();
+	}
+
+	/**
+	 * AJAX handler to follow an employer.
+	 *
+	 * @since    1.0.0
+	 */
+	/**
+	 * AJAX handler to check for new notifications.
+	 *
+	 * @since    1.0.0
+	 */
+	public function ajax_check_notifications() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		if ( ! is_user_logged_in() ) wp_send_json_error();
+
+		$user_id = get_current_user_id();
+		$notifications = get_user_meta( $user_id, '_jobs_notifications', true ) ?: array();
+
+		$unread_count = 0;
+		foreach ( $notifications as $notif ) {
+			if ( ! isset( $notif['read'] ) || ! $notif['read'] ) {
+				$unread_count++;
+			}
+		}
+
+		wp_send_json_success( array( 'unread_count' => $unread_count ) );
+		wp_die();
+	}
+
+	public function ajax_follow_employer() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+		if ( ! is_user_logged_in() ) wp_send_json_error( __( 'Login required.', 'jobs' ) );
+
+		$user_id = get_current_user_id();
+		$employer_id = isset( $_POST['employer_id'] ) ? intval( $_POST['employer_id'] ) : 0;
+		$following = get_user_meta( $user_id, '_jobs_followed_employers', true ) ?: array();
+
+		if ( ! in_array( $employer_id, $following ) ) {
+			$following[] = $employer_id;
+			update_user_meta( $user_id, '_jobs_followed_employers', $following );
+			$emp = get_userdata($employer_id);
+			$this->log_activity( $user_id, 'Followed employer: ' . ($emp ? $emp->display_name : 'ID '.$employer_id) );
+			wp_send_json_success( __( 'Employer followed.', 'jobs' ) );
+		} else {
+			$following = array_diff( $following, array($employer_id) );
+			update_user_meta( $user_id, '_jobs_followed_employers', $following );
+			wp_send_json_success( __( 'Employer unfollowed.', 'jobs' ) );
+		}
+		wp_die();
+	}
+
+	/**
+	 * Notify followers when a new job is posted.
+	 *
+	 * @since    1.0.0
+	 */
+	public function notify_followers_new_job( $post_id, $post, $update ) {
+		if ( $update || $post->post_type !== 'job' || $post->post_status !== 'publish' ) return;
+
+		$employer_id = $post->post_author;
+		$users = get_users(); // Simple way for this task, usually should be optimized
+		foreach ( $users as $user ) {
+			$following = get_user_meta( $user->ID, '_jobs_followed_employers', true ) ?: array();
+			if ( in_array( $employer_id, $following ) ) {
+				$notifs = get_user_meta( $user->ID, '_jobs_notifications', true ) ?: array();
+				$notifs[] = array(
+					'message' => sprintf( __( 'New job posted by followed employer: %s', 'jobs' ), $post->post_title ),
+					'time'    => time(),
+				);
+				update_user_meta( $user->ID, '_jobs_notifications', $notifs );
+			}
+		}
+	}
+
+	/**
 	 * AJAX handler for job search.
 	 *
 	 * @since    1.0.0
@@ -167,8 +405,24 @@ class Jobs_Public {
 
 		$keyword  = isset( $_POST['keyword'] ) ? sanitize_text_field( $_POST['keyword'] ) : '';
 		$category = isset( $_POST['category'] ) ? sanitize_text_field( $_POST['category'] ) : '';
+		$type     = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : '';
 		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
+
+		// Track user history for recommendations
+		if ( is_user_logged_in() ) {
+			$user_id = get_current_user_id();
+			$history = get_user_meta( $user_id, '_jobs_search_history', true ) ?: array();
+			if ( ! empty( $category ) ) {
+				$history[] = array( 'type' => 'category', 'value' => $category, 'time' => time() );
+			}
+			if ( ! empty( $keyword ) ) {
+				$history[] = array( 'type' => 'keyword', 'value' => $keyword, 'time' => time() );
+			}
+			// Keep only last 20
+			$history = array_slice( $history, -20 );
+			update_user_meta( $user_id, '_jobs_search_history', $history );
+		}
 
 		$args = array(
 			'post_type'      => 'job',
@@ -184,6 +438,14 @@ class Jobs_Public {
 				'taxonomy' => 'job_category',
 				'field'    => 'slug',
 				'terms'    => $category,
+			);
+		}
+
+		if ( ! empty( $type ) ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'job_type',
+				'field'    => 'slug',
+				'terms'    => $type,
 			);
 		}
 
@@ -216,7 +478,22 @@ class Jobs_Public {
 
 		$output = ob_get_clean();
 
-		wp_send_json_success( $output );
+		// Get category specific ad if available
+		$category_ad = '';
+		if ( ! empty( $category ) ) {
+			$term = get_term_by( 'slug', $category, 'job_category' );
+			if ( $term ) {
+				$cat_ads = get_option( 'jobs_category_ads', array() );
+				if ( isset( $cat_ads[$term->term_id] ) && ! empty( $cat_ads[$term->term_id] ) ) {
+					$category_ad = $cat_ads[$term->term_id];
+				}
+			}
+		}
+
+		wp_send_json_success( array(
+			'html' => $output,
+			'category_ad' => $category_ad
+		) );
 		wp_die();
 	}
 
@@ -245,6 +522,7 @@ class Jobs_Public {
 					</div>
 					<div class="jobs-nav-links">
 						<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><?php _e( 'Dashboard', 'jobs' ); ?></a>
+						<a href="<?php echo home_url( '/jobs-settings' ); ?>"><?php _e( 'Settings', 'jobs' ); ?></a>
 						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
 						<a href="<?php echo wp_logout_url( home_url() ); ?>"><?php _e( 'Logout', 'jobs' ); ?></a>
 					</div>
@@ -264,6 +542,24 @@ class Jobs_Public {
 			wp_redirect( wp_login_url( home_url( '/jobs-dashboard' ) ) );
 			exit;
 		}
+
+		if ( get_query_var( 'job_seeker_profile' ) ) {
+			include plugin_dir_path( __FILE__ ) . 'partials/jobs-public-profile.php';
+			exit;
+		}
+	}
+
+	/**
+	 * Add custom rewrite rules.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_rewrite_rules() {
+		add_rewrite_rule( '^job-seeker/([^/]+)/?', 'index.php?job_seeker_profile=$matches[1]', 'top' );
+		add_filter( 'query_vars', function( $vars ) {
+			$vars[] = 'job_seeker_profile';
+			return $vars;
+		} );
 	}
 
 	/**
@@ -311,29 +607,23 @@ class Jobs_Public {
 			return $this->shortcode_jobs_login( array() );
 		}
 
-		$user = wp_get_current_user();
-		$role = ( array ) $user->roles;
-		$role = $role[0];
+		ob_start();
+		include plugin_dir_path( __FILE__ ) . 'partials/jobs-account-wrapper.php';
+		return ob_get_clean();
+	}
+
+	/**
+	 * Settings shortcode.
+	 *
+	 * @since    1.0.0
+	 */
+	public function shortcode_jobs_settings() {
+		if ( ! is_user_logged_in() ) {
+			return $this->shortcode_jobs_login( array() );
+		}
 
 		ob_start();
-		switch ( $role ) {
-			case 'job_seeker':
-				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-seeker.php';
-				break;
-			case 'employer':
-				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-employer.php';
-				break;
-			case 'job_reviewer':
-				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-reviewer.php';
-				break;
-			case 'system_administrator':
-			case 'administrator':
-				include plugin_dir_path( __FILE__ ) . 'partials/jobs-dashboard-admin.php';
-				break;
-			default:
-				echo '<p>' . __( 'You do not have a dashboard assigned.', 'jobs' ) . '</p>';
-				break;
-		}
+		include plugin_dir_path( __FILE__ ) . 'partials/jobs-settings-panel.php';
 		return ob_get_clean();
 	}
 
@@ -391,6 +681,30 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Log login activity.
+	 *
+	 * @since    1.0.0
+	 */
+	public function log_login_activity( $user_login, $user ) {
+		$this->log_activity( $user->ID, 'User logged in' );
+	}
+
+	/**
+	 * Log user activity.
+	 *
+	 * @since    1.0.0
+	 */
+	public function log_activity( $user_id, $action ) {
+		$logs = get_user_meta( $user_id, '_jobs_activity_log', true ) ?: array();
+		$logs[] = array(
+			'action' => $action,
+			'time'   => time(),
+			'ip'     => $_SERVER['REMOTE_ADDR']
+		);
+		update_user_meta( $user_id, '_jobs_activity_log', array_slice( $logs, -50 ) );
+	}
+
+	/**
 	 * Language switcher shortcode.
 	 *
 	 * @since    1.0.0
@@ -427,6 +741,9 @@ class Jobs_Public {
 		if ( is_wp_error( $user_id ) ) {
 			wp_die( $user_id->get_error_message() );
 		}
+
+		// Log activity
+		$this->log_activity( $user_id, 'Account created' );
 
 		// Set role
 		$user = new WP_User( $user_id );
