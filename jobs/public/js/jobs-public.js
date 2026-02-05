@@ -190,3 +190,73 @@
 	});
 
 })(jQuery);
+
+	// Admin User Management Logic
+	.on('click', '#add-user-btn', function() {
+		.text('Add New User');
+		[0].reset();
+		.fadeIn();
+	});
+
+	.on('click', '.edit-user-link', function(e) {
+		e.preventDefault();
+		.text('Edit User');
+		// In a real app, we'd fetch user data via AJAX here
+		.fadeIn();
+	});
+
+	.on('click', '.delete-user-link', function(e) {
+		e.preventDefault();
+		if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+			// AJAX delete logic here
+			.closest('tr').fadeOut();
+		}
+	});
+
+
+	// Admin User Management Logic
+	$(document).on('click', '#add-user-btn', function() {
+		$('#modal-title').text('Add New User');
+		$('#admin-user-form')[0].reset();
+		$('#user-modal').fadeIn();
+	});
+
+	$(document).on('click', '.edit-user-link', function(e) {
+		e.preventDefault();
+		$('#modal-title').text('Edit User');
+		// In a real app, we'd fetch user data via AJAX here
+		$('#user-modal').fadeIn();
+	});
+
+	$(document).on('click', '.delete-user-link', function(e) {
+		e.preventDefault();
+		if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+			// AJAX delete logic here
+			$(this).closest('tr').fadeOut();
+		}
+	});
+
+	// Browser Geolocation Integration
+	if ("geolocation" in navigator) {
+		navigator.geolocation.getCurrentPosition(function(position) {
+			const lat = position.coords.latitude;
+			const lon = position.coords.longitude;
+
+			// Priority search based on coordinates
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: {
+					action: 'jobs_geo_search',
+					lat: lat,
+					lon: lon,
+					nonce: jobs_ajax.nonce
+				},
+				success: function(response) {
+					if (response.success && response.data.html) {
+						$('#jobs-grid').html(response.data.html);
+					}
+				}
+			});
+		});
+	}

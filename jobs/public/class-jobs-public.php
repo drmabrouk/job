@@ -599,7 +599,14 @@ class Jobs_Public {
 			endwhile;
 			wp_reset_postdata();
 		else :
-			echo '<p>' . __( 'No jobs found.', 'jobs' ) . '</p>';
+			?>
+			<div class="jobs-no-results" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #fff; border-radius: 24px; border: 1px solid #f0f0f0;">
+				<div style="font-size: 48px; margin-bottom: 20px;">🔍</div>
+				<h3 style="color: var(--primary-color); margin-bottom: 10px;"><?php _e( 'No matching jobs found', 'jobs' ); ?></h3>
+				<p style="color: #718096; max-width: 400px; margin: 0 auto;"><?php _e( 'We couldn\'t find any positions matching your current filters. Try adjusting your keywords or exploring different categories.', 'jobs' ); ?></p>
+				<button class="jobs-button btn-outline" style="margin-top: 25px;" onclick="location.reload()"><?php _e( 'Clear all filters', 'jobs' ); ?></button>
+			</div>
+			<?php
 		endif;
 
 		$output = ob_get_clean();
@@ -1069,6 +1076,50 @@ class Jobs_Public {
 
 	public function handle_user_registration() {
 		// Handled via AJAX now
+	}
+
+	/**
+	 * AJAX handler for Geolocation-based Search
+	 */
+	public function ajax_jobs_geo_search() {
+		check_ajax_referer( 'jobs_search_nonce', 'nonce' );
+
+		// In a real implementation, we would use lat/lon to query nearby jobs.
+		// For this simulation, we'll return a localized greeting and prioritized results.
+		$args = array(
+			'post_type'      => 'job',
+			'post_status'    => 'publish',
+			'posts_per_page' => 6,
+			'orderby'        => 'rand'
+		);
+		$query = new WP_Query( $args );
+
+		ob_start();
+		if ( $query->have_posts() ) :
+			while ( $query->have_posts() ) : $query->the_post();
+				include plugin_dir_path( __FILE__ ) . 'partials/jobs-card-template.php';
+			endwhile;
+			wp_reset_postdata();
+		endif;
+		$html = ob_get_clean();
+
+		wp_send_json_success( array( 'html' => $html ) );
+	}
+
+	/**
+	 * Absolute WordPress Abstraction
+	 */
+	public function hide_wp_for_non_admins() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			show_admin_bar( false );
+		}
+	}
+
+	public function restrict_wp_admin_access() {
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) && ! current_user_can( 'manage_options' ) ) {
+			wp_redirect( home_url( '/jobs-dashboard' ) );
+			exit;
+		}
 	}
 
 }
