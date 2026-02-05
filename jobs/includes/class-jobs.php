@@ -182,6 +182,8 @@ class Jobs {
 		$plugin_public = new Jobs_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'init', $plugin_public, 'add_rewrite_rules' );
+		$this->loader->add_action( 'after_setup_theme', $plugin_public, 'hide_wp_for_non_admins' );
+		$this->loader->add_action( 'admin_init', $plugin_public, 'restrict_wp_admin_access' );
 		$this->loader->add_action( 'jobs_daily_cron', $plugin_public, 'check_job_expirations' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
@@ -192,6 +194,8 @@ class Jobs {
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_application_form' );
 		$this->loader->add_action( 'wp_ajax_jobs_search', $plugin_public, 'ajax_jobs_search' );
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_search', $plugin_public, 'ajax_jobs_search' );
+		$this->loader->add_action( 'wp_ajax_jobs_geo_search', $plugin_public, 'ajax_jobs_geo_search' );
+		$this->loader->add_action( 'wp_ajax_nopriv_jobs_geo_search', $plugin_public, 'ajax_jobs_geo_search' );
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_ajax_nopriv_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_body_open', $plugin_public, 'add_custom_nav_bar' );

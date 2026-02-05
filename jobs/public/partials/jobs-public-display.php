@@ -31,23 +31,14 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 					<input type="text" id="jobs-search-input" class="jobs-search-input-modern" placeholder="<?php _e( 'Job title or profession...', 'jobs' ); ?>" style="width: 100%; text-align: center; padding: 20px; font-size: 20px; border: 1px solid #e2e8f0; border-radius: 12px;" />
 				</div>
 
-				<div class="search-filters-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 30px;">
+				<div class="search-filters-row" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 30px;">
 					<div class="filter-col">
 						<select id="jobs-category-select" class="jobs-filter-select-modern">
-							<option value=""><?php _e( 'Select Category', 'jobs' ); ?></option>
+							<option value=""><?php _e( 'Select Specialization', 'jobs' ); ?></option>
 							<?php
 							$categories = get_terms( array( 'taxonomy' => 'job_category', 'hide_empty' => false, 'parent' => 0 ) );
 							foreach ( $categories as $cat ) : ?>
 								<option value="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></option>
-							<?php endforeach; ?>
-						</select>
-					</div>
-					<div class="filter-col">
-						<?php $types = get_terms( array( 'taxonomy' => 'job_type', 'hide_empty' => false ) ); ?>
-						<select id="jobs-type-select" class="jobs-filter-select-modern">
-							<option value=""><?php _e( 'Specialization/Type', 'jobs' ); ?></option>
-							<?php foreach ( $types as $type ) : ?>
-								<option value="<?php echo esc_attr( $type->slug ); ?>"><?php echo esc_html( $type->name ); ?></option>
 							<?php endforeach; ?>
 						</select>
 					</div>

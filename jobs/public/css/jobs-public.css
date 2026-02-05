@@ -1106,12 +1106,14 @@ body.rtl .notification-item {
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 
-.jobs-account-main {
+.jobs-account-main,
+.account-main {
     flex: 1;
-    background: #fff;
+    background: transparent !important;
     padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 .user-profile-summary {
@@ -1503,4 +1505,28 @@ body.rtl .auth-box {
 
 body.rtl .form-footer-actions {
     flex-direction: row-reverse;
+}
+
+
+/* Absolute Borderless Dashboard */
+.account-main,
+.account-body,
+.jobs-tab-content,
+.jobs-dashboard,
+.seeker-dashboard,
+.employer-dashboard,
+.admin-dashboard-advanced,
+.reviewer-dashboard,
+.account-section {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.jobs-tab-content {
+    max-width: 100% !important; /* Wider and more spacious */
+}
+
+.account-body {
+    padding: 0 40px 40px 40px !important;
 }

@@ -99,30 +99,9 @@ $admin_tab = isset($_GET['admin_tab']) ? sanitize_text_field($_GET['admin_tab'])
 			</table>
 		</div>
 
-	<?php elseif ( $admin_tab == 'users' ) : ?>
-		<div class="admin-table-wrapper">
-			<h3><?php _e( 'Platform Users', 'jobs' ); ?></h3>
-			<table class="jobs-table">
-				<thead>
-					<tr>
-						<th><?php _e( 'Name', 'jobs' ); ?></th>
-						<th><?php _e( 'Email', 'jobs' ); ?></th>
-						<th><?php _e( 'Role', 'jobs' ); ?></th>
-						<th><?php _e( 'Actions', 'jobs' ); ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php foreach ( get_users( array( 'number' => 20 ) ) as $u ) : ?>
-						<tr>
-							<td><?php echo esc_html($u->display_name); ?></td>
-							<td><?php echo esc_html($u->user_email); ?></td>
-							<td><?php echo implode(', ', $u->roles); ?></td>
-							<td><a href="<?php echo get_edit_user_link($u->ID); ?>"><?php _e( 'Edit', 'jobs' ); ?></a></td>
-						</tr>
-					<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
+	<?php elseif ( $admin_tab == 'users' ) :
+		include plugin_dir_path(__FILE__) . 'jobs-admin-users.php';
+	?>
 
 	<?php elseif ( $admin_tab == 'locations' ) :
 		include plugin_dir_path(__FILE__) . 'jobs-admin-locations.php';
