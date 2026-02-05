@@ -403,6 +403,12 @@ class Jobs_Public {
 		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
 
+		// If no country selected, try geolocation for prioritization
+		$geo_country = '';
+		if ( empty( $country ) ) {
+			$geo_country = $this->get_user_country_by_ip();
+		}
+
 		// Track user history for recommendations
 		if ( is_user_logged_in() ) {
 			$user_id = get_current_user_id();
@@ -426,6 +432,26 @@ class Jobs_Public {
 			'meta_query'     => array(),
 			'tax_query'      => array(),
 		);
+
+		// Prioritization logic: if geo_country is found, we might want to sort or filter.
+		// For simplicity, we'll add it to the meta query as a "soft" preference if nothing else is selected.
+		if ( ! empty( $geo_country ) && empty( $country ) && empty( $keyword ) ) {
+			// This is just for initial load / empty search prioritization
+			$args['meta_query']['relation'] = 'OR';
+			$args['meta_query'][] = array(
+				'key' => '_job_country',
+				'value' => $geo_country,
+				'compare' => '=',
+			);
+			$args['meta_query'][] = array(
+				'key' => '_job_country',
+				'compare' => 'EXISTS',
+			);
+			$args['orderby'] = array(
+				'meta_value' => 'DESC',
+				'date' => 'DESC',
+			);
+		}
 
 		if ( ! empty( $category ) ) {
 			$args['tax_query'][] = array(
@@ -497,29 +523,60 @@ class Jobs_Public {
 	 * @since    1.0.0
 	 */
 	public function add_custom_nav_bar() {
-		if ( ! is_user_logged_in() ) {
-			return;
-		}
-
 		$user = wp_get_current_user();
-		$role_names = get_option( 'jobs_role_names' );
-		$roles = ( array ) $user->roles;
-		$role_id = $roles[0];
-		$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst( str_replace( '_', ' ', $role_id ) );
+		$is_logged_in = is_user_logged_in();
 
 		?>
-		<nav class="jobs-top-nav">
-			<div class="jobs-container">
-				<div class="jobs-nav-content">
-					<div class="jobs-user-welcome">
-						<?php printf( __( 'Welcome, %s (%s)', 'jobs' ), '<strong>' . $user->display_name . '</strong>', $display_role ); ?>
+		<nav class="jobs-top-nav-modern">
+			<div class="jobs-container-nav">
+				<div class="jobs-nav-left">
+					<a href="<?php echo home_url(); ?>" class="nav-logo-link">
+						<?php if ( $logo_id = get_option( 'jobs_logo_id' ) ) : ?>
+							<?php echo wp_get_attachment_image( $logo_id, array(100, 40), false, array( 'class' => 'nav-logo-img' ) ); ?>
+						<?php else : ?>
+							<span class="nav-brand-text">Jobedia</span>
+						<?php endif; ?>
+					</a>
+					<div class="nav-main-links">
+						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
 					</div>
-					<div class="jobs-nav-links">
-						<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><?php _e( 'Dashboard', 'jobs' ); ?></a>
-						<a href="<?php echo home_url( '/jobs-settings' ); ?>"><?php _e( 'Settings', 'jobs' ); ?></a>
-						<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
-						<a href="<?php echo wp_logout_url( home_url() ); ?>"><?php _e( 'Logout', 'jobs' ); ?></a>
+				</div>
+
+				<div class="jobs-nav-right">
+					<div class="nav-lang-switcher">
+						<?php echo $this->shortcode_language_switcher(); ?>
 					</div>
+
+					<?php if ( $is_logged_in ) :
+						$role_names = get_option( 'jobs_role_names' );
+						$roles = ( array ) $user->roles;
+						$role_id = $roles[0];
+						$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst($role_id);
+					?>
+						<div class="nav-user-account">
+							<div class="nav-profile-trigger">
+								<?php echo get_avatar( $user->ID, 32 ); ?>
+								<span class="nav-user-name"><?php echo esc_html( $user->display_name ); ?></span>
+								<i class="dashicons dashicons-arrow-down-alt2"></i>
+							</div>
+							<div class="nav-account-dropdown">
+								<div class="dropdown-header">
+									<strong><?php echo esc_html( $user->display_name ); ?></strong>
+									<span class="role-badge"><?php echo esc_html( $display_role ); ?></span>
+								</div>
+								<ul>
+									<li><a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="dashicons dashicons-dashboard"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a></li>
+									<li><a href="<?php echo home_url( '/jobs-settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Settings', 'jobs' ); ?></a></li>
+									<li><a href="<?php echo wp_logout_url( home_url() ); ?>"><i class="dashicons dashicons-exit"></i> <?php _e( 'Logout', 'jobs' ); ?></a></li>
+								</ul>
+							</div>
+						</div>
+					<?php else : ?>
+						<div class="nav-auth-links">
+							<a href="<?php echo wp_login_url(); ?>" class="btn-login"><?php _e( 'Login', 'jobs' ); ?></a>
+							<a href="<?php echo wp_registration_url(); ?>" class="btn-register"><?php _e( 'Register', 'jobs' ); ?></a>
+						</div>
+					<?php endif; ?>
 				</div>
 			</div>
 		</nav>
@@ -669,6 +726,7 @@ class Jobs_Public {
 	 * @since    1.0.0
 	 */
 	public function shortcode_jobs_search_engine( $atts ) {
+		$geo_country = $this->get_user_country_by_ip();
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . 'partials/jobs-public-display.php';
 		return ob_get_clean();
@@ -721,6 +779,25 @@ class Jobs_Public {
 	 *
 	 * @since    1.0.0
 	 */
+	/**
+	 * Get user country by IP.
+	 *
+	 * @since    1.0.0
+	 */
+	private function get_user_country_by_ip() {
+		$ip = $_SERVER['REMOTE_ADDR'];
+		if ( $ip == '127.0.0.1' || $ip == '::1' ) return 'USA'; // Mock for local
+
+		$response = wp_remote_get( "http://ip-api.com/json/{$ip}" );
+		if ( ! is_wp_error( $response ) ) {
+			$body = json_decode( wp_remote_retrieve_body( $response ) );
+			if ( isset( $body->country ) ) {
+				return $body->country;
+			}
+		}
+		return '';
+	}
+
 	public function handle_user_registration() {
 		if ( ! isset( $_POST['jobs_nonce'] ) || ! wp_verify_nonce( $_POST['jobs_nonce'], 'jobs_register_nonce' ) ) {
 			wp_die( __( 'Security check failed.', 'jobs' ) );
