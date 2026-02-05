@@ -1,0 +1,20 @@
+#wpadminbar {
+    background: #1d3469;
+}
+.wp-core-ui .button-primary {
+    background: #1d3469;
+    border-color: #1d3469;
+}
+.wp-core-ui .button-primary:hover {
+    background: #2a4a94;
+    border-color: #2a4a94;
+}
+#adminmenu, #adminmenu .wp-submenu, #adminmenuback, #adminmenuwrap {
+    background-color: #1d3469;
+}
+#adminmenu .wp-has-current-submenu .wp-submenu, #adminmenu .wp-has-current-submenu.opensub .wp-submenu, #adminmenu .wp-submenu, #adminmenu a.wp-has-current-submenu:focus + .wp-submenu {
+    background: #15264d;
+}
+#adminmenu li.current a.menu-top, #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu, #adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head, #adminmenu li.wp-has-current-submenu.opensub > a.menu-top {
+    background: #15264d;
+}
