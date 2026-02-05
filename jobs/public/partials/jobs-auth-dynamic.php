@@ -17,6 +17,7 @@
 		<!-- Login Form -->
 		<form id="jobs-login-form" class="auth-form active">
 			<?php wp_nonce_field( 'jobs_auth_nonce', 'auth_nonce' ); ?>
+			<input type="hidden" name="redirect_to" value="<?php echo esc_url( isset($_GET['redirect_to']) ? $_GET['redirect_to'] : wp_get_referer() ); ?>">
 			<div class="form-group">
 				<label><?php _e( 'Username or Email', 'jobs' ); ?></label>
 				<input type="text" name="user_login" required placeholder="name@company.com">
