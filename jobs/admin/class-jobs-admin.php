@@ -246,10 +246,24 @@ class Jobs_Admin {
 				?>
 				<table class="form-table">
 					<tr valign="top">
-						<th scope="row"><?php _e( 'Google AdSense Code', 'jobs' ); ?></th>
+						<th scope="row"><?php _e( 'Top Ad Zone', 'jobs' ); ?></th>
 						<td>
-							<textarea name="jobs_adsense_code" rows="10" cols="50" class="large-text"><?php echo esc_textarea( get_option( 'jobs_adsense_code' ) ); ?></textarea>
-							<p class="description"><?php _e( 'Paste your AdSense ad code here. It will be displayed at the top of the job search engine.', 'jobs' ); ?></p>
+							<textarea name="jobs_ad_top" rows="5" cols="50" class="large-text"><?php echo esc_textarea( get_option( 'jobs_ad_top' ) ); ?></textarea>
+							<p class="description"><?php _e( 'Displays at the top of the search engine.', 'jobs' ); ?></p>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Bottom Ad Zone', 'jobs' ); ?></th>
+						<td>
+							<textarea name="jobs_ad_bottom" rows="5" cols="50" class="large-text"><?php echo esc_textarea( get_option( 'jobs_ad_bottom' ) ); ?></textarea>
+							<p class="description"><?php _e( 'Displays at the bottom of the job listings.', 'jobs' ); ?></p>
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Sidebar/Grid Ad Zone', 'jobs' ); ?></th>
+						<td>
+							<textarea name="jobs_ad_sidebar" rows="5" cols="50" class="large-text"><?php echo esc_textarea( get_option( 'jobs_ad_sidebar' ) ); ?></textarea>
+							<p class="description"><?php _e( 'Strategically placed within the layout for maximum visibility.', 'jobs' ); ?></p>
 						</td>
 					</tr>
 				</table>
@@ -296,6 +310,9 @@ class Jobs_Admin {
 	public function register_settings() {
 		register_setting( 'jobs_options', 'jobs_role_names' );
 		register_setting( 'jobs_options', 'jobs_adsense_code' );
+		register_setting( 'jobs_options', 'jobs_ad_top' );
+		register_setting( 'jobs_options', 'jobs_ad_bottom' );
+		register_setting( 'jobs_options', 'jobs_ad_sidebar' );
 		register_setting( 'jobs_options', 'jobs_default_status' );
 		register_setting( 'jobs_options', 'jobs_enable_notifications' );
 	}

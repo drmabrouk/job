@@ -291,6 +291,68 @@ body.rtl .job-meta .job-location {
     margin-left: 0;
 }
 
+/* Ad Zones */
+.jobs-ad-zone {
+    margin: 20px 0;
+    text-align: center;
+    overflow: hidden;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.jobs-ad-top, .jobs-ad-bottom {
+    width: 100%;
+    min-height: 90px;
+    background: #fdfdfd;
+    border: 1px dashed #eee;
+}
+
+.jobs-ad-sidebar {
+    max-width: 300px;
+    min-height: 250px;
+    margin-left: 20px;
+    background: #fdfdfd;
+    border: 1px dashed #eee;
+}
+
+body.rtl .jobs-ad-sidebar {
+    margin-left: 0;
+    margin-right: 20px;
+}
+
+.jobs-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.jobs-grid {
+    flex: 1;
+}
+
+@media (max-width: 1023px) {
+    .jobs-content-wrapper {
+        flex-direction: column;
+    }
+    .jobs-ad-sidebar {
+        max-width: 100%;
+        width: 100%;
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 20px;
+    }
+}
+
+.jobs-ad-inline-top {
+    margin-bottom: 30px;
+}
+
+.jobs-ad-inline-bottom {
+    margin-top: 30px;
+}
+
 /* Dashboard Styles */
 .jobs-dashboard {
     padding: 30px;

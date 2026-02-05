@@ -45,12 +45,13 @@
 		</div>
 	</div>
 
-	<?php if ( get_option( 'jobs_adsense_code' ) ) : ?>
-	<div class="jobs-adsense-top" style="margin-bottom: 30px; text-align: center;">
-		<?php echo get_option( 'jobs_adsense_code' ); ?>
+	<?php if ( $ad_top = get_option( 'jobs_ad_top' ) ?: get_option( 'jobs_adsense_code' ) ) : ?>
+	<div class="jobs-ad-zone jobs-ad-top">
+		<?php echo $ad_top; ?>
 	</div>
 	<?php endif; ?>
 
+	<div class="jobs-content-wrapper">
 	<div id="jobs-grid" class="jobs-grid">
 		<!-- Job cards will be loaded here via AJAX or initial load -->
 		<?php
@@ -71,4 +72,17 @@
 		endif;
 		?>
 	</div>
+
+	<?php if ( $ad_sidebar = get_option( 'jobs_ad_sidebar' ) ) : ?>
+	<aside class="jobs-ad-zone jobs-ad-sidebar">
+		<?php echo $ad_sidebar; ?>
+	</aside>
+	<?php endif; ?>
+	</div>
+
+	<?php if ( $ad_bottom = get_option( 'jobs_ad_bottom' ) ) : ?>
+	<div class="jobs-ad-zone jobs-ad-bottom">
+		<?php echo $ad_bottom; ?>
+	</div>
+	<?php endif; ?>
 </div>

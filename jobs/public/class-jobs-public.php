@@ -114,6 +114,26 @@ class Jobs_Public {
 	}
 
 	/**
+	 * Add ads to single job content.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_job_single_ads( $content ) {
+		if ( is_singular( 'job' ) && is_main_query() ) {
+			$ad_top = get_option( 'jobs_ad_top' );
+			$ad_bottom = get_option( 'jobs_ad_bottom' );
+
+			if ( $ad_top ) {
+				$content = '<div class="jobs-ad-zone jobs-ad-inline-top">' . $ad_top . '</div>' . $content;
+			}
+			if ( $ad_bottom ) {
+				$content .= '<div class="jobs-ad-zone jobs-ad-inline-bottom">' . $ad_bottom . '</div>';
+			}
+		}
+		return $content;
+	}
+
+	/**
 	 * AJAX handler to get states by country.
 	 *
 	 * @since    1.0.0
