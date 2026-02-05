@@ -138,6 +138,18 @@ class Jobs_Activator {
 			'supports'    => array( 'title', 'editor', 'custom-fields' ),
 			'menu_icon'   => 'dashicons-clipboard',
 		) );
+
+		// Messages CPT
+		register_post_type( 'jobs_message', array(
+			'labels' => array(
+				'name'          => __( 'Messages', 'jobs' ),
+				'singular_name' => __( 'Message', 'jobs' ),
+			),
+			'public'      => false,
+			'show_ui'     => true,
+			'supports'    => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'menu_icon'   => 'dashicons-email-alt',
+		) );
 	}
 
 	/**

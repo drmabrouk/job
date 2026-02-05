@@ -6,6 +6,9 @@ $user_id = get_current_user_id();
 
 $jobs_count = wp_count_posts( 'job' );
 $apps_count = wp_count_posts( 'application' );
+
+$profile_views = get_user_meta( $user_id, '_jobs_profile_views', true ) ?: array();
+$total_views = count($profile_views);
 ?>
 <div class="jobs-analytics-section">
 	<h2><?php _e( 'Reports & Analytics', 'jobs' ); ?></h2>
@@ -34,7 +37,11 @@ $apps_count = wp_count_posts( 'application' );
 		</div>
 
 		<div class="analytics-card" style="background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee;">
-			<h3><?php _e( 'System Performance', 'jobs' ); ?></h3>
+			<h3><?php _e( 'Your Performance', 'jobs' ); ?></h3>
+			<div class="stat-box" style="margin-top: 15px; background: var(--primary-light);">
+				<h3><?php _e( 'Profile Views', 'jobs' ); ?></h3>
+				<p><?php echo $total_views; ?></p>
+			</div>
 			<div class="performance-indicators" style="display: flex; justify-content: space-around; margin-top: 25px;">
 				<div class="indicator">
 					<div class="progress-ring" style="--percent: 75;">

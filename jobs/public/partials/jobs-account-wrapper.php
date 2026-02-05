@@ -33,6 +33,8 @@ $tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'overview';
 
 				<li class="<?php echo ($tab == 'notifications') ? 'active' : ''; ?>"><a href="<?php echo home_url('/jobs-dashboard?tab=notifications'); ?>"><i class="dashicons dashicons-bell"></i> <?php _e( 'Notifications', 'jobs' ); ?></a></li>
 
+				<li class="<?php echo ($tab == 'messages') ? 'active' : ''; ?>"><a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>"><i class="dashicons dashicons-email-alt"></i> <?php _e( 'Messages', 'jobs' ); ?></a></li>
+
 				<li class="<?php echo ($tab == 'analytics') ? 'active' : ''; ?>"><a href="<?php echo home_url('/jobs-dashboard?tab=analytics'); ?>"><i class="dashicons dashicons-chart-area"></i> <?php _e( 'Reports & Analytics', 'jobs' ); ?></a></li>
 
 				<?php if ( $role_id == 'employer' || $role_id == 'administrator' || $role_id == 'system_administrator' ) : ?>
@@ -56,13 +58,16 @@ $tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'overview';
 					include plugin_dir_path(__FILE__) . 'jobs-manage-applications.php';
 					break;
 				case 'cv':
-					include plugin_dir_path(__FILE__) . 'jobs-cv-manager.php';
+					include plugin_dir_path(__FILE__) . 'jobs-document-manager.php';
 					break;
 				case 'saved':
 					include plugin_dir_path(__FILE__) . 'jobs-saved-items.php';
 					break;
 				case 'notifications':
 					include plugin_dir_path(__FILE__) . 'jobs-notifications.php';
+					break;
+				case 'messages':
+					include plugin_dir_path(__FILE__) . 'jobs-messages.php';
 					break;
 				case 'analytics':
 					include plugin_dir_path(__FILE__) . 'jobs-frontend-analytics.php';

@@ -8,6 +8,23 @@ $privacy_pref = get_user_meta( $user->ID, '_jobs_privacy_pref', true ) ?: 'publi
 $profile_public = get_user_meta( $user->ID, '_jobs_profile_public', true ) ?: 'no';
 $profile_indexed = get_user_meta( $user->ID, '_jobs_profile_indexed', true ) ?: 'no';
 $dashboard_layout = get_user_meta( $user->ID, '_jobs_dash_layout', true ) ?: 'grid';
+$settings_view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'general';
+
+// Handle Password Change
+if ( isset( $_POST['jobs_change_password'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
+	if ( ! empty( $_POST['new_pass'] ) && $_POST['new_pass'] === $_POST['confirm_pass'] ) {
+		wp_set_password( $_POST['new_pass'], $user->ID );
+		echo '<div class="jobs-msg">' . __( 'Password changed successfully.', 'jobs' ) . '</div>';
+	} else {
+		echo '<div class="jobs-msg" style="background:#f8d7da; color:#721c24;">' . __( 'Passwords do not match.', 'jobs' ) . '</div>';
+	}
+}
+
+// Handle Logout from other devices
+if ( isset( $_POST['jobs_logout_others'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
+	wp_destroy_other_sessions();
+	echo '<div class="jobs-msg">' . __( 'Logged out from all other devices.', 'jobs' ) . '</div>';
+}
 
 if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['jobs_settings_nonce'], 'jobs_save_settings' ) ) {
 	update_user_meta( $user->ID, '_jobs_notif_pref', sanitize_text_field( $_POST['notif_pref'] ) );
@@ -24,7 +41,15 @@ if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['j
 }
 ?>
 <div class="jobs-settings-panel">
-	<h2><?php _e( 'Account Settings', 'jobs' ); ?></h2>
+	<div class="settings-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+		<h2><?php _e( 'Account Settings', 'jobs' ); ?></h2>
+		<div class="settings-nav">
+			<a href="?tab=settings&view=general" class="button <?php echo $settings_view == 'general' ? 'button-primary' : ''; ?>"><?php _e( 'General', 'jobs' ); ?></a>
+			<a href="?tab=settings&view=security" class="button <?php echo $settings_view == 'security' ? 'button-primary' : ''; ?>"><?php _e( 'Security', 'jobs' ); ?></a>
+		</div>
+	</div>
+
+	<?php if ( $settings_view == 'general' ) : ?>
 	<form method="post" action="">
 		<?php wp_nonce_field( 'jobs_save_settings', 'jobs_settings_nonce' ); ?>
 
@@ -98,4 +123,50 @@ if ( isset( $_POST['jobs_save_account_settings'] ) && wp_verify_nonce( $_POST['j
 			<input type="submit" name="jobs_save_account_settings" class="button button-primary" value="<?php _e( 'Save Settings', 'jobs' ); ?>">
 		</p>
 	</form>
+	<?php else : ?>
+		<div class="security-settings">
+			<div class="settings-group">
+				<h3><?php _e( 'Change Password', 'jobs' ); ?></h3>
+				<form method="post" class="jobs-frontend-form">
+					<?php wp_nonce_field( 'jobs_save_security', 'jobs_security_nonce' ); ?>
+					<p>
+						<label><?php _e( 'New Password', 'jobs' ); ?></label>
+						<input type="password" name="new_pass" required>
+					</p>
+					<p>
+						<label><?php _e( 'Confirm New Password', 'jobs' ); ?></label>
+						<input type="password" name="confirm_pass" required>
+					</p>
+					<input type="submit" name="jobs_change_password" class="button button-primary" value="<?php _e( 'Update Password', 'jobs' ); ?>">
+				</form>
+			</div>
+
+			<div class="settings-group">
+				<h3><?php _e( 'Active Sessions', 'jobs' ); ?></h3>
+				<p><?php _e( 'You are currently logged into this account on these devices:', 'jobs' ); ?></p>
+				<table class="jobs-table">
+					<thead>
+						<tr>
+							<th><?php _e( 'IP Address', 'jobs' ); ?></th>
+							<th><?php _e( 'Last Activity', 'jobs' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						$sessions = wp_get_all_sessions();
+						foreach ( $sessions as $session ) : ?>
+							<tr>
+								<td><?php echo esc_html($session['ip']); ?></td>
+								<td><?php echo date('M j, H:i', $session['login']); ?></td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+				<form method="post" style="margin-top: 20px;">
+					<?php wp_nonce_field( 'jobs_save_security', 'jobs_security_nonce' ); ?>
+					<input type="submit" name="jobs_logout_others" class="button" value="<?php _e( 'Logout from all other devices', 'jobs' ); ?>">
+				</form>
+			</div>
+		</div>
+	<?php endif; ?>
 </div>

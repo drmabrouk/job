@@ -188,6 +188,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_head', $plugin_public, 'add_seo_meta_tags' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_job_single_ads' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_follow_employer_button' );
+		$this->loader->add_filter( 'the_content', $plugin_public, 'add_application_form' );
 		$this->loader->add_action( 'wp_ajax_jobs_search', $plugin_public, 'ajax_jobs_search' );
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_search', $plugin_public, 'ajax_jobs_search' );
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
@@ -197,6 +198,7 @@ class Jobs {
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'handle_dashboard_redirection' );
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );
 		$this->loader->add_action( 'admin_post_nopriv_jobs_register_user', $plugin_public, 'handle_user_registration' );
+		$this->loader->add_action( 'admin_post_jobs_submit_application', $plugin_public, 'handle_application_submission' );
 		$this->loader->add_action( 'wp_ajax_reactivate_job', $plugin_public, 'ajax_reactivate_job' );
 		$this->loader->add_action( 'wp_ajax_extend_job', $plugin_public, 'ajax_extend_job' );
 		$this->loader->add_action( 'wp_ajax_save_job', $plugin_public, 'ajax_save_job' );
