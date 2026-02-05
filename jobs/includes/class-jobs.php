@@ -146,6 +146,7 @@ class Jobs {
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 		$this->loader->add_filter( 'locale', $plugin_i18n, 'set_locale' );
+		$this->loader->add_filter( 'gettext', $plugin_i18n, 'manual_arabic_translation', 10, 3 );
 
 	}
 
