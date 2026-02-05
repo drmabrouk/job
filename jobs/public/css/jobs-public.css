@@ -1413,3 +1413,94 @@ body.rtl .jobs-search-input-modern {
 .jobs-platform-highlights {
     display: none;
 }
+
+/* Robust RTL Mirroring Overhaul */
+body.rtl .jobs-top-nav-refined .nav-inner-container {
+    flex-direction: row-reverse;
+}
+
+body.rtl .nav-brand-section {
+    flex-direction: row-reverse;
+}
+
+body.rtl .nav-actions-section {
+    flex-direction: row-reverse;
+}
+
+body.rtl .user-meta-controls {
+    flex-direction: row-reverse;
+}
+
+body.rtl .user-pill {
+    padding: 6px 6px 6px 15px;
+    flex-direction: row-reverse;
+}
+
+body.rtl .user-name-role {
+    text-align: right;
+}
+
+body.rtl .smart-dropdown-panel {
+    right: auto;
+    left: 0;
+}
+
+body.rtl .jobs-account-unified {
+    flex-direction: row-reverse;
+}
+
+body.rtl .jobs-account-sidebar {
+    border-right: none;
+    border-left: 1px solid #f0f0f0;
+}
+
+body.rtl .account-nav li a {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+body.rtl .job-card-header {
+    flex-direction: row-reverse;
+}
+
+body.rtl .job-card-title-area {
+    text-align: right;
+}
+
+body.rtl .job-card-actions {
+    flex-direction: row-reverse;
+}
+
+body.rtl .conv-item {
+    flex-direction: row-reverse;
+}
+
+body.rtl .conv-info {
+    text-align: right;
+}
+
+body.rtl .conv-top {
+    flex-direction: row-reverse;
+}
+
+body.rtl .jobs-messages-system-refined {
+    flex-direction: row-reverse;
+}
+
+body.rtl .messages-sidebar {
+    border-right: none;
+    border-left: 1px solid #f0f0f0;
+}
+
+body.rtl .notif-row {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+body.rtl .auth-box {
+    text-align: right;
+}
+
+body.rtl .form-footer-actions {
+    flex-direction: row-reverse;
+}

@@ -77,4 +77,34 @@ class Jobs_i18n {
 		return $locale;
 	}
 
+	/**
+	 * Manual Arabic Translation Fallback
+	 */
+	public function manual_arabic_translation( $translated, $text, $domain ) {
+		if ( $domain !== 'jobs' || get_locale() !== 'ar' ) {
+			return $translated;
+		}
+
+		$translations = array(
+			'Find Jobs' => 'بحث عن وظائف',
+			'Employers' => 'أصحاب العمل',
+			'Notifications' => 'التنبيهات',
+			'Messages' => 'الرسائل',
+			'Dashboard' => 'لوحة التحكم',
+			'Account Settings' => 'إعدادات الحساب',
+			'Logout' => 'تسجيل الخروج',
+			'Login to Your Account' => 'تسجيل الدخول إلى حسابك',
+			'Create an Account' => 'إنشاء حساب جديد',
+			'Sign In' => 'تسجيل الدخول',
+			'Join 100,000+ professionals today.' => 'انضم إلى أكثر من 100,000 محترف اليوم.',
+			'View Details' => 'عرض التفاصيل',
+			'Apply Now' => 'تقدم الآن',
+			'Quick Apply' => 'تقدم سريع',
+			'Save for later' => 'حفظ لوقت لاحق',
+			'Trusted by 100,000+ professionals' => 'موثوق من قبل أكثر من 100,000 محترف',
+		);
+
+		return isset( $translations[$text] ) ? $translations[$text] : $translated;
+	}
+
 }

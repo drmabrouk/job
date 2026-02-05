@@ -716,8 +716,6 @@ class Jobs_Public {
 		if ( is_singular( 'job' ) ) {
 			$new_template = plugin_dir_path( __FILE__ ) . 'partials/jobs-single-listing.php';
 			if ( file_exists( $new_template ) ) {
-				// Wrap with header/footer
-				include_once ABSPATH . 'wp-admin/includes/file.php';
 				return $new_template;
 			}
 		}
