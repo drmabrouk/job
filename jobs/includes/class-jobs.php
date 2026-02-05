@@ -195,7 +195,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_ajax_nopriv_get_states', $plugin_public, 'ajax_get_states' );
 		$this->loader->add_action( 'wp_body_open', $plugin_public, 'add_custom_nav_bar' );
-		$this->loader->add_filter( 'template_include', $plugin_public, 'job_single_template' );
+		$this->loader->add_filter( 'template_include', $plugin_public, 'job_single_template', 99 );
 		$this->loader->add_action( 'wp_login', $plugin_public, 'log_login_activity', 10, 2 );
 		$this->loader->add_action( 'template_redirect', $plugin_public, 'handle_dashboard_redirection' );
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );
@@ -206,8 +206,14 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_save_job', $plugin_public, 'ajax_save_job' );
 		$this->loader->add_action( 'wp_ajax_follow_employer', $plugin_public, 'ajax_follow_employer' );
 		$this->loader->add_action( 'wp_ajax_check_notifications', $plugin_public, 'ajax_check_notifications' );
+		$this->loader->add_action( 'wp_ajax_jobs_ajax_login', $plugin_public, 'ajax_login' );
+		$this->loader->add_action( 'wp_ajax_nopriv_jobs_ajax_login', $plugin_public, 'ajax_login' );
+		$this->loader->add_action( 'wp_ajax_jobs_ajax_register', $plugin_public, 'ajax_register' );
+		$this->loader->add_action( 'wp_ajax_nopriv_jobs_ajax_register', $plugin_public, 'ajax_register' );
+		$this->loader->add_action( 'wp_ajax_jobs_submit_application_ajax', $plugin_public, 'ajax_submit_application' );
 		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 
+		$this->loader->add_shortcode( 'jobs_auth', $plugin_public, 'shortcode_jobs_auth' );
 		$this->loader->add_shortcode( 'jobs_login', $plugin_public, 'shortcode_jobs_login' );
 		$this->loader->add_shortcode( 'jobs_register', $plugin_public, 'shortcode_jobs_register' );
 		$this->loader->add_shortcode( 'jobs_search_engine', $plugin_public, 'shortcode_jobs_search_engine' );

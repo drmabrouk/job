@@ -141,7 +141,30 @@ class Jobs_Admin {
 		add_submenu_page( 'job-reports', __( 'Audit Trail', 'jobs' ), __( 'Audit Trail', 'jobs' ), 'manage_options', 'job-audit-trail', array( $this, 'display_audit_trail_page' ) );
 	}
 
-	public function display_job_management_page() { echo '<div class="wrap"><h1>Job Management</h1></div>'; }
+	public function display_job_management_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Job Management Overview', 'jobs' ); ?></h1>
+			<div class="jobs-admin-dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+				<div class="card">
+					<h2><?php _e( 'Active Jobs', 'jobs' ); ?></h2>
+					<p style="font-size: 32px; font-weight: 700;"><?php echo wp_count_posts('job')->publish; ?></p>
+					<a href="edit.php?post_type=job" class="button"><?php _e( 'Manage All Jobs', 'jobs' ); ?></a>
+				</div>
+				<div class="card">
+					<h2><?php _e( 'Pending Review', 'jobs' ); ?></h2>
+					<p style="font-size: 32px; font-weight: 700; color: #f39c12;"><?php echo wp_count_posts('job')->pending; ?></p>
+					<a href="edit.php?post_type=job&post_status=pending" class="button"><?php _e( 'Review Now', 'jobs' ); ?></a>
+				</div>
+				<div class="card">
+					<h2><?php _e( 'Categories', 'jobs' ); ?></h2>
+					<p style="font-size: 32px; font-weight: 700;"><?php echo wp_count_terms('job_category'); ?></p>
+					<a href="edit-tags.php?taxonomy=job_category&post_type=job" class="button"><?php _e( 'Manage Categories', 'jobs' ); ?></a>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
 	public function display_job_settings_page() {
 		?>
 		<div class="wrap">
@@ -185,9 +208,48 @@ class Jobs_Admin {
 		</div>
 		<?php
 	}
-	public function display_applications_page() { echo '<div class="wrap"><h1>Applications</h1></div>'; }
-	public function display_applications_pending_page() { echo '<div class="wrap"><h1>Pending Review</h1></div>'; }
-	public function display_applications_shortlisted_page() { echo '<div class="wrap"><h1>Shortlisted</h1></div>'; }
+	public function display_applications_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Applications Management', 'jobs' ); ?></h1>
+			<div class="jobs-admin-dashboard-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+				<div class="card">
+					<h2><?php _e( 'Total Applications', 'jobs' ); ?></h2>
+					<p style="font-size: 32px; font-weight: 700;"><?php echo wp_count_posts('application')->publish; ?></p>
+					<a href="edit.php?post_type=application" class="button"><?php _e( 'View All', 'jobs' ); ?></a>
+				</div>
+				<div class="card">
+					<h2><?php _e( 'Recent Activity', 'jobs' ); ?></h2>
+					<p><?php _e( 'Applications submitted in last 24h', 'jobs' ); ?></p>
+					<p style="font-size: 24px; font-weight: 700;">12</p>
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+	public function display_applications_pending_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Applications Pending Review', 'jobs' ); ?></h1>
+			<p><?php _e( 'Review applications that require attention.', 'jobs' ); ?></p>
+			<?php
+			// Display a table or list of pending applications
+			echo '<div class="notice notice-info"><p>' . __( 'No applications currently pending review.', 'jobs' ) . '</p></div>';
+			?>
+		</div>
+		<?php
+	}
+	public function display_applications_shortlisted_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Shortlisted Candidates', 'jobs' ); ?></h1>
+			<p><?php _e( 'View candidates that have been shortlisted for further evaluation.', 'jobs' ); ?></p>
+			<?php
+			echo '<div class="notice notice-info"><p>' . __( 'No candidates shortlisted yet.', 'jobs' ) . '</p></div>';
+			?>
+		</div>
+		<?php
+	}
 	public function display_application_settings_page() {
 		?>
 		<div class="wrap">
@@ -268,7 +330,43 @@ class Jobs_Admin {
 		</div>
 		<?php
 	}
-	public function display_colors_fonts_page() { echo '<div class="wrap"><h1>Colors & Fonts</h1></div>'; }
+	public function display_colors_fonts_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Colors & Fonts Customization', 'jobs' ); ?></h1>
+			<form method="post" action="options.php">
+				<?php
+				settings_fields( 'jobs_options' );
+				?>
+				<table class="form-table">
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Primary Color', 'jobs' ); ?></th>
+						<td>
+							<input type="color" name="jobs_primary_color" value="<?php echo esc_attr( get_option( 'jobs_primary_color', '#1d3469' ) ); ?>" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Secondary Color', 'jobs' ); ?></th>
+						<td>
+							<input type="color" name="jobs_secondary_color" value="<?php echo esc_attr( get_option( 'jobs_secondary_color', '#15264d' ) ); ?>" />
+						</td>
+					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Global Font Family', 'jobs' ); ?></th>
+						<td>
+							<select name="jobs_font_family">
+								<option value="Rubik">Rubik</option>
+								<option value="Arial">Arial</option>
+								<option value="Helvetica">Helvetica</option>
+							</select>
+						</td>
+					</tr>
+				</table>
+				<?php submit_button(); ?>
+			</form>
+		</div>
+		<?php
+	}
 	public function display_role_renaming_page() {
 		$role_names = get_option( 'jobs_role_names', array(
 			'job_seeker'           => 'Job Seeker',
@@ -376,9 +474,45 @@ class Jobs_Admin {
 
 		return $metrics;
 	}
-	public function display_job_stats_page() { echo '<div class="wrap"><h1>Job Stats</h1></div>'; }
-	public function display_app_stats_page() { echo '<div class="wrap"><h1>Application Stats</h1></div>'; }
-	public function display_user_activity_page() { echo '<div class="wrap"><h1>User Activity</h1></div>'; }
+	public function display_job_stats_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Job Analytics', 'jobs' ); ?></h1>
+			<div class="card" style="max-width: 800px;">
+				<p><?php _e( 'Detailed breakdown of job posting trends and performance.', 'jobs' ); ?></p>
+				<div style="height: 300px; background: #f8f9fa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center;">
+					[<?php _e( 'Interactive Job Growth Chart Placeholder', 'jobs' ); ?>]
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+	public function display_app_stats_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Application Reports', 'jobs' ); ?></h1>
+			<div class="card" style="max-width: 800px;">
+				<p><?php _e( 'Analyze application conversion rates and source channels.', 'jobs' ); ?></p>
+				<div style="height: 300px; background: #f8f9fa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center;">
+					[<?php _e( 'Interactive Application Conversion Chart Placeholder', 'jobs' ); ?>]
+				</div>
+			</div>
+		</div>
+		<?php
+	}
+	public function display_user_activity_page() {
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'User Growth & Retention', 'jobs' ); ?></h1>
+			<div class="card" style="max-width: 800px;">
+				<p><?php _e( 'Track registration trends and user engagement metrics.', 'jobs' ); ?></p>
+				<div style="height: 300px; background: #f8f9fa; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center;">
+					[<?php _e( 'Interactive User Metrics Chart Placeholder', 'jobs' ); ?>]
+				</div>
+			</div>
+		</div>
+		<?php
+	}
 
 	/**
 	 * Display Audit Trail page.
@@ -437,6 +571,9 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_enable_geo' );
 		register_setting( 'jobs_options', 'jobs_default_status' );
 		register_setting( 'jobs_options', 'jobs_enable_notifications' );
+		register_setting( 'jobs_options', 'jobs_primary_color' );
+		register_setting( 'jobs_options', 'jobs_secondary_color' );
+		register_setting( 'jobs_options', 'jobs_font_family' );
 	}
 
 }
