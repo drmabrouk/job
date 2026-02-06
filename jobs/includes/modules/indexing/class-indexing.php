@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Indexing Module
- *
- * Handles SEO, Meta tags, and Sitemap generation.
- */
 class Jobs_Module_Indexing extends Jobs_Module {
 
 	public function __construct() {
@@ -19,9 +14,6 @@ class Jobs_Module_Indexing extends Jobs_Module {
 		add_action( 'template_redirect', array( $this, 'render_sitemap' ) );
 	}
 
-	/**
-	 * Generate SEO Meta Tags and JSON-LD Schema.
-	 */
 	public function generate_meta_tags() {
 		if ( is_singular( 'job' ) ) {
 			$this->render_job_meta();
@@ -35,7 +27,6 @@ class Jobs_Module_Indexing extends Jobs_Module {
 	private function render_job_meta() {
 		global $post;
 		$description = wp_trim_words( $post->post_excerpt ?: $post->post_content, 25 );
-
 		echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
 		echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . '" />' . "\n";
 		echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
@@ -43,7 +34,6 @@ class Jobs_Module_Indexing extends Jobs_Module {
 		echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . '" />' . "\n";
 		echo '<link rel="canonical" href="' . esc_url( get_permalink() ) . '" />' . "\n";
 
-		// Enhanced Schema.org JobPosting
 		$schema = array(
 			'@context' => 'https://schema.org/',
 			'@type'    => 'JobPosting',
@@ -72,24 +62,17 @@ class Jobs_Module_Indexing extends Jobs_Module {
 	private function render_profile_meta() {
 		$username = get_query_var( 'job_seeker_profile' );
 		$user = get_user_by( 'slug', $username );
-
 		if ( ! $user ) return;
-
 		$is_indexed = get_user_meta( $user->ID, '_jobs_profile_indexed', true ) === 'yes';
-
 		if ( ! $is_indexed ) {
 			echo '<meta name="robots" content="noindex, nofollow" />' . "\n";
 			return;
 		}
-
 		$title = sprintf( __( '%s Profile | Jobedia', 'jobs' ), $user->display_name );
 		$description = wp_trim_words( $user->description, 25 ) ?: sprintf( __( 'Professional profile of %s on Jobedia.', 'jobs' ), $user->display_name );
-
 		echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
 		echo '<meta property="og:title" content="' . esc_attr( $title ) . '" />' . "\n";
 		echo '<meta property="og:url" content="' . esc_url( home_url( '/job-seeker/' . $username ) ) . '" />' . "\n";
-
-		// Person Schema
 		$schema = array(
 			'@context' => 'https://schema.org/',
 			'@type'    => 'Person',
@@ -104,10 +87,8 @@ class Jobs_Module_Indexing extends Jobs_Module {
 	private function render_taxonomy_meta() {
 		$term = get_queried_object();
 		if ( ! $term ) return;
-
 		$title = sprintf( __( '%s Jobs | Jobedia', 'jobs' ), $term->name );
 		$description = $term->description ?: sprintf( __( 'Browse latest %s job openings on Jobedia.', 'jobs' ), $term->name );
-
 		echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
 		echo '<link rel="canonical" href="' . esc_url( get_term_link( $term ) ) . '" />' . "\n";
 	}
@@ -117,9 +98,6 @@ class Jobs_Module_Indexing extends Jobs_Module {
 		return ! empty( $types ) ? $types[0] : 'FULL_TIME';
 	}
 
-	/**
-	 * Sitemap process.
-	 */
 	public function add_sitemap_rewrite_rule() {
 		add_rewrite_rule( '^jobs-sitemap\.xml$', 'index.php?jobs_sitemap=1', 'top' );
 	}
@@ -134,27 +112,20 @@ class Jobs_Module_Indexing extends Jobs_Module {
 			header( 'Content-Type: application/xml; charset=utf-8' );
 			echo '<?xml version="1.0" encoding="UTF-8"?>';
 			echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-
-			// Jobs
 			$jobs = new WP_Query( array( 'post_type' => 'job', 'post_status' => 'publish', 'posts_per_page' => -1 ) );
 			while ( $jobs->have_posts() ) {
 				$jobs->the_post();
 				echo '<url><loc>' . get_permalink() . '</loc><lastmod>' . get_the_modified_date( 'c' ) . '</lastmod><changefreq>daily</changefreq></url>';
 			}
 			wp_reset_postdata();
-
-			// Indexed Profiles
 			$users = get_users( array( 'meta_key' => '_jobs_profile_indexed', 'meta_value' => 'yes' ) );
 			foreach ( $users as $user ) {
 				echo '<url><loc>' . home_url( '/job-seeker/' . $user->user_nicename ) . '</loc><changefreq>weekly</changefreq></url>';
 			}
-
-			// Categories
 			$cats = get_terms( array( 'taxonomy' => 'job_category', 'hide_empty' => true ) );
 			foreach ( $cats as $cat ) {
 				echo '<url><loc>' . get_term_link( $cat ) . '</loc><changefreq>weekly</changefreq></url>';
 			}
-
 			echo '</urlset>';
 			exit;
 		}

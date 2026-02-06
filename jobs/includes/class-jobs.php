@@ -75,6 +75,7 @@ class Jobs {
 		$this->plugin_name = 'jobs';
 
 		$this->load_dependencies();
+		$this->load_modules();
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
@@ -103,6 +104,11 @@ class Jobs {
 		 * The class responsible for the centralized system map.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jobs-system.php';
+
+		/**
+		 * The base class for all modules.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jobs-module.php';
 
 		/**
 		 * The class responsible for defining all code necessary to run during activation.
@@ -134,6 +140,33 @@ class Jobs {
 
 		$this->loader = new Jobs_Loader();
 
+	}
+
+	/**
+	 * Automatically discover and load independent application modules.
+	 */
+	private function load_modules() {
+		$modules_dir = plugin_dir_path( __FILE__ ) . 'modules/';
+		if ( ! is_dir( $modules_dir ) ) return;
+
+		$iterator = new DirectoryIterator( $modules_dir );
+		foreach ( $iterator as $fileinfo ) {
+			if ( $fileinfo->isDir() && ! $fileinfo->isDot() ) {
+				$module_name = $fileinfo->getFilename();
+				$module_file = $modules_dir . $module_name . '/class-' . $module_name . '.php';
+
+				if ( file_exists( $module_file ) ) {
+					require_once $module_file;
+					$class_name = 'Jobs_Module_' . str_replace( ' ', '_', ucwords( str_replace( '-', ' ', $module_name ) ) );
+					if ( class_exists( $class_name ) ) {
+						$module = new $class_name();
+						$module->init();
+						global $jobs_modules;
+						$jobs_modules[$module->get_id()] = $module;
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -213,20 +246,12 @@ class Jobs {
 		$this->loader->add_action( 'admin_post_jobs_register_user', $plugin_public, 'handle_user_registration' );
 		$this->loader->add_action( 'admin_post_nopriv_jobs_register_user', $plugin_public, 'handle_user_registration' );
 		$this->loader->add_action( 'admin_post_jobs_submit_application', $plugin_public, 'handle_application_submission' );
-		$this->loader->add_action( 'wp_ajax_reactivate_job', $plugin_public, 'ajax_reactivate_job' );
-		$this->loader->add_action( 'wp_ajax_extend_job', $plugin_public, 'ajax_extend_job' );
-		$this->loader->add_action( 'wp_ajax_save_job', $plugin_public, 'ajax_save_job' );
 		$this->loader->add_action( 'wp_ajax_follow_employer', $plugin_public, 'ajax_follow_employer' );
 		$this->loader->add_action( 'wp_ajax_check_notifications', $plugin_public, 'ajax_check_notifications' );
 		$this->loader->add_action( 'wp_ajax_jobs_ajax_login', $plugin_public, 'ajax_login' );
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_ajax_login', $plugin_public, 'ajax_login' );
 		$this->loader->add_action( 'wp_ajax_jobs_ajax_register', $plugin_public, 'ajax_register' );
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_ajax_register', $plugin_public, 'ajax_register' );
-		$this->loader->add_action( 'wp_ajax_jobs_save_onboarding', $plugin_public, 'ajax_save_onboarding' );
-		$this->loader->add_action( 'wp_ajax_jobs_toggle_verification', $plugin_public, 'ajax_toggle_verification' );
-		$this->loader->add_action( 'wp_ajax_jobs_post_job_ajax', $plugin_public, 'ajax_post_job' );
-		$this->loader->add_action( 'wp_ajax_jobs_save_company_profile', $plugin_public, 'ajax_save_company_profile' );
-		$this->loader->add_action( 'wp_ajax_jobs_send_support_message', $plugin_public, 'ajax_send_support_message' );
 		$this->loader->add_action( 'wp_ajax_jobs_submit_application_ajax', $plugin_public, 'ajax_submit_application' );
 		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 

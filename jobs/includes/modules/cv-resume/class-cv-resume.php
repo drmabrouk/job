@@ -1,0 +1,1 @@
+<?php class Jobs_Module_CV_Resume extends Jobs_Module { public function __construct() { $this->id = 'cv-resume'; $this->name = 'CV / Resume'; } public function init() { $this->add_ajax('save_onboarding', 'ajax_save_onboarding'); } public function ajax_save_onboarding() { check_ajax_referer('jobs_onboarding_nonce', 'onboarding_nonce'); wp_send_json_success(); } }
