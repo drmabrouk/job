@@ -75,16 +75,17 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 	<?php endif; ?>
 
 	<div class="jobs-content-wrapper">
-		<div id="jobs-grid" class="jobs-grid">
-			<?php
-			$args = array(
-				'post_type'      => 'job',
-				'post_status'    => 'publish',
-				'posts_per_page' => 6,
-				'paged'          => 1,
-				'orderby'        => 'date',
-				'order'          => 'DESC'
-			);
+		<div class="jobs-main-listing-area">
+			<div id="jobs-grid" class="jobs-grid">
+				<?php
+				$args = array(
+					'post_type'      => 'job',
+					'post_status'    => 'publish',
+					'posts_per_page' => 6,
+					'paged'          => 1,
+					'orderby'        => 'date',
+					'order'          => 'DESC'
+				);
 			$query = new WP_Query( $args );
 
 			if ( $query->have_posts() ) :
@@ -94,20 +95,21 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 				wp_reset_postdata();
 			else :
 				echo '<p>' . __( 'No jobs found.', 'jobs' ) . '</p>';
-			endif;
-			?>
-		</div>
-		<div id="jobs-pagination" class="jobs-pagination-container">
-			<?php
-			if ( $query->max_num_pages > 1 ) :
-				echo '<div class="jobs-numeric-pagination">';
-				for ( $i = 1; $i <= $query->max_num_pages; $i++ ) {
-					$active = ( $i == 1 ) ? 'active' : '';
-					echo '<button class="page-numbers ' . $active . '" data-page="' . $i . '">' . $i . '</button>';
-				}
-				echo '</div>';
-			endif;
-			?>
+				endif;
+				?>
+			</div>
+			<div id="jobs-pagination" class="jobs-pagination-container">
+				<?php
+				if ( $query->max_num_pages > 1 ) :
+					echo '<div class="jobs-numeric-pagination">';
+					for ( $i = 1; $i <= $query->max_num_pages; $i++ ) {
+						$active = ( $i == 1 ) ? 'active' : '';
+						echo '<button class="page-numbers ' . $active . '" data-page="' . $i . '">' . $i . '</button>';
+					}
+					echo '</div>';
+				endif;
+				?>
+			</div>
 		</div>
 	</div>
 

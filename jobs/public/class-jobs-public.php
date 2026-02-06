@@ -171,9 +171,9 @@ class Jobs_Public {
 	 * @since    1.0.0
 	 */
 	public function add_application_form( $content ) {
-		if ( is_singular( 'job' ) && is_main_query() ) {
+		if ( is_singular( 'job' ) ) {
 			if ( ! is_user_logged_in() ) {
-				return '<div class="jobs-msg">' . sprintf( __( 'Please <a href="%s">login</a> to apply for this job.', 'jobs' ), home_url('/jobs-auth') ) . '</div>' . $content;
+				return '<div class="jobs-msg">' . sprintf( __( 'Please <a href="%s">login</a> to apply for this job.', 'jobs' ), home_url('/jobs-auth?redirect_to=' . urlencode(get_permalink())) ) . '</div>' . $content;
 			}
 
 			$user_id = get_current_user_id();
@@ -651,63 +651,87 @@ class Jobs_Public {
 	 * Add custom transparent navigation bar with Unified Applications Menu.
 	 * Global Website Navigation Bar
 	 */
+	/**
+	 * Add custom transparent navigation bar with Unified Applications Menu.
+	 * Global Website Navigation Bar - Refined
+	 */
+	/**
+	 * Add custom transparent navigation bar with Unified Applications Menu.
+	 * Global Website Navigation Bar - Refined Final
+	 */
 	public function add_custom_nav_bar() {
 		$user = wp_get_current_user();
 		$is_logged_in = is_user_logged_in();
 		$is_rtl = is_rtl();
+		$is_home = is_front_page() || is_home();
 
 		?>
-		<nav class="jobs-global-top-nav">
+		<nav class="jobs-global-top-nav-refined">
 			<div class="nav-content-container">
-				<?php if ( ! $is_rtl ) : ?>
-					<!-- LTR Layout -->
-					<div class="nav-side-left">
-						<a href="<?php echo home_url(); ?>" class="global-logo">
+				<div class="nav-side-start">
+					<?php if ( ! $is_home ) : ?>
+						<a href="<?php echo home_url(); ?>" class="global-logo-refined">
 							<?php if ( $logo_id = get_option('jobs_logo_id') ) : ?>
 								<img src="<?php echo wp_get_attachment_url($logo_id); ?>" alt="Logo">
 							<?php else : ?>
 								<span>Jobedia</span>
 							<?php endif; ?>
 						</a>
-						<div class="global-menu-links">
-							<a href="<?php echo home_url(); ?>"><?php _e( 'Home', 'jobs' ); ?></a>
-							<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
-							<a href="#"><?php _e( 'Companies', 'jobs' ); ?></a>
+					<?php endif; ?>
+				</div>
+
+				<div class="nav-side-end">
+					<div class="top-nav-actions-group">
+						<div class="lang-switcher-wrap">
+							<?php echo $this->shortcode_language_switcher(); ?>
 						</div>
-					</div>
-					<div class="nav-side-right">
-						<?php echo $this->shortcode_language_switcher(); ?>
-						<button id="jobs-apps-launcher-btn" class="apps-launcher-trigger" title="<?php _e('Applications', 'jobs'); ?>">
-							<i class="fas fa-th"></i>
+
+						<?php if ( $is_logged_in ) : ?>
+							<div class="notif-msg-group">
+								<div class="nav-icon-wrapper" id="jobs-notif-trigger" title="<?php _e('Notifications', 'jobs'); ?>">
+									<i class="fas fa-bell"></i>
+									<span class="notif-dot"></span>
+									<div class="nav-mini-panel" id="jobs-notif-panel">
+										<div class="panel-inner-header"><?php _e('Notifications', 'jobs'); ?></div>
+										<div class="panel-scrollable-content">
+											<p class="empty-notif"><?php _e('No new updates', 'jobs'); ?></p>
+										</div>
+									</div>
+								</div>
+								<div class="nav-icon-wrapper" id="jobs-msg-trigger" title="<?php _e('Messages', 'jobs'); ?>">
+									<i class="fas fa-comment-dots"></i>
+									<div class="nav-mini-panel" id="jobs-msg-panel">
+										<div class="panel-inner-header"><?php _e('Messages', 'jobs'); ?></div>
+										<div class="panel-scrollable-content">
+											<p class="empty-notif"><?php _e('No new messages', 'jobs'); ?></p>
+										</div>
+										<a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>" class="view-all-link"><?php _e('View All', 'jobs'); ?></a>
+									</div>
+								</div>
+							</div>
+
+							<div class="user-profile-circle-wrap">
+								<div class="profile-pic-circle-btn" id="jobs-profile-pic-btn">
+									<?php echo get_avatar( $user->ID, 40, '', '', array('class' => 'circular-avatar') ); ?>
+								</div>
+								<div class="profile-dropdown-content" id="jobs-profile-dropdown">
+									<a href="<?php echo home_url('/jobs-dashboard?tab=settings'); ?>"><i class="fas fa-user-circle"></i> <?php _e('Account Settings', 'jobs'); ?></a>
+									<a href="<?php echo home_url('/jobs-dashboard?tab=analytics'); ?>"><i class="fas fa-history"></i> <?php _e('Activity Logs', 'jobs'); ?></a>
+									<div class="panel-divider"></div>
+									<a href="<?php echo wp_logout_url( home_url() ); ?>" class="logout-link"><i class="fas fa-power-off"></i> <?php _e('Logout', 'jobs'); ?></a>
+								</div>
+							</div>
+						<?php endif; ?>
+
+						<button id="jobs-apps-launcher-btn" class="apps-launcher-modern-trigger" title="<?php _e('Applications', 'jobs'); ?>">
+							<i class="fas fa-th-large"></i>
 						</button>
 					</div>
-				<?php else : ?>
-					<!-- RTL Layout -->
-					<div class="nav-side-left">
-						<button id="jobs-apps-launcher-btn" class="apps-launcher-trigger" title="<?php _e('Applications', 'jobs'); ?>">
-							<i class="fas fa-th"></i>
-						</button>
-						<?php echo $this->shortcode_language_switcher(); ?>
-					</div>
-					<div class="nav-side-right">
-						<div class="global-menu-links">
-							<a href="#"><?php _e( 'Companies', 'jobs' ); ?></a>
-							<a href="<?php echo home_url( '/jobs' ); ?>"><?php _e( 'Browse Jobs', 'jobs' ); ?></a>
-							<a href="<?php echo home_url(); ?>"><?php _e( 'Home', 'jobs' ); ?></a>
-						</div>
-						<a href="<?php echo home_url(); ?>" class="global-logo">
-							<?php if ( $logo_id = get_option('jobs_logo_id') ) : ?>
-								<img src="<?php echo wp_get_attachment_url($logo_id); ?>" alt="Logo">
-							<?php else : ?>
-								<span>Jobedia</span>
-							<?php endif; ?>
-						</a>
-					</div>
-				<?php endif; ?>
+				</div>
 			</div>
 		</nav>
 
-		<!-- Apps Grid Interface (Google Launcher Style) -->
+		<!-- Apps Launcher Panel (Global Account Controls) -->
 		<div id="jobs-apps-panel" class="jobs-apps-panel-overlay">
 			<div class="apps-panel-card">
 				<div class="apps-panel-header">
@@ -721,40 +745,33 @@ class Jobs_Public {
 						$roles = ( array ) $user->roles;
 						$role_id = $roles[0];
 						$is_admin = current_user_can('manage_options');
-						$is_employer = ($role_id === 'employer' || $is_admin);
+						$is_employer = ($role_id === 'employer' || $role_id === 'job_reviewer' || $is_admin);
 						$is_seeker = ($role_id === 'job_seeker' || $is_admin);
 					?>
-						<!-- User Identity -->
-						<div class="apps-user-identity">
-							<?php echo get_avatar( $user->ID, 48, '', '', array('class' => 'circular-avatar') ); ?>
-							<div class="user-meta">
-								<strong><?php echo esc_html( $user->display_name ); ?></strong>
-								<span><?php echo esc_html( isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst($role_id) ); ?></span>
-							</div>
-						</div>
-
 						<div class="apps-launcher-grid">
-							<!-- Employer Apps -->
 							<?php if ( $is_employer ) : ?>
-								<a href="<?php echo home_url('/jobs-dashboard?tab=manage-jobs&action=add'); ?>" class="app-item">
-									<div class="app-icon" style="background: #e0f2fe; color: #0369a1;"><i class="fas fa-plus-circle"></i></div>
+								<div class="app-item" id="app-post-job-trigger">
+									<div class="app-icon" style="background: #e0f2fe; color: #0369a1;"><i class="fas fa-plus"></i></div>
 									<span><?php _e( 'Post a Job', 'jobs' ); ?></span>
-								</a>
+								</div>
 								<a href="<?php echo home_url('/jobs-dashboard?tab=manage-jobs'); ?>" class="app-item">
-									<div class="app-icon" style="background: #f0fdf4; color: #166534;"><i class="fas fa-history"></i></div>
+									<div class="app-icon" style="background: #f0fdf4; color: #166534;"><i class="fas fa-briefcase"></i></div>
 									<span><?php _e( 'Job History', 'jobs' ); ?></span>
 								</a>
+								<a href="<?php echo home_url('/jobs-dashboard?tab=settings'); ?>" class="app-item">
+									<div class="app-icon" style="background: #fef3c7; color: #92400e;"><i class="fas fa-sliders-h"></i></div>
+									<span><?php _e( 'Posting Settings', 'jobs' ); ?></span>
+								</a>
 								<a href="<?php echo home_url('/jobs-dashboard?tab=manage-jobs&view=drafts'); ?>" class="app-item">
-									<div class="app-icon" style="background: #fff7ed; color: #9a3412;"><i class="fas fa-file-alt"></i></div>
+									<div class="app-icon" style="background: #f3f4f6; color: #374151;"><i class="fas fa-file-signature"></i></div>
 									<span><?php _e( 'Draft Manager', 'jobs' ); ?></span>
 								</a>
 								<a href="<?php echo home_url('/jobs-dashboard?tab=my-applications'); ?>" class="app-item">
-									<div class="app-icon" style="background: #fef2f2; color: #991b1b;"><i class="fas fa-users"></i></div>
+									<div class="app-icon" style="background: #fee2e2; color: #991b1b;"><i class="fas fa-users"></i></div>
 									<span><?php _e( 'Application Records', 'jobs' ); ?></span>
 								</a>
 							<?php endif; ?>
 
-							<!-- Seeker Apps -->
 							<?php if ( $is_seeker ) : ?>
 								<a href="<?php echo home_url('/jobs-dashboard?tab=my-applications'); ?>" class="app-item">
 									<div class="app-icon" style="background: #f5f3ff; color: #5b21b6;"><i class="fas fa-paper-plane"></i></div>
@@ -766,22 +783,21 @@ class Jobs_Public {
 								</a>
 							<?php endif; ?>
 
-							<!-- General Apps -->
 							<a href="<?php echo home_url('/jobs-dashboard?tab=settings'); ?>" class="app-item">
 								<div class="app-icon" style="background: #f8fafc; color: #475569;"><i class="fas fa-cog"></i></div>
 								<span><?php _e( 'Account Settings', 'jobs' ); ?></span>
 							</a>
-
-							<?php if ( $is_admin ) : ?>
-								<a href="<?php echo home_url('/jobs-settings'); ?>" class="app-item">
-									<div class="app-icon" style="background: #f1f5f9; color: #1e293b;"><i class="fas fa-tools"></i></div>
-									<span><?php _e( 'Job Settings', 'jobs' ); ?></span>
-								</a>
-							<?php endif; ?>
 						</div>
 
-						<div class="apps-panel-footer">
-							<a href="<?php echo wp_logout_url( home_url() ); ?>" class="apps-logout-btn"><?php _e( 'Sign Out', 'jobs' ); ?></a>
+						<!-- Inline Job Posting Dropdown Panel -->
+						<div id="inline-job-post-panel" class="inline-apps-sub-panel">
+							<div class="sub-panel-header">
+								<button class="back-to-apps"><i class="fas fa-arrow-left"></i></button>
+								<h4><?php _e('Post a Job', 'jobs'); ?></h4>
+							</div>
+							<div class="sub-panel-body">
+								<?php include plugin_dir_path(__FILE__) . 'jobs-post-inline.php'; ?>
+							</div>
 						</div>
 
 					<?php else : ?>
@@ -1293,4 +1309,45 @@ public function ajax_toggle_verification() {
 		wp_send_json_success( $new_status );
 	}
 
+
+	/**
+	 * AJAX handler for Inline Job Posting
+	 */
+	public function ajax_post_job() {
+		check_ajax_referer( 'jobs_post_job_nonce', 'nonce' );
+
+		if ( ! is_user_logged_in() || ! (current_user_can('employer') || current_user_can('manage_options')) ) {
+			wp_send_json_error( __('Unauthorized to post jobs.', 'jobs') );
+		}
+
+		$title = sanitize_text_field( $_POST['job_title'] );
+		$cat   = intval( $_POST['job_category'] );
+		$loc   = sanitize_text_field( $_POST['job_location'] );
+		$type  = intval( $_POST['job_type'] );
+		$desc  = wp_kses_post( $_POST['job_description'] );
+
+		$job_id = wp_insert_post( array(
+			'post_title'   => $title,
+			'post_content' => $desc,
+			'post_status'  => 'pending',
+			'post_type'    => 'job',
+			'post_author'  => get_current_user_id(),
+		) );
+
+		if ( $job_id ) {
+			wp_set_object_terms( $job_id, $cat, 'job_category' );
+			wp_set_object_terms( $job_id, $type, 'job_type' );
+			update_post_meta( $job_id, '_job_location', $loc );
+
+			// Auto set expiration
+			$days = get_option( 'jobs_expiration_days', '50' );
+			$expiration = date( 'Y-m-d H:i:s', strtotime( '+ ' . $days . ' days' ) );
+			update_post_meta( $job_id, '_jobs_expiration_date', $expiration );
+
+			$this->log_activity( get_current_user_id(), 'Posted new job: ' . $title );
+			wp_send_json_success( __('Job posted successfully and is pending review!', 'jobs') );
+		}
+
+		wp_send_json_error( __('Failed to post job. Please try again.', 'jobs') );
+	}
 }

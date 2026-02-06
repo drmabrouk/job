@@ -1,6 +1,6 @@
 <?php
 /**
- * Professional Single Job Listing Template
+ * Professional Single Job Listing Template - Refined
  */
 get_header();
 $job_id = get_the_ID();
@@ -13,121 +13,164 @@ $apply_url = get_post_meta( $job_id, '_jobs_external_url', true );
 $apply_email = get_post_meta( $job_id, '_jobs_external_email', true );
 $is_quick_apply = get_post_meta( $job_id, '_jobs_quick_apply', true ) === 'yes';
 
+$share_url = urlencode(get_permalink());
+$share_title = urlencode(get_the_title());
 ?>
-<div class="jobs-single-listing">
-	<header class="job-header">
+<div class="jobs-single-listing-refined">
+	<header class="job-hero-section">
 		<div class="jobs-container-nav">
-			<div class="job-header-main">
-				<div class="job-logo-large">
+			<div class="job-hero-content">
+				<div class="job-hero-logo">
 					<?php if ( has_post_thumbnail() ) : the_post_thumbnail( 'medium' ); else: ?>
 						<i class="fas fa-building"></i>
 					<?php endif; ?>
 				</div>
-				<div class="job-title-meta">
-					<div class="job-meta-top">
+				<div class="job-hero-title-area">
+					<div class="job-hero-tags">
 						<?php
 						$types = get_the_terms( $job_id, 'job_type' );
-						if($types) foreach($types as $t) echo '<span class="job-tag tag-type">' . $t->name . '</span>';
+						if($types) foreach($types as $t) echo '<span class="hero-tag">' . $t->name . '</span>';
 						?>
 					</div>
 					<h1><?php the_title(); ?></h1>
-					<p class="header-subtitle">
-						<i class="fas fa-briefcase"></i> <?php echo $author ? $author->display_name : 'Company'; ?>
-						<span class="sep">|</span>
-						<i class="fas fa-map-marker-alt"></i> <?php echo esc_html("$location, $state, $country"); ?>
+					<p class="hero-subtitle">
+						<span><i class="fas fa-briefcase"></i> <?php echo $author ? $author->display_name : 'Company'; ?></span>
+						<span class="sep">•</span>
+						<span><i class="fas fa-map-marker-alt"></i> <?php echo esc_html("$location, $state, $country"); ?></span>
 					</p>
 				</div>
 			</div>
-			<div class="job-header-actions" id="job-apply-container">
-				<?php if ( $is_quick_apply && is_user_logged_in() ) : ?>
-					<form id="quick-apply-form">
-						<input type="hidden" name="job_id" value="<?php echo $job_id; ?>">
-						<input type="hidden" name="quick_apply" value="1">
-						<?php wp_nonce_field( 'jobs_apply_nonce', 'nonce' ); ?>
-						<button type="submit" class="jobs-button btn-primary-modern"><?php _e( 'Quick Apply', 'jobs' ); ?></button>
-					</form>
-				<?php elseif ( $apply_url ) : ?>
-					<a href="<?php echo esc_url($apply_url); ?>" class="jobs-button btn-primary-modern" target="_blank"><?php _e( 'Apply on Company Site', 'jobs' ); ?></a>
-				<?php elseif ( $apply_email ) : ?>
-					<a href="mailto:<?php echo esc_attr($apply_email); ?>?subject=Application for <?php echo rawurlencode(get_the_title()); ?>" class="jobs-button btn-primary-modern"><?php _e( 'Apply via Email', 'jobs' ); ?></a>
+			<div class="job-hero-actions">
+				<?php if ( is_user_logged_in() ) : ?>
+					<button id="inline-apply-trigger" class="jobs-button btn-primary-lg"><?php _e( 'Apply for this Job', 'jobs' ); ?></button>
+				<?php else : ?>
+					<a href="<?php echo home_url('/jobs-auth?redirect_to=' . urlencode(get_permalink())); ?>" class="jobs-button btn-primary-lg"><?php _e( 'Login to Apply', 'jobs' ); ?></a>
 				<?php endif; ?>
+
+				<div class="job-share-wrap">
+					<span><?php _e('Share:', 'jobs'); ?></span>
+					<a href="https://api.whatsapp.com/send?text=<?php echo $share_title . ' ' . $share_url; ?>" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+					<a href="https://www.facebook.com/sharer/sharer.php?u=<?php echo $share_url; ?>" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+					<a href="https://twitter.com/intent/tweet?text=<?php echo $share_title; ?>&url=<?php echo $share_url; ?>" target="_blank" title="X"><i class="fab fa-x-twitter"></i></a>
+				</div>
 			</div>
 		</div>
 	</header>
 
-	<div class="jobs-container">
-		<div class="job-details-grid">
-			<div class="job-description-area">
-				<div class="account-section content-card">
-					<h3 class="section-title"><?php _e( 'Job Description', 'jobs' ); ?></h3>
-					<div class="entry-content">
-						<?php the_content(); ?>
-					</div>
+	<div id="inline-application-form-container" class="inline-application-dropdown">
+		<div class="jobs-container">
+			<div class="application-form-card">
+				<div class="form-card-header">
+					<h3><?php _e('Submit Your Application', 'jobs'); ?></h3>
+					<button id="close-apply-form">&times;</button>
 				</div>
-			</div>
-
-			<div class="job-sidebar-area">
-				<div class="account-section info-card">
-					<h3 class="section-title"><?php _e( 'Job Overview', 'jobs' ); ?></h3>
-					<ul class="overview-list">
-						<li>
-							<strong><?php _e( 'Posted:', 'jobs' ); ?></strong>
-							<span><?php echo get_the_date(); ?></span>
-						</li>
-						<li>
-							<strong><?php _e( 'Category:', 'jobs' ); ?></strong>
-							<span><?php echo strip_tags(get_the_term_list($job_id, 'job_category', '', ', ')); ?></span>
-						</li>
-						<li>
-							<strong><?php _e( 'Expiration:', 'jobs' ); ?></strong>
-							<span class="expiry-date"><?php echo get_post_meta($job_id, '_jobs_expiration_date', true) ?: 'N/A'; ?></span>
-						</li>
-					</ul>
-				</div>
-
-				<div class="account-section company-card">
-					<h3 class="section-title"><?php _e( 'About Company', 'jobs' ); ?></h3>
-					<div class="company-info-large">
-						<?php echo get_avatar($author_id, 80); ?>
-						<h4><?php echo $author ? $author->display_name : 'Company Name'; ?></h4>
-						<p><?php _e( 'Verified Employer', 'jobs' ); ?></p>
-						<button class="jobs-button btn-outline-modern follow-employer-btn" data-id="<?php echo $author_id; ?>"><?php _e( 'Follow Company', 'jobs' ); ?></button>
-					</div>
-				</div>
+				<?php
+				// Reuse existing application form logic
+				$plugin_public = new Jobs_Public('jobs', '1.0.0');
+				echo $plugin_public->add_application_form('');
+				?>
 			</div>
 		</div>
 	</div>
+
+	<div class="jobs-container content-grid-layout">
+		<div class="job-main-column">
+			<div class="job-content-card">
+				<h3 class="card-title"><?php _e( 'Job Description', 'jobs' ); ?></h3>
+				<div class="job-entry-content">
+					<?php the_content(); ?>
+				</div>
+			</div>
+		</div>
+
+		<aside class="job-sidebar-column">
+			<div class="job-info-card">
+				<h3 class="card-title"><?php _e( 'Overview', 'jobs' ); ?></h3>
+				<ul class="job-overview-list">
+					<li><strong><?php _e( 'Posted:', 'jobs' ); ?></strong> <span><?php echo get_the_date(); ?></span></li>
+					<li><strong><?php _e( 'Category:', 'jobs' ); ?></strong> <span><?php echo strip_tags(get_the_term_list($job_id, 'job_category', '', ', ')); ?></span></li>
+					<li><strong><?php _e( 'Type:', 'jobs' ); ?></strong> <span><?php echo strip_tags(get_the_term_list($job_id, 'job_type', '', ', ')); ?></span></li>
+					<li><strong><?php _e( 'Expiration:', 'jobs' ); ?></strong> <span class="text-danger"><?php echo get_post_meta($job_id, '_jobs_expiration_date', true) ?: 'N/A'; ?></span></li>
+				</ul>
+			</div>
+
+			<div class="job-company-card">
+				<div class="company-card-header">
+					<?php echo get_avatar($author_id, 64, '', '', array('class' => 'circular-avatar')); ?>
+					<div class="company-meta">
+						<h4><?php echo $author ? $author->display_name : 'Company Name'; ?></h4>
+						<p><?php _e( 'Verified Employer', 'jobs' ); ?></p>
+					</div>
+				</div>
+				<button class="jobs-button btn-outline follow-employer-btn" data-id="<?php echo $author_id; ?>"><?php _e( 'Follow Company', 'jobs' ); ?></button>
+			</div>
+		</aside>
+	</div>
 </div>
 
+<script>
+jQuery(document).ready(function($) {
+	$('#inline-apply-trigger').on('click', function() {
+		$('#inline-application-form-container').slideDown();
+		$('html, body').animate({
+			scrollTop: $("#inline-application-form-container").offset().top - 100
+		}, 500);
+	});
+
+	$('#close-apply-form').on('click', function() {
+		$('#inline-application-form-container').slideUp();
+	});
+});
+</script>
+
 <style>
-.jobs-single-listing { background: #f8fafc; min-height: 100vh; padding-bottom: 60px; }
-.job-header { background: var(--primary-color); color: #fff; padding: 60px 0; border-radius: 0 0 30px 30px; margin-bottom: 40px; }
-.job-header .jobs-container-nav { display: flex; justify-content: space-between; align-items: center; gap: 30px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.job-header-main { display: flex; align-items: center; gap: 30px; }
-.job-logo-large { width: 90px; height: 90px; background: #fff; border-radius: 18px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.job-logo-large i { font-size: 40px; color: #cbd5e0; }
-.job-logo-large img { width: 100%; height: 100%; object-fit: contain; }
-.job-title-meta h1 { margin: 0; font-size: 32px; font-weight: 700; color: #fff; }
-.header-subtitle { font-size: 16px; opacity: 0.9; margin-top: 10px; display: flex; align-items: center; gap: 10px; }
-.header-subtitle .sep { opacity: 0.4; }
-.job-details-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.content-card, .info-card, .company-card { background: #fff; border-radius: 20px; padding: 30px; border: 1px solid #e2e8f0; }
-.section-title { font-size: 20px; color: var(--primary-color); margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
-.overview-list { list-style: none; padding: 0; margin: 0; }
-.overview-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-.overview-list li:last-child { border-bottom: none; }
-.overview-list li strong { color: #64748b; }
-.expiry-date { color: #e53e3e; font-weight: 600; }
-.company-info-large { text-align: center; }
-.company-info-large img { border-radius: 15px; margin-bottom: 15px; }
-.company-info-large h4 { margin: 0; font-size: 18px; }
-.company-info-large p { color: #64748b; font-size: 13px; margin: 5px 0 20px; }
-.follow-employer-btn { width: 100%; }
-@media (max-width: 768px) {
-	.job-header .jobs-container-nav { flex-direction: column; text-align: center; }
-	.job-header-main { flex-direction: column; }
-	.job-details-grid { grid-template-columns: 1fr; }
+.jobs-single-listing-refined { background: #fcfcfc; min-height: 100vh; padding-bottom: 80px; }
+.job-hero-section { background: #fff; padding: 60px 0; border-bottom: 1px solid #f1f5f9; margin-bottom: 50px; }
+.job-hero-section .jobs-container-nav { display: flex; justify-content: space-between; align-items: center; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.job-hero-content { display: flex; align-items: center; gap: 30px; }
+.job-hero-logo { width: 100px; height: 100px; background: #f8fafc; border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #edf2f7; }
+.job-hero-logo i { font-size: 40px; color: #cbd5e0; }
+.job-hero-logo img { width: 100%; height: 100%; object-fit: contain; }
+.job-hero-title-area h1 { margin: 10px 0; font-size: 36px; font-weight: 800; color: #1a202c; line-height: 1.2; }
+.hero-tag { background: var(--primary-light); color: var(--primary-color); padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.hero-subtitle { display: flex; align-items: center; gap: 15px; color: #718096; font-size: 16px; font-weight: 500; }
+.hero-subtitle .sep { color: #cbd5e0; }
+.job-hero-actions { text-align: right; }
+.btn-primary-lg { padding: 18px 40px; font-size: 18px; font-weight: 700; border-radius: 14px; }
+.job-share-wrap { margin-top: 20px; display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.job-share-wrap span { font-size: 13px; color: #94a3b8; font-weight: 600; }
+.job-share-wrap a { color: #64748b; font-size: 18px; transition: color 0.2s; }
+.job-share-wrap a:hover { color: var(--primary-color); }
+
+.inline-application-dropdown { display: none; background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 40px 0; }
+.application-form-card { background: #fff; border-radius: 24px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
+.form-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.form-card-header h3 { margin: 0; font-size: 22px; }
+#close-apply-form { background: none; border: none; font-size: 32px; cursor: pointer; color: #cbd5e0; }
+
+.content-grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.job-content-card, .job-info-card, .job-company-card { background: #fff; border-radius: 24px; padding: 40px; border: 1px solid #f1f5f9; margin-bottom: 30px; }
+.card-title { font-size: 20px; font-weight: 700; color: #1a202c; margin-top: 0; margin-bottom: 25px; }
+.job-entry-content { line-height: 1.8; color: #4a5568; font-size: 16px; }
+.job-overview-list { list-style: none; padding: 0; margin: 0; }
+.job-overview-list li { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+.job-overview-list li:last-child { border-bottom: none; }
+.job-overview-list li strong { color: #64748b; }
+.job-company-card .company-card-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; }
+.company-meta h4 { margin: 0; font-size: 18px; }
+.company-meta p { margin: 5px 0 0; color: #94a3b8; font-size: 13px; }
+.follow-employer-btn { width: 100%; padding: 12px; }
+
+@media (max-width: 991px) {
+	.job-hero-section .jobs-container-nav { flex-direction: column; text-align: center; }
+	.job-hero-content { flex-direction: column; }
+	.job-hero-actions { text-align: center; margin-top: 30px; }
+	.job-share-wrap { justify-content: center; }
+	.content-grid-layout { grid-template-columns: 1fr; }
 }
+
+/* RTL Adjustment */
+body.rtl .job-hero-actions, body.rtl .job-share-wrap { text-align: left; justify-content: flex-start; }
 </style>
 <?php
 get_footer();

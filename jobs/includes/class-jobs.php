@@ -220,6 +220,7 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_nopriv_jobs_ajax_register', $plugin_public, 'ajax_register' );
 		$this->loader->add_action( 'wp_ajax_jobs_save_onboarding', $plugin_public, 'ajax_save_onboarding' );
 		$this->loader->add_action( 'wp_ajax_jobs_toggle_verification', $plugin_public, 'ajax_toggle_verification' );
+		$this->loader->add_action( 'wp_ajax_jobs_post_job_ajax', $plugin_public, 'ajax_post_job' );
 		$this->loader->add_action( 'wp_ajax_jobs_submit_application_ajax', $plugin_public, 'ajax_submit_application' );
 		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 
