@@ -66,5 +66,31 @@ $total_views = count($profile_views);
 			</div>
 		</div>
 
+		<div class="analytics-card" style="grid-column: 1 / -1; background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #eee;">
+			<h3><?php _e( 'Your Activity Logs', 'jobs' ); ?></h3>
+			<table class="jobs-table" style="width:100%; border-collapse: collapse; margin-top: 20px;">
+				<thead>
+					<tr style="text-align: left; border-bottom: 2px solid #f1f5f9;">
+						<th style="padding: 15px;"><?php _e( 'Action', 'jobs' ); ?></th>
+						<th style="padding: 15px;"><?php _e( 'Date & Time', 'jobs' ); ?></th>
+						<th style="padding: 15px;"><?php _e( 'IP Address', 'jobs' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					$logs = get_user_meta( $user_id, '_jobs_activity_log', true ) ?: array();
+					if ( ! empty($logs) ) : foreach ( array_reverse(array_slice($logs, -10)) as $log ) : ?>
+						<tr style="border-bottom: 1px solid #f1f5f9;">
+							<td style="padding: 15px; font-weight: 600; color: var(--primary-color);"><?php echo esc_html($log['action']); ?></td>
+							<td style="padding: 15px; color: #718096;"><?php echo date('M j, Y H:i', $log['time']); ?></td>
+							<td style="padding: 15px; color: #a0aec0; font-family: monospace;"><?php echo esc_html($log['ip']); ?></td>
+						</tr>
+					<?php endforeach; else : ?>
+						<tr><td colspan="3" style="text-align: center; padding: 30px; color: #94a3b8;"><?php _e( 'No activity logs found.', 'jobs' ); ?></td></tr>
+					<?php endif; ?>
+				</tbody>
+			</table>
+		</div>
+
 	</div>
 </div>

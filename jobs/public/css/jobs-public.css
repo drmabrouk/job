@@ -2664,3 +2664,373 @@ body:not(.admin-bar) .wp-admin-bar {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+
+/* Refined Global Top Nav */
+.jobs-global-top-nav-refined {
+    height: 80px;
+    background: transparent !important;
+    border-bottom: none !important;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.jobs-global-top-nav-refined.scrolled {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+}
+
+.nav-content-container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.global-logo-refined img {
+    max-height: 50px;
+}
+
+.global-logo-refined span {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.top-nav-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-icon-wrapper {
+    position: relative;
+    font-size: 22px;
+    color: #4a5568;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.nav-icon-wrapper:hover {
+    color: var(--primary-color);
+}
+
+.notif-dot {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    background: #f56565;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.nav-mini-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 320px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin-top: 15px;
+    display: none;
+    z-index: 10002;
+    overflow: hidden;
+}
+
+.panel-inner-header {
+    padding: 15px 20px;
+    font-weight: 700;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.panel-scrollable-content {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.empty-notif {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.view-all-link {
+    display: block;
+    padding: 12px;
+    text-align: center;
+    background: #f8fafc;
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.user-profile-circle-wrap {
+    position: relative;
+}
+
+.profile-pic-circle-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.profile-pic-circle-btn:hover {
+    border-color: var(--primary-color);
+}
+
+.profile-dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 240px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    margin-top: 15px;
+    padding: 10px;
+    display: none;
+    z-index: 10002;
+}
+
+.profile-dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.profile-dropdown-content a:hover {
+    background: #f8fafc;
+    color: var(--primary-color);
+}
+
+.apps-launcher-modern-trigger {
+    background: transparent;
+    border: none;
+    font-size: 26px;
+    color: #4a5568;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.apps-launcher-modern-trigger:hover {
+    color: var(--primary-color);
+}
+
+/* RTL Layout reflection */
+body.rtl .jobs-global-top-nav-refined {
+    direction: rtl;
+}
+
+body.rtl .nav-content-container {
+    flex-direction: row-reverse;
+}
+
+body.rtl .top-nav-actions-group {
+    flex-direction: row-reverse;
+}
+
+body.rtl .profile-dropdown-content,
+body.rtl .nav-mini-panel {
+    right: auto;
+    left: 0;
+}
+
+
+.apps-launcher-modern-trigger {
+    width: 50px !important;
+    height: 40px !important;
+    border-radius: 8px !important;
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.apps-launcher-modern-trigger:hover {
+    background: #f1f5f9 !important;
+    border-color: var(--primary-color) !important;
+}
+
+
+/* Inline Apps Sub Panel */
+.inline-apps-sub-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    z-index: 10;
+    display: none;
+    flex-direction: column;
+}
+
+.sub-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sub-panel-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.back-to-apps {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 18px;
+}
+
+.sub-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Inline Job Post Form Styling */
+.inline-post-job-container {
+    max-width: 100%;
+}
+
+.inline-post-job-container .form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.inline-post-job-container .form-group label {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: block;
+    color: #64748b;
+}
+
+.inline-post-job-container input,
+.inline-post-job-container select,
+.inline-post-job-container textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.inline-form-footer {
+    margin-top: 20px;
+}
+
+.btn-lg {
+    width: 100%;
+    padding: 12px;
+}
+
+
+/* Professional Job Card Updates */
+.job-card-refined {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.job-card-refined:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(29, 52, 105, 0.08) !important;
+    border-color: rgba(29, 52, 105, 0.1);
+}
+
+.btn-card-action {
+    padding: 10px 20px !important;
+    border-radius: 10px !important;
+    font-weight: 700 !important;
+    transition: all 0.2s !important;
+}
+
+.btn-card-action.btn-primary {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.btn-card-action.btn-primary:hover {
+    background: var(--primary-dark) !important;
+    transform: scale(1.05);
+}
+
+.btn-card-action.btn-outline {
+    border: 2px solid #edf2f7 !important;
+    color: #4a5568 !important;
+    background: transparent !important;
+}
+
+.btn-card-action.btn-outline:hover {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Pagination Fix */
+.jobs-pagination-container {
+    width: 100%;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.jobs-numeric-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+
+/* Listing Area Fix */
+.jobs-content-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+}
+
+.jobs-main-listing-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 1023px) {
+    .jobs-content-wrapper {
+        flex-direction: column;
+    }
+}

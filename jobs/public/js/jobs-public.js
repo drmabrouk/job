@@ -180,18 +180,113 @@
 			$('.jobs-account-sidebar').addClass('collapsed');
 		}
 
-		// Smart Notification Dropdown
-		$(document).on('click', '#notif-drop-btn', function(e) {
+		// Unified Apps Launcher Toggle
+		$(document).on('click', '#jobs-apps-launcher-btn', function(e) {
+			e.preventDefault();
 			e.stopPropagation();
-			$('#notif-panel').toggleClass('show');
+			$('#jobs-apps-panel').addClass('show');
+		});
+
+		$(document).on('click', '.close-apps-btn, .jobs-apps-panel-overlay', function(e) {
+			if (e.target === this || $(this).hasClass('close-apps-btn')) {
+				$('#jobs-apps-panel').removeClass('show');
+			}
+		});
+
+		$('.apps-panel-card').on('click', function(e) {
+			e.stopPropagation();
+		});
+
+		// Apps Launcher Sub-panels
+		$(document).on('click', '#app-post-job-trigger', function() {
+			$('#inline-job-post-panel').css('display', 'flex');
+		});
+
+		$(document).on('click', '.back-to-apps', function() {
+			$('#inline-job-post-panel').hide();
+		});
+
+		// Inline Job Post Submission
+		$(document).on('submit', '#jobs-inline-post-form', function(e) {
+			e.preventDefault();
+			var $form = $(this);
+			var $btn = $form.find('button[type="submit"]');
+			var $result = $('#inline-post-result');
+
+			$.ajax({
+				url: jobs_ajax.ajax_url,
+				type: 'POST',
+				data: $form.serialize() + '&action=jobs_post_job_ajax',
+				beforeSend: function() {
+					$btn.prop('disabled', true).text('Posting...');
+				},
+				success: function(res) {
+					if (res.success) {
+						$result.html('<div class="jobs-msg success">' + res.data + '</div>');
+						$form.slideUp();
+						setTimeout(function() {
+							$('#inline-job-post-panel').hide();
+							$form.show();
+							$form[0].reset();
+							$result.empty();
+							$btn.prop('disabled', false).text('Post Job Now');
+						}, 2000);
+					} else {
+						$result.html('<div class="jobs-msg error">' + res.data + '</div>');
+						$btn.prop('disabled', false).text('Post Job Now');
+					}
+				}
+			});
+		});
+
+		// Global Top Nav Refined Interactions
+		$(window).on('scroll', function() {
+			if ($(window).scrollTop() > 30) {
+				$('.jobs-global-top-nav-refined').addClass('scrolled');
+			} else {
+				$('.jobs-global-top-nav-refined').removeClass('scrolled');
+			}
+		});
+
+		// Profile Dropdown
+		$(document).on('click', '#jobs-profile-pic-btn', function(e) {
+			e.stopPropagation();
+			$('#jobs-profile-dropdown').toggle();
+			$('#jobs-notif-panel, #jobs-msg-panel').hide();
+		});
+
+		// Notifications Panel
+		$(document).on('click', '#jobs-notif-trigger', function(e) {
+			e.stopPropagation();
+			$('#jobs-notif-panel').toggle();
+			$('#jobs-profile-dropdown, #jobs-msg-panel').hide();
+		});
+
+		// Messages Panel
+		$(document).on('click', '#jobs-msg-trigger', function(e) {
+			e.stopPropagation();
+			$('#jobs-msg-panel').toggle();
+			$('#jobs-profile-dropdown, #jobs-notif-panel').hide();
 		});
 
 		$(document).on('click', function() {
-			$('.smart-dropdown-panel').removeClass('show');
+			$('#jobs-profile-dropdown, #jobs-notif-panel, #jobs-msg-panel').hide();
 		});
 
-		$('.smart-dropdown-panel').on('click', function(e) {
-			e.stopPropagation();
+		// Toggle User Verification
+		$(document).on('click', '.verify-user-link', function(e) {
+			e.preventDefault();
+			var $btn = $(this);
+			var userId = $btn.data('id');
+
+			$.post(jobs_ajax.ajax_url, {
+				action: 'jobs_toggle_verification',
+				user_id: userId
+			}, function(res) {
+				if (res.success) {
+					location.reload();
+				}
+			});
 		});
 
 		// Notification Polling
@@ -205,32 +300,31 @@
 				},
 				success: function(response) {
 					if (response.success && response.data.unread_count > 0) {
-						if ($('.pulse-badge').length) {
-							$('.pulse-badge').text(response.data.unread_count);
+						if ($('.notif-dot').length) {
+							$('.notif-dot').show();
 						}
+					} else {
+						$('.notif-dot').hide();
 					}
 				}
 			});
 		}
 
-		if ($('.jobs-top-nav-refined').length) {
+		if ($('.jobs-global-top-nav-refined').length) {
 			setInterval(checkNotifications, 30000);
 			checkNotifications();
 		}
 
-		// Browser Geolocation Integration
+		// Browser Geolocation
 		if ("geolocation" in navigator) {
 			navigator.geolocation.getCurrentPosition(function(position) {
-				const lat = position.coords.latitude;
-				const lon = position.coords.longitude;
-
 				$.ajax({
 					url: jobs_ajax.ajax_url,
 					type: 'POST',
 					data: {
 						action: 'jobs_geo_search',
-						lat: lat,
-						lon: lon,
+						lat: position.coords.latitude,
+						lon: position.coords.longitude,
 						nonce: jobs_ajax.nonce
 					},
 					success: function(response) {
@@ -241,88 +335,6 @@
 				});
 			});
 		}
-
-		// Admin User Management Logic (if present)
-		$(document).on('click', '#add-user-btn', function() {
-			$('#modal-title').text('Add New User');
-			if($('#admin-user-form').length) $('#admin-user-form')[0].reset();
-			$('#user-modal').fadeIn();
-		});
-
-		$(document).on('click', '.edit-user-link', function(e) {
-			e.preventDefault();
-			$('#modal-title').text('Edit User');
-			$('#user-modal').fadeIn();
-		});
-
-		$(document).on('click', '.delete-user-link', function(e) {
-			e.preventDefault();
-			if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-				$(this).closest('tr').fadeOut();
-			}
-		});
-
 	});
 
 })(jQuery);
-
-// Handle Transparent Nav Scroll
-jQuery(window).on('scroll', function() {
-    if (jQuery(window).scrollTop() > 50) {
-        jQuery('.jobs-top-nav-refined').addClass('scrolled');
-    } else {
-        jQuery('.jobs-top-nav-refined').removeClass('scrolled');
-    }
-});
-
-// Unified Action Panel Toggle
-jQuery(document).on('click', '#jobs-unified-action-btn', function(e) {
-    e.preventDefault();
-    jQuery('#jobs-action-panel').addClass('show');
-});
-
-jQuery(document).on('click', '.close-panel-btn, .jobs-action-panel-overlay', function(e) {
-    if (e.target === this) {
-        jQuery('#jobs-action-panel').removeClass('show');
-    }
-});
-
-jQuery('.action-panel-content').on('click', function(e) {
-    e.stopPropagation();
-});
-
-jQuery(document).on('click', '.close-panel-btn', function() {
-    jQuery('#jobs-action-panel').removeClass('show');
-});
-
-// Unified Apps Launcher Toggle
-jQuery(document).on('click', '#jobs-apps-launcher-btn', function(e) {
-    e.preventDefault();
-    jQuery('#jobs-apps-panel').toggleClass('show');
-});
-
-jQuery(document).on('click', '.close-apps-btn, .jobs-apps-panel-overlay', function(e) {
-    if (e.target === this || jQuery(this).hasClass('close-apps-btn')) {
-        jQuery('#jobs-apps-panel').removeClass('show');
-    }
-});
-
-jQuery('.apps-panel-card').on('click', function(e) {
-    e.stopPropagation();
-});
-
-// Toggle User Verification
-jQuery(document).on('click', '.verify-user-link', function(e) {
-    e.preventDefault();
-    const btn = jQuery(this);
-    const userId = btn.data('id');
-
-    $.post(jobs_ajax.ajax_url, {
-        action: 'jobs_toggle_verification',
-        user_id: userId
-    }, function(res) {
-        if (res.success) {
-            location.reload(); // Simple way to refresh UI for now
-        }
-    });
-});
