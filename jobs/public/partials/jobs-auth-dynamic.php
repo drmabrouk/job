@@ -45,6 +45,10 @@
 				<label><?php _e( 'Full Name', 'jobs' ); ?></label>
 				<input type="text" name="full_name" required placeholder="John Doe">
 			</div>
+			<div class="form-group" id="prof-title-group">
+				<label><?php _e( 'Professional Title', 'jobs' ); ?></label>
+				<input type="text" name="professional_title" placeholder="<?php _e('e.g. Senior Software Engineer', 'jobs'); ?>">
+			</div>
 			<div class="form-group">
 				<label><?php _e( 'Email Address', 'jobs' ); ?></label>
 				<input type="email" name="user_email" required placeholder="john@example.com">
@@ -90,6 +94,14 @@ jQuery(document).ready(function($) {
 		$loginForm.addClass('active').fadeIn();
 		$title.text("<?php _e( 'Login to Your Account', 'jobs' ); ?>");
 		$subtitle.text("<?php _e( 'Welcome back! Please enter your details.', 'jobs' ); ?>");
+	});
+
+	$('select[name="user_role"]').on('change', function() {
+		if ($(this).val() === 'employer') {
+			$('#prof-title-group').hide();
+		} else {
+			$('#prof-title-group').show();
+		}
 	});
 
 	// Handle AJAX Login

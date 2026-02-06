@@ -1892,3 +1892,152 @@ body.rtl .jobs-search-input-modern {
     color: var(--primary-color);
     border-color: var(--primary-color);
 }
+
+
+/* Transparent Nav Bar */
+.jobs-top-nav-refined {
+    background: transparent !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    transition: background 0.3s ease;
+}
+
+.jobs-top-nav-refined.scrolled {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+
+.nav-inner-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+}
+
+.nav-item {
+    color: var(--primary-color) !important;
+    font-weight: 600;
+}
+
+
+.jobs-site-logo-container {
+    padding: 40px 0;
+    text-align: center;
+}
+
+.jobs-site-logo {
+    max-width: 350px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.jobs-site-logo:hover {
+    transform: scale(1.02);
+}
+
+.brand-text {
+    font-size: 64px !important;
+    font-weight: 800;
+    color: var(--primary-color);
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+}
+
+
+/* Bespoke Auth UI */
+.jobs-auth-container {
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.auth-box {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    padding: 50px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(29, 52, 105, 0.05);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.auth-logo {
+    max-height: 60px;
+    margin-bottom: 25px;
+}
+
+.auth-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin: 0 0 10px;
+}
+
+.auth-header p {
+    color: #718096;
+    font-size: 16px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form select {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    font-family: 'Rubik', sans-serif;
+    transition: all 0.3s;
+}
+
+.auth-form input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(29, 52, 105, 0.05);
+    outline: none;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+.switch-auth {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 14px;
+    color: #718096;
+}
+
+.switch-auth a {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-decoration: none;
+}

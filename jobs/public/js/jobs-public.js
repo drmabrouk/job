@@ -239,3 +239,12 @@
 	});
 
 })(jQuery);
+
+// Handle Transparent Nav Scroll
+jQuery(window).on('scroll', function() {
+    if (jQuery(window).scrollTop() > 50) {
+        jQuery('.jobs-top-nav-refined').addClass('scrolled');
+    } else {
+        jQuery('.jobs-top-nav-refined').removeClass('scrolled');
+    }
+});

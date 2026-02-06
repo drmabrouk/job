@@ -10,8 +10,8 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 	<div class="jobs-homepage-header">
 		<?php if ( $logo_id ) : ?>
 			<div class="jobs-site-logo-container">
-				<a href="<?php echo home_url(); ?>">
-					<?php echo wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'jobs-site-logo', 'style' => 'width:' . $logo_width . 'px;' ) ); ?>
+				<a href="<?php echo home_url(); ?>" class="logo-link">
+					<?php echo wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'jobs-site-logo', 'style' => 'width:' . $logo_width . 'px; max-width: 100%;' ) ); ?>
 				</a>
 				<div class="jobs-trust-badge-subtle"><?php _e( 'Trusted by 100,000+ professionals', 'jobs' ); ?></div>
 			</div>
