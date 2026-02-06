@@ -299,9 +299,19 @@ class Jobs_Activator {
 				'Environment' => array( 'Environmental Scientist', 'Geologist', 'Park Ranger', 'Ecologist' ),
 			),
 			'Science & Research' => array(
-				'Life Sciences' => array( 'Biologist', 'Biotechnologist', 'Microbiologist' ),
-				'Physical Sciences' => array( 'Physicist', 'Chemist', 'Astronomer' ),
-				'Social Sciences' => array( 'Psychologist', 'Sociologist', 'Anthropologist' ),
+				'Life Sciences' => array( 'Biologist', 'Biotechnologist', 'Microbiologist', 'Geneticist', 'Pharmacologist' ),
+				'Physical Sciences' => array( 'Physicist', 'Chemist', 'Astronomer', 'Meteorologist', 'Oceanographer' ),
+				'Social Sciences' => array( 'Psychologist', 'Sociologist', 'Anthropologist', 'Archaeologist', 'Economist' ),
+			),
+			'Media & Communication' => array(
+				'Broadcasting' => array( 'Radio Host', 'TV Presenter', 'Camera Operator', 'Sound Technician' ),
+				'Writing' => array( 'Technical Writer', 'Scriptwriter', 'Blogger', 'Grant Writer' ),
+				'Translation' => array( 'Interpreter', 'Translator', 'Localization Specialist' ),
+			),
+			'Human Services' => array(
+				'Social Work' => array( 'Social Worker', 'Case Manager', 'Child Advocate' ),
+				'Counseling' => array( 'Career Counselor', 'Marriage Therapist', 'Addiction Counselor' ),
+				'Non-Profit' => array( 'Fundraiser', 'Program Coordinator', 'Volunteer Manager' ),
 			),
 		);
 

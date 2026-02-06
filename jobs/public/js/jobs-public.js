@@ -294,3 +294,35 @@ jQuery('.action-panel-content').on('click', function(e) {
 jQuery(document).on('click', '.close-panel-btn', function() {
     jQuery('#jobs-action-panel').removeClass('show');
 });
+
+// Unified Apps Launcher Toggle
+jQuery(document).on('click', '#jobs-apps-launcher-btn', function(e) {
+    e.preventDefault();
+    jQuery('#jobs-apps-panel').toggleClass('show');
+});
+
+jQuery(document).on('click', '.close-apps-btn, .jobs-apps-panel-overlay', function(e) {
+    if (e.target === this || jQuery(this).hasClass('close-apps-btn')) {
+        jQuery('#jobs-apps-panel').removeClass('show');
+    }
+});
+
+jQuery('.apps-panel-card').on('click', function(e) {
+    e.stopPropagation();
+});
+
+// Toggle User Verification
+jQuery(document).on('click', '.verify-user-link', function(e) {
+    e.preventDefault();
+    const btn = jQuery(this);
+    const userId = btn.data('id');
+
+    $.post(jobs_ajax.ajax_url, {
+        action: 'jobs_toggle_verification',
+        user_id: userId
+    }, function(res) {
+        if (res.success) {
+            location.reload(); // Simple way to refresh UI for now
+        }
+    });
+});

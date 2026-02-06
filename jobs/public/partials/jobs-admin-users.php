@@ -64,8 +64,16 @@ $roles = get_editable_roles();
 					<tr>
 						<td>
 							<div style="display: flex; align-items: center; gap: 10px;">
-								<?php echo get_avatar($u->ID, 32); ?>
-								<strong><?php echo esc_html($u->display_name); ?></strong>
+								<?php echo get_avatar($u->ID, 48, '', '', array('class' => 'circular-avatar-large')); ?>
+								<div style="display:flex; flex-direction:column;">
+									<strong>
+										<?php echo esc_html($u->display_name); ?>
+										<?php if ( get_user_meta($u->ID, '_jobs_verified', true) === 'yes' ) : ?>
+											<span class="verified-badge" title="<?php _e('Verified Account', 'jobs'); ?>">✔</span>
+										<?php endif; ?>
+									</strong>
+									<small style="color:#718096;"><?php echo esc_html($u->user_login); ?></small>
+								</div>
 							</div>
 						</td>
 						<td><?php echo esc_html($u->user_email); ?></td>
@@ -73,6 +81,7 @@ $roles = get_editable_roles();
 						<td><?php echo date('M j, Y', strtotime($u->user_registered)); ?></td>
 						<td>
 							<div style="display: flex; gap: 10px;">
+								<a href="#" class="verify-user-link" data-id="<?php echo $u->ID; ?>" title="<?php _e( 'Toggle Verification', 'jobs' ); ?>"><i class="dashicons dashicons-shield"></i></a>
 								<a href="#" class="edit-user-link" data-id="<?php echo $u->ID; ?>" title="<?php _e( 'Edit', 'jobs' ); ?>"><i class="dashicons dashicons-edit"></i></a>
 								<a href="#" class="delete-user-link" data-id="<?php echo $u->ID; ?>" style="color: #e53e3e;" title="<?php _e( 'Delete', 'jobs' ); ?>"><i class="dashicons dashicons-trash"></i></a>
 							</div>
@@ -91,9 +100,15 @@ $roles = get_editable_roles();
 	<div style="background: #fff; margin: 5% auto; padding: 40px; width: 500px; border-radius: 24px;">
 		<h4 id="modal-title"><?php _e( 'Add New User', 'jobs' ); ?></h4>
 		<form id="admin-user-form" style="margin-top: 25px;">
-			<div class="form-group" style="margin-bottom: 15px;">
-				<label><?php _e( 'Full Name', 'jobs' ); ?></label>
-				<input type="text" name="display_name" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+			<div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px;">
+				<div class="form-group" style="flex: 1;">
+					<label><?php _e( 'First Name', 'jobs' ); ?></label>
+					<input type="text" name="first_name" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+				</div>
+				<div class="form-group" style="flex: 1;">
+					<label><?php _e( 'Last Name', 'jobs' ); ?></label>
+					<input type="text" name="last_name" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd;">
+				</div>
 			</div>
 			<div class="form-group" style="margin-bottom: 15px;">
 				<label><?php _e( 'Email', 'jobs' ); ?></label>
