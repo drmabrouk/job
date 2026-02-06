@@ -96,7 +96,8 @@ $settings_view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'ge
 					</thead>
 					<tbody>
 						<?php
-						$sessions = wp_get_all_sessions();
+						$manager = WP_Session_Tokens::get_instance( $user->ID );
+						$sessions = $manager->get_all();
 						foreach ( $sessions as $session ) : ?>
 							<tr style="border-bottom: 1px solid #f7fafc;">
 								<td style="padding: 15px;"><?php echo esc_html($session['ip']); ?></td>

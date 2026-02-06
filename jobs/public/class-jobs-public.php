@@ -63,7 +63,7 @@ class Jobs_Public {
 
 		wp_enqueue_style( 'dashicons' );
 		wp_enqueue_style( 'rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap', array(), null );
-		wp_enqueue_style( 'fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css', array(), '6.0.0' );
+		wp_enqueue_style( 'fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css', array(), '6.5.1' );
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jobs-public.css', array(), $this->version, 'all' );
 
 		// Custom Colors
@@ -939,6 +939,28 @@ class Jobs_Public {
 			include plugin_dir_path( __FILE__ ) . 'partials/jobs-public-profile.php';
 			exit;
 		}
+
+		$this->handle_settings_actions();
+	}
+
+	private function handle_settings_actions() {
+		if ( isset( $_POST['jobs_logout_others'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
+			$user_id = get_current_user_id();
+			$manager = WP_Session_Tokens::get_instance( $user_id );
+			$manager->destroy_others( wp_get_session_token() );
+			wp_redirect( home_url('/jobs-dashboard?tab=settings&view=security&logged_out=1') );
+			exit;
+		}
+
+		if ( isset( $_POST['jobs_change_password'] ) && wp_verify_nonce( $_POST['jobs_security_nonce'], 'jobs_save_security' ) ) {
+			$new_pass = $_POST['new_pass'];
+			$confirm = $_POST['confirm_pass'];
+			if ( $new_pass === $confirm && strlen($new_pass) >= 8 ) {
+				wp_set_password( $new_pass, get_current_user_id() );
+				wp_redirect( home_url('/jobs-auth?auth_action=login&pass_changed=1') );
+				exit;
+			}
+		}
 	}
 
 	/**
@@ -1147,7 +1169,7 @@ class Jobs_Public {
 		check_ajax_referer( 'jobs_auth_nonce', 'auth_nonce' );
 
 		$info = array();
-		$info['user_login'] = sanitize_user($_POST['user_login']);
+		$info['user_login'] = sanitize_text_field($_POST['user_login']);
 		$info['user_password'] = $_POST['user_pass'];
 		$info['remember'] = isset($_POST['rememberme']);
 

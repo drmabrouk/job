@@ -35,9 +35,11 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 							<option value=""><?php _e( 'Select Specialization', 'jobs' ); ?></option>
 							<?php
 							$categories = get_terms( array( 'taxonomy' => 'job_category', 'hide_empty' => false, 'parent' => 0 ) );
-							foreach ( $categories as $cat ) : ?>
-								<option value="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></option>
-							<?php endforeach; ?>
+							if ( ! is_wp_error( $categories ) && ! empty( $categories ) ) :
+								foreach ( $categories as $cat ) : ?>
+									<option value="<?php echo esc_attr( $cat->slug ); ?>"><?php echo esc_html( $cat->name ); ?></option>
+								<?php endforeach;
+							endif; ?>
 						</select>
 					</div>
 					<div class="filter-col">
@@ -59,10 +61,12 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 				<div class="jobs-category-capsules">
 					<?php
 					$all_cats = get_terms( array( 'taxonomy' => 'job_category', 'number' => 8 ) );
-					foreach ( $all_cats as $cat ) :
-					?>
-						<span class="job-capsule" data-slug="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html( $cat->name ); ?></span>
-					<?php endforeach; ?>
+					if ( ! is_wp_error( $all_cats ) && ! empty( $all_cats ) ) :
+						foreach ( $all_cats as $cat ) :
+						?>
+							<span class="job-capsule" data-slug="<?php echo esc_attr($cat->slug); ?>"><?php echo esc_html( $cat->name ); ?></span>
+						<?php endforeach;
+					endif; ?>
 				</div>
 			</div>
 		</div>
@@ -102,10 +106,23 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 				<?php
 				if ( $query->max_num_pages > 1 ) :
 					echo '<div class="jobs-numeric-pagination">';
-					for ( $i = 1; $i <= $query->max_num_pages; $i++ ) {
-						$active = ( $i == 1 ) ? 'active' : '';
+					$current = 1;
+					$max_visible = 5;
+					$start = max(1, $current - floor($max_visible / 2));
+					$end = min($query->max_num_pages, $start + $max_visible - 1);
+					if ($end - $start + 1 < $max_visible) {
+						$start = max(1, $end - $max_visible + 1);
+					}
+
+					if ($start > 1) echo '<button class="page-numbers" data-page="1">1</button>' . ($start > 2 ? '<span class="dots">...</span>' : '');
+
+					for ( $i = $start; $i <= $end; $i++ ) {
+						$active = ( $i == $current ) ? 'active' : '';
 						echo '<button class="page-numbers ' . $active . '" data-page="' . $i . '">' . $i . '</button>';
 					}
+
+					if ($end < $query->max_num_pages) echo ($end < $query->max_num_pages - 1 ? '<span class="dots">...</span>' : '') . '<button class="page-numbers" data-page="' . $query->max_num_pages . '">' . $query->max_num_pages . '</button>';
+
 					echo '</div>';
 				endif;
 				?>

@@ -44,10 +44,29 @@
 			if (totalPages <= 1) return;
 
 			var html = '<div class="jobs-numeric-pagination">';
-			for (var i = 1; i <= totalPages; i++) {
+			var maxVisible = 5;
+			var start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+			var end = Math.min(totalPages, start + maxVisible - 1);
+
+			if (end - start + 1 < maxVisible) {
+				start = Math.max(1, end - maxVisible + 1);
+			}
+
+			if (start > 1) {
+				html += '<button class="page-numbers" data-page="1">1</button>';
+				if (start > 2) html += '<span class="dots">...</span>';
+			}
+
+			for (var i = start; i <= end; i++) {
 				var activeClass = (i == currentPage) ? 'active' : '';
 				html += '<button class="page-numbers ' + activeClass + '" data-page="' + i + '">' + i + '</button>';
 			}
+
+			if (end < totalPages) {
+				if (end < totalPages - 1) html += '<span class="dots">...</span>';
+				html += '<button class="page-numbers" data-page="' + totalPages + '">' + totalPages + '</button>';
+			}
+
 			html += '</div>';
 			$pagination.html(html);
 		}
