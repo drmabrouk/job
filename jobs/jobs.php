@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Currently plugin version.
  * Start at version 1.0.0 and use SemVer - http://semver.org/
  */
-define( 'JOBS_VERSION', '1.1.0' );
+define( 'JOBS_VERSION', '1.0.0' );
 
 /**
  * The code that runs during plugin activation.

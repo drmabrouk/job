@@ -25,7 +25,7 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 		<div class="jobs-search-section-centered">
 			<div class="jobs-smart-search-wrapper">
 				<div class="search-input-group">
-					<i class="fas fa-search"></i>
+					<i class="dashicons dashicons-search"></i>
 					<input type="text" id="jobs-search-input" class="jobs-search-input-modern" placeholder="<?php _e( 'Job title or profession...', 'jobs' ); ?>" />
 				</div>
 
@@ -80,7 +80,8 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 			$args = array(
 				'post_type'      => 'job',
 				'post_status'    => 'publish',
-				'posts_per_page' => 12,
+				'posts_per_page' => 6,
+				'paged'          => 1,
 				'orderby'        => 'date',
 				'order'          => 'DESC'
 			);
@@ -96,6 +97,18 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 			endif;
 			?>
 		</div>
+		<div id="jobs-pagination" class="jobs-pagination-container">
+			<?php
+			if ( $query->max_num_pages > 1 ) :
+				echo '<div class="jobs-numeric-pagination">';
+				for ( $i = 1; $i <= $query->max_num_pages; $i++ ) {
+					$active = ( $i == 1 ) ? 'active' : '';
+					echo '<button class="page-numbers ' . $active . '" data-page="' . $i . '">' . $i . '</button>';
+				}
+				echo '</div>';
+			endif;
+			?>
+		</div>
 	</div>
 
 	<?php if ( $ad_bottom = get_option( 'jobs_ad_bottom' ) ) : ?>
@@ -103,4 +116,8 @@ $logo_width = get_option( 'jobs_logo_width', '200' );
 		<?php echo $ad_bottom; ?>
 	</div>
 	<?php endif; ?>
+
+	<div class="jobs-legal-footer-line">
+		<?php echo esc_html( get_option( 'jobs_footer_text', '© ' . date('Y') . ' Jobedia. All rights reserved.' ) ); ?>
+	</div>
 </div>

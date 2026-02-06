@@ -45,7 +45,7 @@ class Jobs_Activator {
 		self::setup_cron();
 
 		// Automated Versioning & Cache Management
-		update_option( 'jobs_version', '1.1.0' );
+		update_option( 'jobs_version', '1.0.0' );
 		wp_cache_flush();
 		flush_rewrite_rules();
 	}
@@ -122,7 +122,7 @@ class Jobs_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	private static function register_post_types() {
+	public static function register_post_types() {
 		// Jobs CPT
 		register_post_type( 'job', array(
 			'labels' => array(
