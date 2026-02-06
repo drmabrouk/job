@@ -338,3 +338,41 @@
 	});
 
 })(jQuery);
+
+// Unified Apps Sub-panel Logic
+jQuery(document).ready(function($) {
+    $('.sub-trigger, .profile-sub-trigger').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const panelId = $(this).data('panel');
+        $('#jobs-apps-panel').addClass('show'); // Ensure main panel is open
+        $('.apps-sub-panel').hide();
+        $(`#panel-${panelId}`).css('display', 'flex');
+        $('#jobs-profile-dropdown').hide();
+    });
+
+    $('.back-btn').on('click', function() {
+        $(this).closest('.apps-sub-panel').hide();
+    });
+});
+
+// Company Profile and Support AJAX
+jQuery(document).ready(function($) {
+    $(document).on('submit', '#jobs-company-profile-form', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        $.post(jobs_ajax.ajax_url, $form.serialize() + '&action=jobs_save_company_profile', function(res) {
+            alert(res.data);
+        });
+    });
+
+    $(document).on('submit', '#jobs-support-form', function(e) {
+        e.preventDefault();
+        const $form = $(this);
+        $.post(jobs_ajax.ajax_url, $form.serialize() + '&action=jobs_send_support_message', function(res) {
+            alert(res.data);
+            $form[0].reset();
+            $('.apps-sub-panel').hide();
+        });
+    });
+});

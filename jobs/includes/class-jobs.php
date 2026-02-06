@@ -221,6 +221,8 @@ class Jobs {
 		$this->loader->add_action( 'wp_ajax_jobs_save_onboarding', $plugin_public, 'ajax_save_onboarding' );
 		$this->loader->add_action( 'wp_ajax_jobs_toggle_verification', $plugin_public, 'ajax_toggle_verification' );
 		$this->loader->add_action( 'wp_ajax_jobs_post_job_ajax', $plugin_public, 'ajax_post_job' );
+		$this->loader->add_action( 'wp_ajax_jobs_save_company_profile', $plugin_public, 'ajax_save_company_profile' );
+		$this->loader->add_action( 'wp_ajax_jobs_send_support_message', $plugin_public, 'ajax_send_support_message' );
 		$this->loader->add_action( 'wp_ajax_jobs_submit_application_ajax', $plugin_public, 'ajax_submit_application' );
 		$this->loader->add_action( 'wp_insert_post', $plugin_public, 'notify_followers_new_job', 10, 3 );
 
@@ -229,7 +231,7 @@ class Jobs {
 		$this->loader->add_shortcode( 'jobs_register', $plugin_public, 'shortcode_jobs_register' );
 		$this->loader->add_shortcode( 'jobs_search_engine', $plugin_public, 'shortcode_jobs_search_engine' );
 		$this->loader->add_shortcode( 'jobs_language_switcher', $plugin_public, 'shortcode_language_switcher' );
-		$this->loader->add_shortcode( 'jobs_dashboard', $plugin_public, 'shortcode_jobs_dashboard' );
+		// $this->loader->add_shortcode( 'jobs_dashboard', $plugin_public, 'shortcode_jobs_dashboard' ); // Legacy Removed
 		$this->loader->add_shortcode( 'jobs_settings', $plugin_public, 'shortcode_jobs_settings' );
 
 	}
