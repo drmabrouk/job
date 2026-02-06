@@ -31,9 +31,6 @@ get_header();
 ?>
 <div class="jobs-container">
 	<div class="jobs-public-profile">
-		<?php if ( ! $is_indexed ) : ?>
-			<meta name="robots" content="noindex, nofollow">
-		<?php endif; ?>
 
 		<div class="profile-header" style="text-align: center; margin-bottom: 40px;">
 			<?php echo get_avatar( $user->ID, 128, '', '', array( 'class' => 'profile-avatar' ) ); ?>

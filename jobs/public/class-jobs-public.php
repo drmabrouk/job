@@ -101,49 +101,6 @@ class Jobs_Public {
 		return $classes;
 	}
 
-	/**
-	 * Add SEO meta tags to the head.
-	 *
-	 * @since    1.0.0
-	 */
-	public function add_seo_meta_tags() {
-		if ( is_singular( 'job' ) ) {
-			global $post;
-			$description = wp_trim_words( $post->post_excerpt, 25 );
-			if ( empty( $description ) ) {
-				$description = wp_trim_words( $post->post_content, 25 );
-			}
-			echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
-			echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . '" />' . "\n";
-			echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
-			echo '<meta property="og:type" content="article" />' . "\n";
-			echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . '" />' . "\n";
-
-			// Schema.org JobPosting JSON-LD
-			$schema = array(
-				'@context' => 'https://schema.org/',
-				'@type'    => 'JobPosting',
-				'title'    => get_the_title(),
-				'description' => wp_kses_post( $post->post_content ),
-				'datePosted'  => get_the_date( 'c' ),
-				'validThrough' => get_post_meta( get_the_ID(), '_jobs_expiration_date', true ),
-				'hiringOrganization' => array(
-					'@type' => 'Organization',
-					'name'  => get_the_author_meta( 'display_name' ),
-					'sameAs' => home_url(),
-				),
-				'jobLocation' => array(
-					'@type' => 'Place',
-					'address' => array(
-						'@type' => 'PostalAddress',
-						'addressLocality' => get_post_meta( get_the_ID(), '_job_state', true ),
-						'addressCountry' => get_post_meta( get_the_ID(), '_job_country', true ),
-					),
-				),
-			);
-			echo '<script type="application/ld+json">' . json_encode( $schema ) . '</script>' . "\n";
-		}
-	}
 
 	/**
 	 * Add ads to single job content.
@@ -740,147 +697,76 @@ class Jobs_Public {
 				</div>
 
 				<div class="apps-grid-content">
-					<?php if ( $is_logged_in ) :
-						$roles = ( array ) $user->roles;
-						$role_id = $roles[0];
-						$is_admin = current_user_can('manage_options');
-						$is_employer = ($role_id === 'employer' || $is_admin);
-						$is_seeker = ($role_id === 'job_seeker' || $is_admin);
-						$is_reviewer = ($role_id === 'job_reviewer' || $is_admin);
-					?>
+					<?php if ( $is_logged_in ) : ?>
 						<div class="apps-launcher-grid">
-							<?php if ( $is_employer || $is_reviewer ) : ?>
-								<div class="app-item sub-trigger" data-panel="post-job">
-									<div class="app-icon" style="background: #e0f2fe; color: #0369a1;"><i class="fas fa-plus"></i></div>
-									<span><?php _e( 'Post a Job', 'jobs' ); ?></span>
-								</div>
-								<div class="app-item sub-trigger" data-panel="job-history">
-									<div class="app-icon" style="background: #f0fdf4; color: #166534;"><i class="fas fa-history"></i></div>
-									<span><?php _e( 'Job History', 'jobs' ); ?></span>
-								</div>
-								<div class="app-item sub-trigger" data-panel="manage-apps">
-									<div class="app-icon" style="background: #fff7ed; color: #ea580c;"><i class="fas fa-inbox"></i></div>
-									<span><?php _e( 'Job Requests', 'jobs' ); ?></span>
-								</div>
-							<?php endif; ?>
+							<?php
+							$apps = Jobs_System::get_applications();
+							foreach ( $apps as $key => $app ) :
+								if ( isset( $app['hidden'] ) && $app['hidden'] ) continue;
 
-							<a href="<?php echo home_url('/job-seeker/' . $user->user_nicename); ?>" class="app-item">
-								<div class="app-icon" style="background: #ecfeff; color: #155e75;"><i class="fas fa-user-circle"></i></div>
-								<span><?php _e( 'Public Profile', 'jobs' ); ?></span>
-							</a>
+								// Capability Check
+								if ( isset( $app['capability'] ) && ! current_user_can( $app['capability'] ) && ! current_user_can( 'manage_options' ) ) continue;
 
-							<?php if ( $is_seeker ) : ?>
-								<div class="app-item sub-trigger" data-panel="submitted-apps">
-									<div class="app-icon" style="background: #f5f3ff; color: #5b21b6;"><i class="fas fa-paper-plane"></i></div>
-									<span><?php _e( 'Applications Submitted', 'jobs' ); ?></span>
-								</div>
-								<div class="app-item sub-trigger" data-panel="cv-resume">
-									<div class="app-icon" style="background: #fff1f2; color: #e11d48;"><i class="fas fa-file-invoice"></i></div>
-									<span><?php _e( 'CV / Resume', 'jobs' ); ?></span>
-								</div>
-							<?php endif; ?>
+								$classes = 'app-item';
+								$data_attr = '';
+								$href = '#';
 
-							<?php if ( $is_employer ) : ?>
-								<div class="app-item sub-trigger" data-panel="company-profile">
-									<div class="app-icon" style="background: #fef3c7; color: #92400e;"><i class="fas fa-building"></i></div>
-									<span><?php _e( 'Company Profile', 'jobs' ); ?></span>
-								</div>
-							<?php endif; ?>
+								if ( isset( $app['panel'] ) ) {
+									$classes .= ' sub-trigger';
+									$data_attr = 'data-panel="' . esc_attr( $app['panel'] ) . '"';
+								}
 
-							<div class="app-item sub-trigger" data-panel="favorites">
-								<div class="app-icon" style="background: #fdf2f8; color: #db2777;"><i class="fas fa-heart"></i></div>
-								<span><?php _e( 'Favorites', 'jobs' ); ?></span>
-							</div>
-
-							<div class="app-item sub-trigger" data-panel="drafts">
-								<div class="app-icon" style="background: #f3f4f6; color: #374151;"><i class="fas fa-edit"></i></div>
-								<span><?php _e( 'Drafts', 'jobs' ); ?></span>
-							</div>
-
-							<div class="app-item sub-trigger" data-panel="support">
-								<div class="app-icon" style="background: #f0f9ff; color: #0284c7;"><i class="fas fa-headset"></i></div>
-								<span><?php _e( 'Support', 'jobs' ); ?></span>
-							</div>
-
-							<?php if ( $is_admin ) : ?>
-								<div class="app-item sub-trigger" data-panel="admin-advanced">
-									<div class="app-icon" style="background: #1e293b; color: #fff;"><i class="fas fa-user-shield"></i></div>
-									<span><?php _e( 'Advanced', 'jobs' ); ?></span>
-								</div>
-							<?php endif; ?>
-
-							<a href="<?php echo home_url('/terms'); ?>" class="app-item">
-								<div class="app-icon" style="background: #fafafa; color: #718096;"><i class="fas fa-file-contract"></i></div>
-								<span><?php _e( 'Terms', 'jobs' ); ?></span>
-							</a>
-
-							<a href="<?php echo home_url('/blog'); ?>" class="app-item">
-								<div class="app-icon" style="background: #fafafa; color: #718096;"><i class="fas fa-newspaper"></i></div>
-								<span><?php _e( 'Articles', 'jobs' ); ?></span>
-							</a>
+								if ( isset( $app['link'] ) && $app['link'] ) {
+									if ( $key === 'public-profile' ) {
+										$href = home_url( '/job-seeker/' . $user->user_nicename );
+									} elseif ( isset( $app['url'] ) ) {
+										$href = home_url( $app['url'] );
+									}
+								}
+								?>
+								<a href="<?php echo esc_url( $href ); ?>" class="<?php echo esc_attr( $classes ); ?>" <?php echo $data_attr; ?>>
+									<div class="app-icon" style="background: <?php echo esc_attr( $app['bg'] ); ?>; color: <?php echo esc_attr( $app['color'] ); ?>;">
+										<i class="<?php echo esc_attr( $app['icon'] ); ?>"></i>
+									</div>
+									<span><?php echo esc_html( $app['label'] ); ?></span>
+								</a>
+							<?php endforeach; ?>
 						</div>
 
 						<!-- Sub Panels Container -->
 						<div id="apps-sub-panels-wrapper">
-							<div class="apps-sub-panel" id="panel-post-job">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Post a Job', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/jobs-post-inline.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-job-history">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Job History', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-job-history.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-submitted-apps">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Submitted Apps', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-submitted-apps.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-drafts">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Draft Manager', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-drafts.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-cv-resume">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('CV / Resume', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-cv-resume.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-company-profile">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Company Profile', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-company-profile.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-favorites">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Favorites', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-favorites.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-support">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Support', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-support.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-admin-advanced">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Advanced Settings', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-admin-advanced.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-settings">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Settings', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-settings.php'; ?></div>
-							</div>
-							<div class="apps-sub-panel" id="panel-system">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Activity Logs', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body">
-									<ul class="activity-log-list" style="list-style:none; padding:0;">
+							<?php foreach ( $apps as $key => $app ) :
+								if ( ! isset( $app['panel'] ) ) continue;
+								?>
+								<div class="apps-sub-panel" id="panel-<?php echo esc_attr( $app['panel'] ); ?>">
+									<div class="sub-panel-header">
+										<button class="back-btn"><i class="fas fa-chevron-left"></i></button>
+										<h4><?php echo esc_html( $app['label'] ); ?></h4>
+									</div>
+									<div class="sub-panel-body">
 										<?php
-										$logs = get_user_meta(get_current_user_id(), '_jobs_activity_log', true) ?: array();
-										foreach(array_reverse($logs) as $log): ?>
-											<li style="padding:10px; border-bottom:1px solid #eee; font-size:12px;">
-												<strong><?php echo esc_html($log['action']); ?></strong><br>
-												<small style="color:#999;"><?php echo date('Y-m-d H:i', $log['time']); ?> - <?php echo esc_html($log['ip']); ?></small>
-											</li>
-										<?php endforeach; ?>
-									</ul>
+										if ( $key === 'activity-logs' ) : ?>
+											<ul class="activity-log-list" style="list-style:none; padding:0;">
+												<?php
+												$logs = get_user_meta(get_current_user_id(), '_jobs_activity_log', true) ?: array();
+												foreach(array_reverse($logs) as $log): ?>
+													<li style="padding:10px; border-bottom:1px solid #eee; font-size:12px;">
+														<strong><?php echo esc_html($log['action']); ?></strong><br>
+														<small style="color:#999;"><?php echo date('Y-m-d H:i', $log['time']); ?> - <?php echo esc_html($log['ip']); ?></small>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										<?php elseif ( isset( $app['partial'] ) ) :
+											$partial_path = plugin_dir_path(__FILE__) . 'partials/' . $app['partial'];
+											if ( file_exists( $partial_path ) ) {
+												include $partial_path;
+											} else {
+												printf( __( 'Component %s not found.', 'jobs' ), esc_html( $app['partial'] ) );
+											}
+										endif; ?>
+									</div>
 								</div>
-							</div>
-							<div class="apps-sub-panel" id="panel-manage-apps">
-								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Job Requests', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/jobs-manage-applications.php'; ?></div>
-							</div>
+							<?php endforeach; ?>
 						</div>
 
 					<?php else : ?>
