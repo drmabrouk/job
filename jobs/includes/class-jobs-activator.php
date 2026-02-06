@@ -434,21 +434,7 @@ class Jobs_Activator {
 			wp_update_post( array( 'ID' => $page_check->ID, 'post_content' => $page_content ) );
 		}
 
-		// Jobs Dashboard
-		$dash_title = 'Jobs Dashboard';
-		$dash_check = get_page_by_title( $dash_title );
-		if ( ! isset( $dash_check->ID ) ) {
-			wp_insert_post( array(
-				'post_type'    => 'page',
-				'post_title'   => $dash_title,
-				'post_content' => '[jobs_dashboard]',
-				'post_status'  => 'publish',
-				'post_author'  => 1,
-				'post_name'    => 'jobs-dashboard',
-			) );
-		} else {
-			wp_update_post( array( 'ID' => $dash_check->ID, 'post_content' => '[jobs_dashboard]' ) );
-		}
+		// Jobs Dashboard - Legacy Removed
 
 		// Jobs Settings
 		$settings_title = 'Jobs Settings';
