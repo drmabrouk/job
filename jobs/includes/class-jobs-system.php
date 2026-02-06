@@ -166,6 +166,13 @@ class Jobs_System {
 				'capability' => 'read',
 				'hidden'    => true,
 			),
+			'indexing' => array(
+				'label'     => __( 'SEO Indexing', 'jobs' ),
+				'icon'      => 'fas fa-search-plus',
+				'panel'     => 'indexing',
+				'capability' => 'manage_options',
+				'hidden'    => true,
+			),
 			'terms' => array(
 				'label'     => __( 'Terms', 'jobs' ),
 				'icon'      => 'fas fa-file-contract',

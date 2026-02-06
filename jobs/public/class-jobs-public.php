@@ -101,49 +101,6 @@ class Jobs_Public {
 		return $classes;
 	}
 
-	/**
-	 * Add SEO meta tags to the head.
-	 *
-	 * @since    1.0.0
-	 */
-	public function add_seo_meta_tags() {
-		if ( is_singular( 'job' ) ) {
-			global $post;
-			$description = wp_trim_words( $post->post_excerpt, 25 );
-			if ( empty( $description ) ) {
-				$description = wp_trim_words( $post->post_content, 25 );
-			}
-			echo '<meta name="description" content="' . esc_attr( $description ) . '" />' . "\n";
-			echo '<meta property="og:title" content="' . esc_attr( get_the_title() ) . '" />' . "\n";
-			echo '<meta property="og:description" content="' . esc_attr( $description ) . '" />' . "\n";
-			echo '<meta property="og:type" content="article" />' . "\n";
-			echo '<meta property="og:url" content="' . esc_url( get_permalink() ) . '" />' . "\n";
-
-			// Schema.org JobPosting JSON-LD
-			$schema = array(
-				'@context' => 'https://schema.org/',
-				'@type'    => 'JobPosting',
-				'title'    => get_the_title(),
-				'description' => wp_kses_post( $post->post_content ),
-				'datePosted'  => get_the_date( 'c' ),
-				'validThrough' => get_post_meta( get_the_ID(), '_jobs_expiration_date', true ),
-				'hiringOrganization' => array(
-					'@type' => 'Organization',
-					'name'  => get_the_author_meta( 'display_name' ),
-					'sameAs' => home_url(),
-				),
-				'jobLocation' => array(
-					'@type' => 'Place',
-					'address' => array(
-						'@type' => 'PostalAddress',
-						'addressLocality' => get_post_meta( get_the_ID(), '_job_state', true ),
-						'addressCountry' => get_post_meta( get_the_ID(), '_job_country', true ),
-					),
-				),
-			);
-			echo '<script type="application/ld+json">' . json_encode( $schema ) . '</script>' . "\n";
-		}
-	}
 
 	/**
 	 * Add ads to single job content.

@@ -197,7 +197,6 @@ class Jobs {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_filter( 'body_class', $plugin_public, 'add_rtl_body_class' );
-		$this->loader->add_action( 'wp_head', $plugin_public, 'add_seo_meta_tags' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_job_single_ads' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_follow_employer_button' );
 		$this->loader->add_filter( 'the_content', $plugin_public, 'add_application_form' );
