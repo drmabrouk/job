@@ -20,6 +20,7 @@ $page_titles = array(
 	'analytics'       => __( 'Reports & Insights', 'jobs' ),
 	'settings'        => __( 'Account Settings', 'jobs' ),
 	'help'            => __( 'Help & Support', 'jobs' ),
+	'onboarding'      => __( 'Complete Your Profile', 'jobs' ),
 );
 $current_title = isset($page_titles[$tab]) ? $page_titles[$tab] : __( 'Dashboard', 'jobs' );
 ?>
@@ -114,8 +115,8 @@ $current_title = isset($page_titles[$tab]) ? $page_titles[$tab] : __( 'Dashboard
 		</header>
 
 		<!-- Content -->
-		<main class="account-body" style="flex: 1; padding: 40px; overflow-y: auto;">
-			<div class="jobs-tab-content" style="max-width: 1200px;">
+		<main class="account-body" style="flex: 1; padding: 20px 0; overflow-y: auto;">
+			<div class="jobs-tab-content" style="max-width: 100%; width: 100%;">
 				<?php
 				switch($tab) {
 					case 'manage-jobs':
@@ -141,6 +142,9 @@ $current_title = isset($page_titles[$tab]) ? $page_titles[$tab] : __( 'Dashboard
 						break;
 					case 'settings':
 						include plugin_dir_path(__FILE__) . 'jobs-settings-panel.php';
+						break;
+					case 'onboarding':
+						include plugin_dir_path(__FILE__) . 'jobs-onboarding.php';
 						break;
 					case 'overview':
 					default:
