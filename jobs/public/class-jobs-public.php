@@ -668,7 +668,6 @@ class Jobs_Public {
 	public function add_custom_nav_bar() {
 		$user = wp_get_current_user();
 		$is_logged_in = is_user_logged_in();
-		$is_rtl = is_rtl();
 		$is_home = is_front_page() || is_home();
 
 		?>
@@ -759,6 +758,10 @@ class Jobs_Public {
 									<div class="app-icon" style="background: #f0fdf4; color: #166534;"><i class="fas fa-history"></i></div>
 									<span><?php _e( 'Job History', 'jobs' ); ?></span>
 								</div>
+								<div class="app-item sub-trigger" data-panel="manage-apps">
+									<div class="app-icon" style="background: #fff7ed; color: #ea580c;"><i class="fas fa-inbox"></i></div>
+									<span><?php _e( 'Job Requests', 'jobs' ); ?></span>
+								</div>
 							<?php endif; ?>
 
 							<a href="<?php echo home_url('/job-seeker/' . $user->user_nicename); ?>" class="app-item">
@@ -769,7 +772,7 @@ class Jobs_Public {
 							<?php if ( $is_seeker ) : ?>
 								<div class="app-item sub-trigger" data-panel="submitted-apps">
 									<div class="app-icon" style="background: #f5f3ff; color: #5b21b6;"><i class="fas fa-paper-plane"></i></div>
-									<span><?php _e( 'Submitted Apps', 'jobs' ); ?></span>
+									<span><?php _e( 'Applications Submitted', 'jobs' ); ?></span>
 								</div>
 								<div class="app-item sub-trigger" data-panel="cv-resume">
 									<div class="app-icon" style="background: #fff1f2; color: #e11d48;"><i class="fas fa-file-invoice"></i></div>
@@ -821,43 +824,62 @@ class Jobs_Public {
 						<div id="apps-sub-panels-wrapper">
 							<div class="apps-sub-panel" id="panel-post-job">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Post a Job', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'jobs-post-inline.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/jobs-post-inline.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-job-history">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Job History', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-job-history.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-job-history.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-submitted-apps">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Submitted Apps', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-submitted-apps.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-submitted-apps.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-drafts">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Draft Manager', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-drafts.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-drafts.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-cv-resume">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('CV / Resume', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-cv-resume.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-cv-resume.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-company-profile">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Company Profile', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-company-profile.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-company-profile.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-favorites">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Favorites', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-favorites.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-favorites.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-support">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Support', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-support.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-support.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-admin-advanced">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Advanced Settings', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-admin-advanced.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-admin-advanced.php'; ?></div>
 							</div>
 							<div class="apps-sub-panel" id="panel-settings">
 								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Settings', 'jobs'); ?></h4></div>
-								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'app-settings.php'; ?></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/app-settings.php'; ?></div>
+							</div>
+							<div class="apps-sub-panel" id="panel-system">
+								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Activity Logs', 'jobs'); ?></h4></div>
+								<div class="sub-panel-body">
+									<ul class="activity-log-list" style="list-style:none; padding:0;">
+										<?php
+										$logs = get_user_meta(get_current_user_id(), '_jobs_activity_log', true) ?: array();
+										foreach(array_reverse($logs) as $log): ?>
+											<li style="padding:10px; border-bottom:1px solid #eee; font-size:12px;">
+												<strong><?php echo esc_html($log['action']); ?></strong><br>
+												<small style="color:#999;"><?php echo date('Y-m-d H:i', $log['time']); ?> - <?php echo esc_html($log['ip']); ?></small>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+								</div>
+							</div>
+							<div class="apps-sub-panel" id="panel-manage-apps">
+								<div class="sub-panel-header"><button class="back-btn"><i class="fas fa-chevron-left"></i></button><h4><?php _e('Job Requests', 'jobs'); ?></h4></div>
+								<div class="sub-panel-body"><?php include plugin_dir_path(__FILE__) . 'partials/jobs-manage-applications.php'; ?></div>
 							</div>
 						</div>
 
@@ -873,6 +895,19 @@ class Jobs_Public {
 				</div>
 			</div>
 		</div>
+		<!-- Global Modal System -->
+		<div id="jobs-global-modal" class="jobs-modal-overlay">
+			<div class="jobs-modal-container">
+				<div class="jobs-modal-header">
+					<h3 id="jobs-modal-title"><?php _e('Job Portal', 'jobs'); ?></h3>
+					<button class="jobs-modal-close-btn">&times;</button>
+				</div>
+				<div class="jobs-modal-body" id="jobs-modal-body">
+					<!-- Content loaded dynamically or via JS -->
+				</div>
+			</div>
+		</div>
+
 		<?php
 	}
 
@@ -885,7 +920,7 @@ class Jobs_Public {
 	 * Override Single Job Template
 	 */
 	public function job_single_template( $template ) {
-		if ( is_singular( 'job' ) || get_post_type() === 'job' ) {
+		if ( is_singular( 'job' ) ) {
 			$new_template = plugin_dir_path( __FILE__ ) . 'partials/jobs-single-listing.php';
 			if ( file_exists( $new_template ) ) {
 				return $new_template;
@@ -964,9 +999,7 @@ class Jobs_Public {
 			return $this->shortcode_jobs_login( array() );
 		}
 
-		ob_start();
-		include plugin_dir_path( __FILE__ ) . 'partials/jobs-account-wrapper.php';
-		return ob_get_clean();
+		return '<div class="jobs-msg info">' . __('The traditional dashboard has been replaced by the Apps Launcher in the top navigation bar. Please use the grid icon to access your applications and profile.', 'jobs') . '</div>';
 	}
 
 	/**

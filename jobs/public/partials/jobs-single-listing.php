@@ -57,22 +57,6 @@ $share_title = urlencode(get_the_title());
 		</div>
 	</header>
 
-	<div id="inline-application-form-container" class="inline-application-dropdown">
-		<div class="jobs-container">
-			<div class="application-form-card">
-				<div class="form-card-header">
-					<h3><?php _e('Submit Your Application', 'jobs'); ?></h3>
-					<button id="close-apply-form">&times;</button>
-				</div>
-				<?php
-				// Reuse existing application form logic
-				$plugin_public = new Jobs_Public('jobs', '1.0.0');
-				echo $plugin_public->add_application_form('');
-				?>
-			</div>
-		</div>
-	</div>
-
 	<div class="jobs-container content-grid-layout">
 		<div class="job-main-column">
 			<div class="job-content-card">
@@ -106,19 +90,35 @@ $share_title = urlencode(get_the_title());
 			</div>
 		</aside>
 	</div>
+
+	<!-- Application Modal Template (Hidden) -->
+	<div style="display:none;">
+		<div id="application-form-source">
+			<div class="application-form-card-modal">
+				<div class="form-card-header">
+					<h3><?php _e('Submit Your Application', 'jobs'); ?></h3>
+				</div>
+				<div class="application-modal-content-inner">
+					<?php
+					$plugin_public = new Jobs_Public('jobs', '1.0.0');
+					echo $plugin_public->add_application_form('');
+					?>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script>
 jQuery(document).ready(function($) {
 	$('#inline-apply-trigger').on('click', function() {
-		$('#inline-application-form-container').slideDown();
-		$('html, body').animate({
-			scrollTop: $("#inline-application-form-container").offset().top - 100
-		}, 500);
-	});
+		const title = $('#application-form-source h3').text();
+		const content = $('#application-form-source .application-modal-content-inner').html();
 
-	$('#close-apply-form').on('click', function() {
-		$('#inline-application-form-container').slideUp();
+		$('#jobs-modal-title').text(title);
+		$('#jobs-modal-body').html(content);
+		$('#jobs-global-modal').css('display', 'flex').hide().fadeIn(300);
+		$('body').addClass('jobs-modal-open');
 	});
 });
 </script>
@@ -141,12 +141,6 @@ jQuery(document).ready(function($) {
 .job-share-wrap span { font-size: 13px; color: #94a3b8; font-weight: 600; }
 .job-share-wrap a { color: #64748b; font-size: 18px; transition: color 0.2s; }
 .job-share-wrap a:hover { color: var(--primary-color); }
-
-.inline-application-dropdown { display: none; background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 40px 0; }
-.application-form-card { background: #fff; border-radius: 24px; padding: 40px; box-shadow: 0 10px 40px rgba(0,0,0,0.05); }
-.form-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.form-card-header h3 { margin: 0; font-size: 22px; }
-#close-apply-form { background: none; border: none; font-size: 32px; cursor: pointer; color: #cbd5e0; }
 
 .content-grid-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 .job-content-card, .job-info-card, .job-company-card { background: #fff; border-radius: 24px; padding: 40px; border: 1px solid #f1f5f9; margin-bottom: 30px; }

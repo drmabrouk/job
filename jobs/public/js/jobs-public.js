@@ -376,3 +376,47 @@ jQuery(document).ready(function($) {
         });
     });
 });
+
+// Global Modal Logic
+jQuery(document).ready(function($) {
+    function openGlobalModal(title, contentHtml) {
+        $('#jobs-modal-title').text(title);
+        $('#jobs-modal-body').html(contentHtml);
+        $('#jobs-global-modal').css('display', 'flex').hide().fadeIn(300);
+        $('body').addClass('jobs-modal-open');
+    }
+
+    function closeGlobalModal() {
+        $('#jobs-global-modal').fadeOut(300, function() {
+            $(this).hide();
+            $('#jobs-modal-body').empty();
+            $('body').removeClass('jobs-modal-open');
+        });
+    }
+
+    $(document).on('click', '.jobs-modal-close-btn, .jobs-modal-overlay', function(e) {
+        if (e.target === this || $(this).hasClass('jobs-modal-close-btn')) {
+            closeGlobalModal();
+        }
+    });
+
+    $('.jobs-modal-container').on('click', function(e) {
+        e.stopPropagation();
+    });
+
+    // Update Apps Launcher to use Global Modal
+    $('.sub-trigger, .profile-sub-trigger').off('click').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const panelId = $(this).data('panel');
+        const $sourcePanel = $(`#panel-${panelId}`);
+
+        if ($sourcePanel.length) {
+            const title = $sourcePanel.find('h4').text();
+            const content = $sourcePanel.find('.sub-panel-body').html();
+            openGlobalModal(title, content);
+            $('#jobs-apps-panel').removeClass('show');
+            $('#jobs-profile-dropdown').hide();
+        }
+    });
+});

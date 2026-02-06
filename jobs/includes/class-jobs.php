@@ -231,7 +231,7 @@ class Jobs {
 		$this->loader->add_shortcode( 'jobs_register', $plugin_public, 'shortcode_jobs_register' );
 		$this->loader->add_shortcode( 'jobs_search_engine', $plugin_public, 'shortcode_jobs_search_engine' );
 		$this->loader->add_shortcode( 'jobs_language_switcher', $plugin_public, 'shortcode_language_switcher' );
-		// $this->loader->add_shortcode( 'jobs_dashboard', $plugin_public, 'shortcode_jobs_dashboard' ); // Legacy Removed
+		$this->loader->add_shortcode( 'jobs_dashboard', $plugin_public, 'shortcode_jobs_dashboard' );
 		$this->loader->add_shortcode( 'jobs_settings', $plugin_public, 'shortcode_jobs_settings' );
 
 	}

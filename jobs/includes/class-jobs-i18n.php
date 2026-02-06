@@ -93,6 +93,8 @@ class Jobs_i18n {
 			'Dashboard' => 'لوحة التحكم',
 			'Account Settings' => 'إعدادات الحساب',
 			'Logout' => 'تسجيل الخروج',
+			'Job Requests' => 'طلبات التوظيف',
+			'Applications Submitted' => 'الطلبات المقدمة',
 			'Login to Your Account' => 'تسجيل الدخول إلى حسابك',
 			'Create an Account' => 'إنشاء حساب جديد',
 			'Sign In' => 'تسجيل الدخول',
