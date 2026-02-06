@@ -596,12 +596,7 @@ class Jobs_Admin {
 			echo '<div class="updated"><p>' . __( 'Plugin pages have been verified and repaired.', 'jobs' ) . '</p></div>';
 		}
 
-		$pages = array(
-			'Jobs'           => '[jobs_search_engine]',
-			'Jobs Dashboard' => '[jobs_dashboard]',
-			'Join Us'        => '[jobs_auth]',
-			'Jobs Settings'  => '[jobs_settings]',
-		);
+		$core_pages = Jobs_System::get_core_pages();
 		?>
 		<div class="wrap">
 			<h1><?php _e( 'Page Manager & Verification', 'jobs' ); ?></h1>
@@ -617,14 +612,14 @@ class Jobs_Admin {
 					</tr>
 				</thead>
 				<tbody>
-					<?php foreach ( $pages as $title => $shortcode ) :
-						$page = get_page_by_title( $title );
+					<?php foreach ( $core_pages as $key => $data ) :
+						$page = get_page_by_title( $data['title'] );
 						$exists = isset( $page->ID );
-						$functional = $exists && strpos( $page->post_content, $shortcode ) !== false;
+						$functional = $exists && strpos( $page->post_content, $data['shortcode'] ) !== false;
 					?>
 					<tr>
-						<td><strong><?php echo esc_html( $title ); ?></strong></td>
-						<td><code><?php echo esc_html( $shortcode ); ?></code></td>
+						<td><strong><?php echo esc_html( $data['title'] ); ?></strong></td>
+						<td><code><?php echo esc_html( $data['shortcode'] ); ?></code></td>
 						<td>
 							<?php if ( $functional ) : ?>
 								<span style="color: #27ae60; font-weight: 700;">✅ <?php _e( 'Functional', 'jobs' ); ?></span>

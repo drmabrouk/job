@@ -100,6 +100,11 @@ class Jobs {
 	private function load_dependencies() {
 
 		/**
+		 * The class responsible for the centralized system map.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jobs-system.php';
+
+		/**
 		 * The class responsible for defining all code necessary to run during activation.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jobs-activator.php';

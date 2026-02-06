@@ -413,59 +413,32 @@ class Jobs_Activator {
 	}
 
 	private static function create_homepage() {
-		// Jobs Home
-		$page_title = 'Jobs';
-		$page_content = '[jobs_search_engine]';
-		$page_check = get_page_by_title( $page_title );
+		$core_pages = Jobs_System::get_core_pages();
 
-		if ( ! isset( $page_check->ID ) ) {
-			$new_page_id = wp_insert_post( array(
-				'post_type'    => 'page',
-				'post_title'   => $page_title,
-				'post_content' => $page_content,
-				'post_status'  => 'publish',
-				'post_author'  => 1,
-			) );
-			if ( $new_page_id ) {
-				update_option( 'show_on_front', 'page' );
-				update_option( 'page_on_front', $new_page_id );
+		foreach ( $core_pages as $key => $data ) {
+			$page_check = get_page_by_title( $data['title'] );
+
+			if ( ! isset( $page_check->ID ) ) {
+				$new_page_id = wp_insert_post( array(
+					'post_type'    => 'page',
+					'post_title'   => $data['title'],
+					'post_content' => $data['shortcode'],
+					'post_status'  => 'publish',
+					'post_author'  => 1,
+					'post_name'    => $data['slug'],
+				) );
+
+				if ( $new_page_id && isset( $data['is_home'] ) && $data['is_home'] ) {
+					update_option( 'show_on_front', 'page' );
+					update_option( 'page_on_front', $new_page_id );
+				}
+			} else {
+				wp_update_post( array(
+					'ID'           => $page_check->ID,
+					'post_content' => $data['shortcode'],
+					'post_name'    => $data['slug'],
+				) );
 			}
-		} else {
-			wp_update_post( array( 'ID' => $page_check->ID, 'post_content' => $page_content ) );
-		}
-
-		// Jobs Dashboard - Legacy Removed
-
-		// Jobs Settings
-		$settings_title = 'Jobs Settings';
-		$settings_check = get_page_by_title( $settings_title );
-		if ( ! isset( $settings_check->ID ) ) {
-			wp_insert_post( array(
-				'post_type'    => 'page',
-				'post_title'   => $settings_title,
-				'post_content' => '[jobs_settings]',
-				'post_status'  => 'publish',
-				'post_author'  => 1,
-				'post_name'    => 'jobs-settings',
-			) );
-		} else {
-			wp_update_post( array( 'ID' => $settings_check->ID, 'post_content' => '[jobs_settings]' ) );
-		}
-
-		// Auth Page
-		$auth_title = 'Join Us';
-		$auth_check = get_page_by_title( $auth_title );
-		if ( ! isset( $auth_check->ID ) ) {
-			wp_insert_post( array(
-				'post_type'    => 'page',
-				'post_title'   => $auth_title,
-				'post_content' => '[jobs_auth]',
-				'post_status'  => 'publish',
-				'post_author'  => 1,
-				'post_name'    => 'jobs-auth',
-			) );
-		} else {
-			wp_update_post( array( 'ID' => $auth_check->ID, 'post_content' => '[jobs_auth]' ) );
 		}
 	}
 
