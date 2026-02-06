@@ -61,10 +61,10 @@ class Jobs_Public {
 	 */
 	public function enqueue_styles() {
 
+		wp_enqueue_style( 'dashicons' );
 		wp_enqueue_style( 'rubik-font', 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap', array(), null );
 		wp_enqueue_style( 'fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css', array(), '6.0.0' );
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/jobs-public.css', array(), $this->version, 'all' );
-		wp_enqueue_script( 'html2pdf', 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', array(), '0.10.1', true );
 
 		// Custom Colors
 		$primary = get_option('jobs_primary_color', '#1d3469');
@@ -80,6 +80,7 @@ class Jobs_Public {
 	 */
 	public function enqueue_scripts() {
 
+		wp_enqueue_script( 'html2pdf', 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', array(), '0.10.1', true );
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/jobs-public.js', array( 'jquery' ), $this->version, false );
 		wp_localize_script( $this->plugin_name, 'jobs_ajax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -512,6 +513,7 @@ class Jobs_Public {
 		$type     = isset( $_POST['type'] ) ? sanitize_text_field( $_POST['type'] ) : '';
 		$country  = isset( $_POST['country'] ) ? sanitize_text_field( $_POST['country'] ) : '';
 		$state    = isset( $_POST['state'] ) ? sanitize_text_field( $_POST['state'] ) : '';
+		$paged    = isset( $_POST['paged'] ) ? intval( $_POST['paged'] ) : 1;
 
 		// If no country selected, try geolocation for prioritization
 		$geo_country = '';
@@ -537,7 +539,8 @@ class Jobs_Public {
 		$args = array(
 			'post_type'      => 'job',
 			'post_status'    => 'publish',
-			'posts_per_page' => 12,
+			'posts_per_page' => 6,
+			'paged'          => $paged,
 			's'              => $keyword,
 			'meta_query'     => array( 'relation' => 'AND' ),
 			'tax_query'      => array( 'relation' => 'AND' ),
@@ -627,7 +630,9 @@ class Jobs_Public {
 
 		wp_send_json_success( array(
 			'html' => $output,
-			'category_ad' => $category_ad
+			'category_ad' => $category_ad,
+			'total_pages' => $query->max_num_pages,
+			'current_page' => $paged
 		) );
 		wp_die();
 	}
@@ -637,98 +642,114 @@ class Jobs_Public {
 	 *
 	 * @since    1.0.0
 	 */
+	/**
+	 * Add custom transparent navigation bar with Unified Action Icon.
+	 *
+	 * @since    1.0.0
+	 */
 	public function add_custom_nav_bar() {
 		$user = wp_get_current_user();
 		$is_logged_in = is_user_logged_in();
+		$is_rtl = is_rtl();
 
 		?>
 		<nav class="jobs-top-nav-refined">
 			<div class="nav-inner-container">
-				<!-- Brand Section (Far Left) -->
-				<div class="nav-brand-section">
-					<div class="main-nav-links">
-						<a href="<?php echo home_url(); ?>" class="nav-item"><?php _e( 'Home', 'jobs' ); ?></a>
-						<a href="<?php echo home_url( '/jobs' ); ?>" class="nav-item"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
-						<a href="#" class="nav-item"><?php _e( 'Employers', 'jobs' ); ?></a>
+				<?php if ( ! $is_rtl ) : ?>
+					<!-- LTR: Icon on the Left -->
+					<div class="nav-left-group">
+						<button id="jobs-unified-action-btn" class="unified-action-trigger" title="<?php _e('Menu', 'jobs'); ?>">
+							<i class="fas fa-th"></i>
+						</button>
+						<div class="main-nav-links">
+							<a href="<?php echo home_url(); ?>" class="nav-item"><?php _e( 'Home', 'jobs' ); ?></a>
+							<a href="<?php echo home_url( '/jobs' ); ?>" class="nav-item"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
+						</div>
 					</div>
-				</div>
-
-				<!-- Action Section (Far Right) -->
-				<div class="nav-actions-section">
-					<div class="lang-toggle-wrap">
+					<div class="nav-right-group">
 						<?php echo $this->shortcode_language_switcher(); ?>
 					</div>
+				<?php else : ?>
+					<!-- RTL: Icon on the Right -->
+					<div class="nav-left-group">
+						<?php echo $this->shortcode_language_switcher(); ?>
+					</div>
+					<div class="nav-right-group">
+						<div class="main-nav-links">
+							<a href="<?php echo home_url( '/jobs' ); ?>" class="nav-item"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
+							<a href="<?php echo home_url(); ?>" class="nav-item"><?php _e( 'Home', 'jobs' ); ?></a>
+						</div>
+						<button id="jobs-unified-action-btn" class="unified-action-trigger" title="<?php _e('Menu', 'jobs'); ?>">
+							<i class="fas fa-th"></i>
+						</button>
+					</div>
+				<?php endif; ?>
+			</div>
+		</nav>
 
+		<!-- Unified Action Panel -->
+		<div id="jobs-action-panel" class="jobs-action-panel-overlay">
+			<div class="action-panel-content">
+				<div class="panel-header-modern">
+					<span class="panel-brand">Jobedia</span>
+					<button class="close-panel-btn">&times;</button>
+				</div>
+
+				<div class="panel-sections-grid">
 					<?php if ( $is_logged_in ) :
 						$role_names = get_option( 'jobs_role_names' );
 						$roles = ( array ) $user->roles;
 						$role_id = $roles[0];
 						$display_role = isset( $role_names[$role_id] ) ? $role_names[$role_id] : ucfirst($role_id);
-
-						// Notifications Polling Context
-						$notifs = get_user_meta( $user->ID, '_jobs_notifications', true ) ?: array();
-						$unread_notifs = count($notifs);
 					?>
-						<div class="user-meta-controls">
-							<!-- Messages Shortcut -->
-							<a href="<?php echo home_url('/jobs-dashboard?tab=messages'); ?>" class="icon-control-btn" title="<?php _e('Messages', 'jobs'); ?>">
-								<i class="dashicons dashicons-email-alt"></i>
-							</a>
-
-							<!-- Notifications Dropdown -->
-							<div class="nav-dropdown-wrapper notification-trigger">
-								<button class="icon-control-btn" id="notif-drop-btn">
-									<i class="dashicons dashicons-bell"></i>
-									<?php if($unread_notifs > 0): ?><span class="pulse-badge"><?php echo $unread_notifs; ?></span><?php endif; ?>
-								</button>
-								<div class="smart-dropdown-panel" id="notif-panel">
-									<div class="panel-header">
-										<span><?php _e( 'Notifications', 'jobs' ); ?></span>
-										<a href="#"><?php _e( 'Mark all read', 'jobs' ); ?></a>
-									</div>
-									<div class="panel-body scrollable">
-										<?php if( !empty($notifs) ) : foreach( array_reverse($notifs) as $n ) : ?>
-											<div class="notif-row unread">
-												<div class="notif-icon"><i class="dashicons dashicons-info"></i></div>
-												<div class="notif-content">
-													<p><?php echo esc_html($n['message']); ?></p>
-													<small><?php echo human_time_diff($n['time'], time()); ?> ago</small>
-												</div>
-											</div>
-										<?php endforeach; else : ?>
-											<p class="empty-msg"><?php _e( 'No new notifications', 'jobs' ); ?></p>
-										<?php endif; ?>
-									</div>
-								</div>
-							</div>
-
-							<!-- Profile Dropdown (Far Right) -->
-							<div class="nav-dropdown-wrapper profile-trigger">
-								<div class="user-pill">
-									<?php echo get_avatar( $user->ID, 40 ); ?>
-									<div class="user-name-role">
-										<span class="u-name"><?php echo esc_html( $user->display_name ); ?></span>
-										<span class="u-role"><?php echo esc_html( $display_role ); ?></span>
-									</div>
-									<i class="dashicons dashicons-arrow-down-alt2"></i>
-								</div>
-								<div class="smart-dropdown-panel profile-panel">
-									<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="dashicons dashicons-dashboard"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a>
-									<a href="<?php echo home_url( '/jobs-dashboard?tab=settings' ); ?>"><i class="dashicons dashicons-admin-settings"></i> <?php _e( 'Account Settings', 'jobs' ); ?></a>
-									<div class="divider"></div>
-									<a href="<?php echo wp_logout_url( home_url() ); ?>" class="logout-link"><i class="dashicons dashicons-exit"></i> <?php _e( 'Logout', 'jobs' ); ?></a>
+						<div class="panel-user-section">
+							<div class="user-info-brief">
+								<?php echo get_avatar( $user->ID, 64 ); ?>
+								<div>
+									<h4 class="u-name"><?php echo esc_html( $user->display_name ); ?></h4>
+									<span class="u-role-badge"><?php echo esc_html( $display_role ); ?></span>
 								</div>
 							</div>
 						</div>
+
+						<div class="panel-links-group">
+							<h3><?php _e( 'Account Management', 'jobs' ); ?></h3>
+							<div class="action-grid-links">
+								<a href="<?php echo home_url( '/jobs-dashboard' ); ?>"><i class="fas fa-chart-line"></i> <?php _e( 'Dashboard', 'jobs' ); ?></a>
+								<a href="<?php echo home_url( '/jobs-dashboard?tab=messages' ); ?>"><i class="fas fa-envelope"></i> <?php _e( 'Messages', 'jobs' ); ?></a>
+								<a href="<?php echo home_url( '/jobs-dashboard?tab=settings' ); ?>"><i class="fas fa-user-cog"></i> <?php _e( 'Settings', 'jobs' ); ?></a>
+								<?php if( current_user_can('manage_options') ) : ?>
+									<a href="<?php echo admin_url(); ?>"><i class="fas fa-user-shield"></i> <?php _e( 'WP Admin', 'jobs' ); ?></a>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<div class="panel-footer-actions">
+							<a href="<?php echo wp_logout_url( home_url() ); ?>" class="btn-logout-modern"><i class="fas fa-sign-out-alt"></i> <?php _e( 'Logout', 'jobs' ); ?></a>
+						</div>
+
 					<?php else : ?>
-						<div class="guest-auth-actions">
-							<a href="<?php echo home_url('/jobs-auth'); ?>" class="btn-login-text"><?php _e( 'Sign In', 'jobs' ); ?></a>
-							<a href="<?php echo home_url('/jobs-auth'); ?>" class="jobs-button"><?php _e( 'Post a Job', 'jobs' ); ?></a>
+						<div class="panel-auth-section">
+							<h3><?php _e( 'Welcome to Jobedia', 'jobs' ); ?></h3>
+							<p><?php _e( 'Sign in to access your dashboard and apply for jobs.', 'jobs' ); ?></p>
+							<div class="auth-btn-row">
+								<a href="<?php echo home_url('/jobs-auth'); ?>" class="btn-panel-primary"><?php _e( 'Login', 'jobs' ); ?></a>
+								<a href="<?php echo home_url('/jobs-auth'); ?>" class="btn-panel-outline"><?php _e( 'Register', 'jobs' ); ?></a>
+							</div>
 						</div>
 					<?php endif; ?>
+
+					<div class="panel-tools-section">
+						<h3><?php _e( 'Quick Tools', 'jobs' ); ?></h3>
+						<div class="action-grid-links">
+							<a href="<?php echo home_url('/jobs'); ?>"><i class="fas fa-search"></i> <?php _e( 'Browse Jobs', 'jobs' ); ?></a>
+							<a href="#"><i class="fas fa-building"></i> <?php _e( 'For Employers', 'jobs' ); ?></a>
+							<a href="#"><i class="fas fa-question-circle"></i> <?php _e( 'Help Center', 'jobs' ); ?></a>
+						</div>
+					</div>
 				</div>
 			</div>
-		</nav>
+		</div>
 		<?php
 	}
 

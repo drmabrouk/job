@@ -2041,3 +2041,328 @@ body.rtl .jobs-search-input-modern {
     font-weight: 700;
     text-decoration: none;
 }
+
+
+/* Numeric Pagination */
+.jobs-pagination-container {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+.jobs-numeric-pagination {
+    display: flex;
+    gap: 10px;
+}
+
+.page-numbers {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #4a5568;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-numbers:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: #f8fafc;
+}
+
+.page-numbers.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(29, 52, 105, 0.2);
+}
+
+
+/* Transparency & Layout Refinement */
+.jobs-smart-search-wrapper,
+.job-card-refined,
+.account-main,
+.account-body {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.job-card-refined {
+    border: 1px solid #f1f5f9; /* Keep subtle border or remove it? Prompt says 'blending naturally'. A border might be okay but let's see. */
+}
+
+.job-card-refined:hover {
+    box-shadow: 0 10px 25px rgba(29, 52, 105, 0.05) !important;
+}
+
+/* Account Layout Fix */
+.jobs-account-main,
+.account-main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.account-body {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.jobs-container {
+    max-width: 1400px; /* Increase container width for more open feel */
+}
+
+.jobs-account-unified {
+    gap: 40px;
+    margin: 30px 0;
+}
+
+
+/* Bookmark Icon Redesign */
+.save-job-btn-refined {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none !important;
+    font-size: 24px !important; /* Increase size */
+    color: var(--primary-color) !important; /* Apply primary color */
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.save-job-btn-refined:hover {
+    background: transparent !important;
+    transform: scale(1.2);
+    color: var(--primary-dark) !important;
+}
+
+.save-job-btn-refined.saved {
+    background: transparent !important;
+    color: var(--primary-color) !important;
+}
+
+
+/* Footer Legal Attribution */
+.jobs-legal-footer-line {
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 50px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+    color: #94a3b8;
+    background: transparent !important;
+}
+
+
+/* Unified Action Panel */
+.unified-action-trigger {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 10px;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.unified-action-trigger:hover {
+    transform: scale(1.1);
+}
+
+.jobs-action-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(4px);
+    z-index: 10001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.jobs-action-panel-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
+.action-panel-content {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 400px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    padding: 30px;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+body.rtl .action-panel-content {
+    left: auto;
+    right: 20px;
+}
+
+.jobs-action-panel-overlay.show .action-panel-content {
+    transform: translateY(0);
+}
+
+.panel-header-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
+.panel-brand {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--primary-color);
+}
+
+.close-panel-btn {
+    background: #f8fafc;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.panel-sections-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.user-info-brief {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-info-brief img {
+    border-radius: 12px;
+}
+
+.u-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.u-role-badge {
+    font-size: 11px;
+    background: var(--primary-light);
+    color: var(--primary-color);
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.panel-links-group h3, .panel-auth-section h3, .panel-tools-section h3 {
+    font-size: 14px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.action-grid-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.action-grid-links a {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 16px;
+    text-decoration: none !important;
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.action-grid-links a:hover {
+    background: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.action-grid-links a i {
+    font-size: 20px;
+}
+
+.btn-logout-modern {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    background: #fff1f2;
+    color: #e11d48;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.auth-btn-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-panel-primary {
+    flex: 1;
+    background: var(--primary-color);
+    color: #fff;
+    padding: 12px;
+    text-align: center;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-weight: 700;
+}
+
+.btn-panel-outline {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    padding: 12px;
+    text-align: center;
+    border-radius: 12px;
+    text-decoration: none !important;
+    font-weight: 700;
+}
+
+.nav-left-group, .nav-right-group {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}

@@ -4,9 +4,11 @@
 	$(function() {
 		var $searchInput = $('.jobs-search-input-modern, #jobs-search-input');
 		var $grid = $('#jobs-grid');
+		var $pagination = $('#jobs-pagination');
 		var searchTimer;
 
-		function performSearch() {
+		function performSearch(page) {
+			page = page || 1;
 			var keyword = $searchInput.val();
 			var category = $('#jobs-category-select').val();
 			var country = $('#jobs-country-select').val();
@@ -21,6 +23,7 @@
 					category: category,
 					country: country,
 					state: state,
+					paged: page,
 					nonce: jobs_ajax.nonce
 				},
 				beforeSend: function() {
@@ -29,11 +32,34 @@
 				success: function(response) {
 					if (response.success) {
 						$grid.html(response.data.html);
+						renderPagination(response.data.total_pages, response.data.current_page);
 					}
 					$grid.css('opacity', '1');
 				}
 			});
 		}
+
+		function renderPagination(totalPages, currentPage) {
+			$pagination.empty();
+			if (totalPages <= 1) return;
+
+			var html = '<div class="jobs-numeric-pagination">';
+			for (var i = 1; i <= totalPages; i++) {
+				var activeClass = (i == currentPage) ? 'active' : '';
+				html += '<button class="page-numbers ' + activeClass + '" data-page="' + i + '">' + i + '</button>';
+			}
+			html += '</div>';
+			$pagination.html(html);
+		}
+
+		$(document).on('click', '.page-numbers', function(e) {
+			e.preventDefault();
+			var page = $(this).data('page');
+			performSearch(page);
+			$('html, body').animate({
+				scrollTop: $grid.offset().top - 150
+			}, 500);
+		});
 
 		$searchInput.on('keyup', function() {
 			clearTimeout(searchTimer);
@@ -247,4 +273,24 @@ jQuery(window).on('scroll', function() {
     } else {
         jQuery('.jobs-top-nav-refined').removeClass('scrolled');
     }
+});
+
+// Unified Action Panel Toggle
+jQuery(document).on('click', '#jobs-unified-action-btn', function(e) {
+    e.preventDefault();
+    jQuery('#jobs-action-panel').addClass('show');
+});
+
+jQuery(document).on('click', '.close-panel-btn, .jobs-action-panel-overlay', function(e) {
+    if (e.target === this) {
+        jQuery('#jobs-action-panel').removeClass('show');
+    }
+});
+
+jQuery('.action-panel-content').on('click', function(e) {
+    e.stopPropagation();
+});
+
+jQuery(document).on('click', '.close-panel-btn', function() {
+    jQuery('#jobs-action-panel').removeClass('show');
 });

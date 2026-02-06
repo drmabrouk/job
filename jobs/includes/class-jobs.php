@@ -178,6 +178,10 @@ class Jobs {
 	 * @access   private
 	 */
 	private function define_public_hooks() {
+		// Register CPTs and Taxonomies on every init
+		require_once plugin_dir_path( __FILE__ ) . 'class-jobs-activator.php';
+		$this->loader->add_action( 'init', 'Jobs_Activator', 'register_post_types' );
+		$this->loader->add_action( 'init', 'Jobs_Activator', 'register_taxonomies' );
 
 		$plugin_public = new Jobs_Public( $this->get_plugin_name(), $this->get_version() );
 

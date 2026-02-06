@@ -325,6 +325,13 @@ class Jobs_Admin {
 							<input type="checkbox" name="jobs_enable_geo" value="1" <?php checked( 1, get_option( 'jobs_enable_geo', 1 ) ); ?> />
 						</td>
 					</tr>
+					<tr valign="top">
+						<th scope="row"><?php _e( 'Footer Legal Text', 'jobs' ); ?></th>
+						<td>
+							<textarea name="jobs_footer_text" rows="3" cols="50" class="large-text"><?php echo esc_textarea( get_option( 'jobs_footer_text', '© ' . date('Y') . ' Jobedia. All rights reserved.' ) ); ?></textarea>
+							<p class="description"><?php _e( 'Appears below the job listings on the homepage.', 'jobs' ); ?></p>
+						</td>
+					</tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>
@@ -575,6 +582,7 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_primary_color' );
 		register_setting( 'jobs_options', 'jobs_secondary_color' );
 		register_setting( 'jobs_options', 'jobs_font_family' );
+		register_setting( 'jobs_options', 'jobs_footer_text' );
 	}
 
 
