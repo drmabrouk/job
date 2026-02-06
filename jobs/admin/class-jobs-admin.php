@@ -92,6 +92,7 @@ class Jobs_Admin {
 		add_submenu_page( 'job-management', __( 'All Jobs', 'jobs' ), __( 'All Jobs', 'jobs' ), 'manage_jobs_plugin', 'edit.php?post_type=job' );
 		add_submenu_page( 'job-management', __( 'Add New Job', 'jobs' ), __( 'Add New Job', 'jobs' ), 'manage_jobs_plugin', 'post-new.php?post_type=job' );
 		add_submenu_page( 'job-management', __( 'Categories', 'jobs' ), __( 'Categories', 'jobs' ), 'manage_jobs_plugin', 'edit-tags.php?taxonomy=job_category&post_type=job' );
+		add_submenu_page( 'job-management', __( 'Page Manager', 'jobs' ), __( 'Page Manager', 'jobs' ), 'manage_jobs_plugin', 'job-page-manager', array( $this, 'display_page_manager_page' ) );
 		add_submenu_page( 'job-management', __( 'Job Settings', 'jobs' ), __( 'Job Settings', 'jobs' ), 'manage_jobs_plugin', 'job-settings', array( $this, 'display_job_settings_page' ) );
 
 		// 2. Applications
@@ -576,4 +577,75 @@ class Jobs_Admin {
 		register_setting( 'jobs_options', 'jobs_font_family' );
 	}
 
+
+	/**
+	 * Display Page Manager Page
+	 */
+	public function display_page_manager_page() {
+		if ( isset( $_POST['repair_pages'] ) && check_admin_referer( 'jobs_repair_pages_action', 'jobs_repair_pages_nonce' ) ) {
+			require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-jobs-activator.php';
+			Jobs_Activator::activate(); // Re-run activation to regenerate pages
+			echo '<div class="updated"><p>' . __( 'Plugin pages have been verified and repaired.', 'jobs' ) . '</p></div>';
+		}
+
+		$pages = array(
+			'Jobs'           => '[jobs_search_engine]',
+			'Jobs Dashboard' => '[jobs_dashboard]',
+			'Join Us'        => '[jobs_auth]',
+			'Jobs Settings'  => '[jobs_settings]',
+		);
+		?>
+		<div class="wrap">
+			<h1><?php _e( 'Page Manager & Verification', 'jobs' ); ?></h1>
+			<p><?php _e( 'Manage and verify the core pages required for the Jobs plugin to function.', 'jobs' ); ?></p>
+
+			<table class="wp-list-table widefat fixed striped">
+				<thead>
+					<tr>
+						<th><?php _e( 'Page Title', 'jobs' ); ?></th>
+						<th><?php _e( 'Required Shortcode', 'jobs' ); ?></th>
+						<th><?php _e( 'Status', 'jobs' ); ?></th>
+						<th><?php _e( 'Actions', 'jobs' ); ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach ( $pages as $title => $shortcode ) :
+						$page = get_page_by_title( $title );
+						$exists = isset( $page->ID );
+						$functional = $exists && strpos( $page->post_content, $shortcode ) !== false;
+					?>
+					<tr>
+						<td><strong><?php echo esc_html( $title ); ?></strong></td>
+						<td><code><?php echo esc_html( $shortcode ); ?></code></td>
+						<td>
+							<?php if ( $functional ) : ?>
+								<span style="color: #27ae60; font-weight: 700;">✅ <?php _e( 'Functional', 'jobs' ); ?></span>
+							<?php elseif ( $exists ) : ?>
+								<span style="color: #e67e22; font-weight: 700;">⚠️ <?php _e( 'Content Mismatch', 'jobs' ); ?></span>
+							<?php else : ?>
+								<span style="color: #c0392b; font-weight: 700;">❌ <?php _e( 'Missing', 'jobs' ); ?></span>
+							<?php endif; ?>
+						</td>
+						<td>
+							<?php if ( $exists ) : ?>
+								<a href="<?php echo get_edit_post_link( $page->ID ); ?>" class="button button-small"><?php _e( 'Edit Page', 'jobs' ); ?></a>
+								<a href="<?php echo get_permalink( $page->ID ); ?>" class="button button-small" target="_blank"><?php _e( 'View Page', 'jobs' ); ?></a>
+							<?php endif; ?>
+						</td>
+					</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+
+			<div style="margin-top: 30px; padding: 20px; background: #fff; border: 1px solid #ccd0d4; border-radius: 4px;">
+				<h3><?php _e( 'Repair & Maintenance', 'jobs' ); ?></h3>
+				<p><?php _e( 'If any pages are missing or not functioning correctly, click the button below to regenerate them automatically.', 'jobs' ); ?></p>
+				<form method="post" action="">
+					<?php wp_nonce_field( 'jobs_repair_pages_action', 'jobs_repair_pages_nonce' ); ?>
+					<input type="submit" name="repair_pages" class="button button-primary" value="<?php _e( 'Verify & Repair All Pages', 'jobs' ); ?>" />
+				</form>
+			</div>
+		</div>
+		<?php
+	}
 }

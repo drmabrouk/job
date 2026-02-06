@@ -646,14 +646,8 @@ class Jobs_Public {
 			<div class="nav-inner-container">
 				<!-- Brand Section (Far Left) -->
 				<div class="nav-brand-section">
-					<a href="<?php echo home_url(); ?>" class="nav-logo-wrap">
-						<?php if ( $logo_id = get_option( 'jobs_logo_id' ) ) : ?>
-							<?php echo wp_get_attachment_image( $logo_id, 'full', false, array( 'class' => 'main-logo-img' ) ); ?>
-						<?php else : ?>
-							<span class="brand-text">Jobedia</span>
-						<?php endif; ?>
-					</a>
 					<div class="main-nav-links">
+						<a href="<?php echo home_url(); ?>" class="nav-item"><?php _e( 'Home', 'jobs' ); ?></a>
 						<a href="<?php echo home_url( '/jobs' ); ?>" class="nav-item"><?php _e( 'Find Jobs', 'jobs' ); ?></a>
 						<a href="#" class="nav-item"><?php _e( 'Employers', 'jobs' ); ?></a>
 					</div>
@@ -1002,6 +996,7 @@ class Jobs_Public {
 
 		$email = sanitize_email($_POST['user_email']);
 		$name = sanitize_text_field($_POST['full_name']);
+		$prof_title = isset($_POST['professional_title']) ? sanitize_text_field($_POST['professional_title']) : '';
 		$pass = $_POST['user_pass'];
 		$role = sanitize_text_field($_POST['user_role']);
 
@@ -1027,6 +1022,10 @@ class Jobs_Public {
 		$user = new WP_User($user_id);
 		$user->set_role($role);
 		wp_update_user( array( 'ID' => $user_id, 'display_name' => $name ) );
+
+		if ( ! empty($prof_title) ) {
+			update_user_meta( $user_id, '_job_title', $prof_title );
+		}
 
 		// Auto login after registration
 		wp_set_auth_cookie($user_id);

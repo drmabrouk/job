@@ -28,15 +28,25 @@ class Jobs_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+		$installed_ver = get_option( 'jobs_version' );
+
 		self::create_roles();
 		self::register_post_types();
 		self::register_taxonomies();
 		self::preload_categories();
 		self::preload_job_types();
 		self::seed_locations();
-		self::seed_sample_jobs();
+
+		if ( ! $installed_ver ) {
+			self::seed_sample_jobs();
+		}
+
 		self::create_homepage();
 		self::setup_cron();
+
+		// Automated Versioning & Cache Management
+		update_option( 'jobs_version', '1.1.0' );
+		wp_cache_flush();
 		flush_rewrite_rules();
 	}
 
@@ -410,6 +420,8 @@ class Jobs_Activator {
 				update_option( 'show_on_front', 'page' );
 				update_option( 'page_on_front', $new_page_id );
 			}
+		} else {
+			wp_update_post( array( 'ID' => $page_check->ID, 'post_content' => $page_content ) );
 		}
 
 		// Jobs Dashboard
@@ -424,6 +436,8 @@ class Jobs_Activator {
 				'post_author'  => 1,
 				'post_name'    => 'jobs-dashboard',
 			) );
+		} else {
+			wp_update_post( array( 'ID' => $dash_check->ID, 'post_content' => '[jobs_dashboard]' ) );
 		}
 
 		// Jobs Settings
@@ -438,6 +452,8 @@ class Jobs_Activator {
 				'post_author'  => 1,
 				'post_name'    => 'jobs-settings',
 			) );
+		} else {
+			wp_update_post( array( 'ID' => $settings_check->ID, 'post_content' => '[jobs_settings]' ) );
 		}
 
 		// Auth Page
@@ -452,6 +468,8 @@ class Jobs_Activator {
 				'post_author'  => 1,
 				'post_name'    => 'jobs-auth',
 			) );
+		} else {
+			wp_update_post( array( 'ID' => $auth_check->ID, 'post_content' => '[jobs_auth]' ) );
 		}
 	}
 
