@@ -133,7 +133,7 @@ class Jobs_Activator {
 			'has_archive' => true,
 			'supports'    => array( 'title', 'editor', 'thumbnail', 'excerpt', 'custom-fields' ),
 			'menu_icon'   => 'dashicons-businessperson',
-			'rewrite'     => array( 'slug' => 'jobs' ),
+			'rewrite'     => array( 'slug' => 'vacancy', 'with_front' => false ),
 			'taxonomies'  => array( 'job_category' ),
 		) );
 
